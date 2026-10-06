@@ -116,8 +116,9 @@ async function boot() {
   picker.set(state.item);
   syncUrl();
 
-  const switcher = mountSwitcher({
+  mountSwitcher({
     label: 'See as',
+    caption: 'See as',
     initial: 'structure',
     items: ORDER.map((id) => ({
       id,
@@ -131,9 +132,6 @@ async function boot() {
       else indicate('seen as', '', FORMS[id].persona);
     },
   });
-  const caption = el('span', 'tx-seeas', 'See as');
-  caption.setAttribute('aria-hidden', 'true');
-  switcher.el.prepend(caption);
 
   // Palette transitions only after the first paint, so the page doesn't fade in from grey.
   requestAnimationFrame(() => requestAnimationFrame(() => body.classList.add('tx-ready')));

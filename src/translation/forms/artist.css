@@ -102,13 +102,15 @@
 
 /* The chrome steps back while the print is up. */
 body[data-form='image'] .note,
-body[data-form='image'] .chrome__nav {
+body[data-form='image'] .chrome__nav,
+body[data-form='image'] .contact:not(.is-open, :focus-within) {
   opacity: 0.35;
   transition: opacity 0.6s;
 }
 
 body[data-form='image'] .note:hover,
-body[data-form='image'] .chrome__nav:hover {
+body[data-form='image'] .chrome__nav:hover,
+body[data-form='image'] .contact:hover {
   opacity: 1;
 }
 

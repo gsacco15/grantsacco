@@ -2,10 +2,16 @@ body.concept-layers {
   background: var(--bg);
 }
 
-.switcher.is-custom .switcher__btn[aria-pressed='true'] {
-  background: transparent;
-  color: var(--ink);
-  box-shadow: inset 0 0 0 1px var(--line);
+/* A custom mix empties the drop: the preset is a starting point, not the state. */
+.switcher.is-custom .switcher__drop {
+  fill: transparent;
+  stroke: var(--ink);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.switcher.is-custom .switcher__inv {
+  opacity: 0;
 }
 
 /* ── Overlay: notes, dims, balloons, places, nodes ────────────────────────── */

@@ -15,6 +15,8 @@ All six mocks share one content file, so the only thing that changes between the
 
 Inside every mock: `1`–`6` or `←` `→` switch sections, and the URL hash (`#structure`, `#place`, …) links straight to a state.
 
+The section switcher is a liquid glass tray: the active tab is an ink drop that stretches as it flows between tabs, and the tray pinches apart around the active and hovered tabs (the neck geometry is adapted from uselayouts' Gooey Navbar). A quiet **Get in touch** pill sits in the top bar; it opens a card built from `site.email`, `site.links` and `site.resume`.
+
 ## Run it
 
 ```bash
@@ -43,7 +45,7 @@ Everything personal lives in **`src/content.js`**:
 index.html, src/gallery/     the concept gallery
 <concept>/index.html         one page per mock
 src/<concept>/               that mock's code and styles
-src/shared/                  chrome (top bar + section switcher), geo helpers, concept list
+src/shared/                  chrome (top bar, contact card, liquid section switcher), geo helpers, concept list
 src/content.js               the content every mock reads
 src/anim.js                  small interruption-safe tween helpers
 public/previews/             gallery thumbnails

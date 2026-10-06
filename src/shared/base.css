@@ -194,7 +194,10 @@ button {
   display: none;
 }
 
-/* ── Section switcher ─────────────────────────────────────────────────────── */
+/* ── Section switcher: liquid glass tray + ink drop ──────────────────────────
+   The tray is drawn, not boxed: one glass bead per tab, joined at rest and
+   pinched apart (with a neck) beside the active and hovered tabs. The ink drop
+   flows between tabs; an inverted copy of the labels is clipped to it. */
 
 .switcher {
   position: fixed;
@@ -203,16 +206,10 @@ button {
   z-index: 35;
   transform: translateX(-50%);
   display: flex;
-  gap: 2px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--bg) 70%, transparent);
-  backdrop-filter: blur(14px) saturate(1.2);
-  -webkit-backdrop-filter: blur(14px) saturate(1.2);
-  transition: background 0.6s var(--ease), border-color 0.6s var(--ease);
+  padding: 1px;
   max-width: calc(100vw - 2 * var(--gutter));
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: none;
 }
 
@@ -220,27 +217,105 @@ button {
   display: none;
 }
 
-.switcher__btn {
+.switcher__track {
   position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  padding: 4px;
+}
+
+.switcher__glass {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  transition: background 0.6s var(--ease);
+}
+
+.switcher__ink {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.switcher__rim {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+
+.switcher__tint,
+.switcher__drop {
+  fill: var(--ink);
+}
+
+.switcher__tint {
+  opacity: 0;
+}
+
+.switcher__dot {
+  fill: var(--accent);
+}
+
+.switcher__btn,
+.switcher__face {
   display: grid;
   justify-items: start;
+  align-content: start;
   gap: 1px;
-  min-width: 96px;
   padding: 8px 12px 9px;
-  border-radius: 10px;
   text-align: left;
+}
+
+.switcher__btn {
+  position: relative;
+  z-index: 1;
+  min-width: 96px;
+  border-radius: 10px;
   color: var(--muted);
-  transition: color 0.25s, background 0.25s;
+  transition: color 0.25s;
   flex: 0 0 auto;
 }
 
-.switcher__btn:hover {
+.switcher__btn:hover,
+.switcher__btn.is-hover,
+.switcher__btn[aria-pressed='true'] {
   color: var(--ink);
 }
 
-.switcher__btn[aria-pressed='true'] {
+.switcher__inv {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
   color: var(--bg);
-  background: var(--ink);
+}
+
+.switcher__face {
+  position: absolute;
+}
+
+.switcher__caption {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  align-self: center;
+  padding: 0 4px 0 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+.switcher__caption::after {
+  content: ':';
 }
 
 .switcher__key {
@@ -255,6 +330,7 @@ button {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .switcher__sub {
@@ -262,7 +338,310 @@ button {
   font-size: 10px;
   letter-spacing: 0.04em;
   text-transform: lowercase;
+  white-space: nowrap;
   opacity: 0.7;
+}
+
+/* ── Contact: a quiet pill in the top bar ────────────────────────────────── */
+
+.chrome__end {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.contact {
+  --w: 118px;
+  position: relative;
+}
+
+/* An open card has to sit above each mock's own top-level UI. */
+.chrome:has(.contact.is-open) {
+  z-index: 70;
+}
+
+.contact__btn {
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: var(--w);
+  height: 32px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.contact__btn:hover,
+.contact__btn[data-phase='end'],
+.contact.is-open .contact__btn {
+  border-color: var(--ink);
+}
+
+.contact__btn:active {
+  transform: scale(0.97);
+}
+
+.contact__idle,
+.contact__live {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.24s cubic-bezier(0.2, 0, 0, 1), transform 0.24s cubic-bezier(0.2, 0, 0, 1),
+    filter 0.24s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.contact__idle {
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.contact__live {
+  padding-left: 3px;
+  opacity: 0;
+}
+
+.contact__btn:not([data-phase='idle']) .contact__idle {
+  opacity: 0;
+  transform: translateY(-14px);
+  filter: blur(3px);
+}
+
+.contact__btn:not([data-phase='idle']) .contact__live {
+  opacity: 1;
+}
+
+/* Beat one: the pair rolls in, centred, with a "+" between them. */
+.contact__cluster {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  transform: translateX(calc((var(--w) - 72px) / 2 - 3px));
+  transition: transform 0.55s cubic-bezier(0.3, 1.45, 0.5, 1);
+}
+
+.contact__me,
+.contact__you {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.45s cubic-bezier(0.34, 1.5, 0.64, 1), margin 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.contact__me {
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--bg);
+  background: var(--ink);
+  transform: translateX(-16px) rotate(-180deg);
+}
+
+.contact__you {
+  position: relative;
+  z-index: 1;
+  font-family: var(--hand);
+  font-size: 15px;
+  line-height: 1;
+  color: var(--ink);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--ink);
+  transform: translateX(16px) rotate(180deg);
+}
+
+.contact__plus {
+  display: block;
+  width: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.6);
+  font-family: var(--mono);
+  font-size: 12px;
+  text-align: center;
+  color: var(--muted);
+  transition: width 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), margin 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.2s, transform 0.3s;
+}
+
+.contact__btn:not([data-phase='idle']) .contact__me,
+.contact__btn:not([data-phase='idle']) .contact__you {
+  opacity: 1;
+  transform: none;
+}
+
+.contact__btn:not([data-phase='idle']) .contact__me {
+  transition-delay: 0.04s;
+}
+
+.contact__btn[data-phase='start'] .contact__you {
+  transition-delay: 0.1s;
+}
+
+.contact__btn[data-phase='start'] .contact__plus {
+  width: 12px;
+  margin: 0 6px;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.14s;
+}
+
+/* Beat two: they merge, slide over, and the words write in. */
+.contact__btn[data-phase='end'] .contact__cluster {
+  transform: none;
+}
+
+.contact__btn[data-phase='end'] .contact__you {
+  margin-left: -7px;
+}
+
+.contact__talk {
+  margin-left: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15.5px;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0;
+  clip-path: inset(-4px 100% -4px 0);
+  transition: opacity 0.24s cubic-bezier(0.2, 0, 0, 1), clip-path 0.42s cubic-bezier(0.2, 0, 0, 1),
+    margin 0.24s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.contact__btn[data-phase='end'] .contact__talk {
+  margin-left: 7px;
+  opacity: 1;
+  clip-path: inset(-4px -4px -4px 0);
+  transition-delay: 0.2s;
+}
+
+/* The card */
+.contact__card {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  width: min(280px, calc(100vw - 2 * var(--gutter)));
+  padding: 14px 16px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px) scale(0.97);
+  transform-origin: top right;
+  transition: opacity 0.22s, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), visibility 0s 0.3s;
+}
+
+.contact.is-open .contact__card {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+
+.contact__hello {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 26px;
+  line-height: 1.05;
+}
+
+.contact__hello span {
+  color: var(--accent);
+}
+
+.contact__lede {
+  margin: 6px 0 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.contact__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.contact__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.contact__row a {
+  display: flex;
+  flex: 1;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+  padding: 9px 0;
+  text-decoration: none;
+}
+
+.contact__k {
+  flex: 0 0 64px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.contact__v {
+  flex: 1;
+  overflow: hidden;
+  font-size: 13.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.contact__row a:hover .contact__v {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.contact__arrow {
+  color: var(--muted);
+}
+
+.contact__copy {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.contact__todo {
+  margin: 10px 0 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--accent);
+}
+
+.contact__todo code {
+  font-family: inherit;
 }
 
 @media (max-width: 760px) {
@@ -276,10 +655,30 @@ button {
   }
   .switcher__btn {
     min-width: 84px;
+  }
+  .switcher__btn,
+  .switcher__face {
     padding: 7px 10px 8px;
   }
-  .chrome__nav .chrome__all-label {
+  .switcher__caption {
+    padding: 0 2px 0 6px;
+  }
+  .chrome {
+    gap: 10px;
+  }
+  /* On a phone the name already links to the gallery. */
+  .chrome__nav .chrome__all,
+  .chrome__concept-word {
     display: none;
+  }
+  .chrome__end {
+    gap: 8px;
+  }
+  .contact {
+    --w: 106px;
+  }
+  .contact__idle {
+    letter-spacing: 0.03em;
   }
 }
 

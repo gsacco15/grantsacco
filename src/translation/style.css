@@ -333,22 +333,6 @@ body.concept-translation.tx-ready {
 
 /* ── Switcher: "SEE AS: [Person] [Engineer] …" ─────────────────────────────── */
 
-.tx-seeas {
-  flex: 0 0 auto;
-  align-self: center;
-  padding: 0 10px 0 12px;
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--muted);
-}
-
-.tx-seeas::after {
-  content: ':';
-}
-
 .concept-translation .switcher__btn {
   min-width: 86px;
 }
@@ -425,7 +409,4 @@ body.concept-translation.tx-ready {
     display: none;
   }
 
-  .tx-seeas {
-    padding: 0 6px 0 8px;
-  }
 }
