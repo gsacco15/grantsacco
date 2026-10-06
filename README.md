@@ -12,7 +12,7 @@ All seven mocks share one content file, so the only thing that changes between t
 | 04 | **Layers** (`/layers/`) | Keeps the camera still and turns CAD-style layers on and off over one modelled film camera: shell ⇄ x-ray, internals, edges, dimensions, process marks, light, handwritten notes, a film strip of places, and a software graph. Visitors can mix their own. |
 | 05 | **Translation** (`/translation/`) | Shows one project at a time, seen as a Person, Engineer, Maker, Artist, Traveller or System. Each lens is a completely different form: a story, a technical drawing, a build log, a print, a map, or live data. |
 | 06 | **Object Morphing** (`/morph/`) | Rearranges twenty triangular plates into everything: a closed icosahedron, an exploded assembly, an arch, robot arm or workbench, a bronze sculpture, an unfolded (Dymaxion-style) world map, or a tiled screen. |
-| 07 | **Lens** (`/lens/`) | Coordinates × Viewport Modes. Every project is a picture on one field. Switching section moves the pictures onto that section's axes while a render line sweeps across and redraws everything in its visual language: photographs, hidden-line drawings, clay, film stills, a map duotone, ASCII. Click a project to open it; the same tabs then translate that one project. |
+| 07 | **Lens** (`/lens/`) | Coordinates × Viewport Modes. Every project is a picture on one field. Switching section moves the pictures onto that section's axes while a render line sweeps across and redraws everything in its visual language: photographs, hidden-line drawings, clay, film stills, a map duotone, ASCII. Click a project to open it; the same tabs then translate that one project. In Art, photo albums are piles of prints: hover skims through a roll, click opens it as an endless, draggable contact sheet with every roll in a sidebar. |
 
 Inside every mock: `1`–`6` or `←` `→` switch sections, and the URL hash (`#structure`, `#place`, …) links straight to a state.
 
@@ -35,6 +35,7 @@ Everything personal lives in **`src/content.js`**:
 
 - `site`: name, role, summary, links, and `draft` (set it to `false` to hide the "Sample content" tag).
 - `modes`: the six perspectives and the blurb for each.
+- `albums`: photo rolls (sample frames are drawn until real photos are added).
 - `items`: every project, trip and app. Each item has `axes` (where it sits in each coordinate system), `lens` (the same item translated into each perspective), `place` (where it goes on the maps), `stage` and `related`.
 - `experience` and `skills`, for a future plain résumé view.
 

@@ -2,7 +2,7 @@
 // Coordinates mock (same axes, same data); what's new here is that the marks
 // are pictures, so they're sized by relevance and relaxed apart, each keeping a
 // leader back to its exact coordinate.
-import { items } from '../content.js';
+import { items, albums } from '../content.js';
 import { polarLayout, mapBounds, STAGES } from '../coordinates/systems.js';
 import { ASPECT } from './render.js';
 
@@ -105,7 +105,36 @@ const hasCaption = (it, mode, W) => isFocus(it, mode) && !(W < 760 && mode === '
  * (anchor), cap (caption shown) }. Tiles start on their anchors and are pushed
  * apart until nothing overlaps, pulled back towards their anchors as they go.
  */
+/** Items hung on the Art wall beside the photo rolls (everything else steps out). */
+export const WALL = ['renders'];
+
+/**
+ * The Art wall: a grid of cells, one per roll, then the WALL items. Each cell
+ * is { x, y, w, h } (top-left and size); `card` is the print size for a stack.
+ */
+export function wallCells(W, H) {
+  const R = plotRect(W, H);
+  const n = albums.length + WALL.length;
+  const m = W < 760;
+  const cols = m ? 2 : n > 6 ? 4 : 3;
+  const rows = Math.ceil(n / cols);
+  const top = R.y + (m ? 4 : 18);
+  const cw = R.w / cols;
+  const ch = (R.y + R.h - top) / rows;
+  const card = Math.max(m ? 56 : 84, Math.min(m ? 96 : 150, cw * 0.4, (ch - (m ? 44 : 64)) / 1.3));
+  const cells = [];
+  for (let i = 0; i < n; i++) {
+    const r = Math.floor(i / cols);
+    // Centre a short last row.
+    const inRow = r === rows - 1 ? n - r * cols : cols;
+    const c = i - r * cols + (cols - inRow) / 2;
+    cells.push({ x: R.x + c * cw, y: top + r * ch, w: cw, h: ch });
+  }
+  return { R, cells, card };
+}
+
 export function layout(mode, W, H) {
+  if (mode === 'image') return wallLayout(W, H);
   const R = plotRect(W, H);
   const gap = W < 760 ? 4 : 8;
   const L = items.map((it) => {
@@ -169,4 +198,24 @@ export function layout(mode, W, H) {
     if (!moved && iter > 160) break;
   }
   return { R, tiles: new Map(L.map((t) => [t.id, t])) };
+}
+
+/** Art: the rolls take the wall; the WALL items hang beside them, the rest step out. */
+function wallLayout(W, H) {
+  const { R, cells, card } = wallCells(W, H);
+  const tiles = new Map();
+  for (const it of items) {
+    const k = WALL.indexOf(it.id);
+    if (k < 0) {
+      tiles.set(it.id, { id: it.id, it, hidden: true, x: 0, y: 0, w: 1, h: 1, ax: 0, ay: 0, cap: false, focus: false });
+      continue;
+    }
+    const cell = cells[albums.length + k];
+    const w = Math.min(cell.w * 0.78, card * 1.9);
+    const h = w / ASPECT.image;
+    const x = cell.x + cell.w / 2;
+    const y = cell.y + cell.h * 0.42;
+    tiles.set(it.id, { id: it.id, it, x, y, w, h, ax: x, ay: y, cap: true, focus: true });
+  }
+  return { R, tiles };
 }

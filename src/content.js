@@ -401,6 +401,21 @@ export const items = [
   },
 ];
 
+/*
+ * Photo albums (rolls). SAMPLE: there are no real photos yet, so every album
+ * draws `count` procedural frames in its `look`. `photos` is where the real
+ * image paths will go once they exist; `cover` is the frame shown on top of
+ * the stack.
+ */
+export const albums = [
+  { id: 'iceland-19', title: 'Ring Road', place: 'Iceland', year: 2019, count: 24, look: 'nordic', cover: 0, photos: [] },
+  { id: 'florence-17', title: 'Stone & Gold', place: 'Florence, Italy', year: 2017, count: 18, look: 'tuscan', cover: 0, photos: [] },
+  { id: 'tokyo-24', title: 'After Dark', place: 'Tokyo, Japan', year: 2024, count: 20, look: 'neon', cover: 0, photos: [] },
+  { id: 'lake-23', title: 'Lake Effect', place: 'Lake Michigan', year: 2023, count: 16, look: 'lake', cover: 0, photos: [] },
+  { id: 'shop-22', title: 'Shop Notes', place: 'Home workshop', year: 2022, count: 14, look: 'workshop', cover: 0, photos: [] },
+  { id: 'city-21', title: 'Roll 042', place: 'Chicago', year: 2021, count: 18, look: 'city', cover: 0, photos: [] },
+];
+
 /* Plain-view extras. These only appear in the résumé view. */
 export const experience = [
   {

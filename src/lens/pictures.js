@@ -7,29 +7,29 @@ import { mulberry32, hashString } from '../anim.js';
 
 const TAU = Math.PI * 2;
 
-const rgba = (hex, a) => {
+export const rgba = (hex, a) => {
   const n = parseInt(hex.slice(1), 16);
   return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / ${a})`;
 };
 
-function lin(g, x0, y0, x1, y1, stops) {
+export function lin(g, x0, y0, x1, y1, stops) {
   const l = g.createLinearGradient(x0, y0, x1, y1);
   for (const [o, c] of stops) l.addColorStop(o, c);
   return l;
 }
 
-function rad(g, x, y, r, stops, r0 = 0) {
+export function rad(g, x, y, r, stops, r0 = 0) {
   const l = g.createRadialGradient(x, y, r0, x, y, r);
   for (const [o, c] of stops) l.addColorStop(o, c);
   return l;
 }
 
-function rect(g, x, y, w, h, fill) {
+export function rect(g, x, y, w, h, fill) {
   g.fillStyle = fill;
   g.fillRect(x, y, w, h);
 }
 
-function rr(g, x, y, w, h, r, fill, stroke, lw = 1) {
+export function rr(g, x, y, w, h, r, fill, stroke, lw = 1) {
   g.beginPath();
   g.roundRect(x, y, w, h, r);
   if (fill) {
@@ -43,7 +43,7 @@ function rr(g, x, y, w, h, r, fill, stroke, lw = 1) {
   }
 }
 
-function poly(g, pts, fill, stroke, lw = 1) {
+export function poly(g, pts, fill, stroke, lw = 1) {
   g.beginPath();
   pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y)));
   g.closePath();
@@ -58,7 +58,7 @@ function poly(g, pts, fill, stroke, lw = 1) {
   }
 }
 
-function line(g, x0, y0, x1, y1, stroke, lw = 1, cap = 'butt') {
+export function line(g, x0, y0, x1, y1, stroke, lw = 1, cap = 'butt') {
   g.beginPath();
   g.moveTo(x0, y0);
   g.lineTo(x1, y1);
@@ -68,7 +68,7 @@ function line(g, x0, y0, x1, y1, stroke, lw = 1, cap = 'butt') {
   g.stroke();
 }
 
-function circle(g, x, y, r, fill, stroke, lw = 1) {
+export function circle(g, x, y, r, fill, stroke, lw = 1) {
   g.beginPath();
   g.arc(x, y, r, 0, TAU);
   if (fill) {
@@ -82,7 +82,7 @@ function circle(g, x, y, r, fill, stroke, lw = 1) {
   }
 }
 
-function glow(g, x, y, r, hex, a = 1) {
+export function glow(g, x, y, r, hex, a = 1) {
   g.fillStyle = rad(g, x, y, r, [
     [0, rgba(hex, a)],
     [0.35, rgba(hex, a * 0.35)],
@@ -92,7 +92,7 @@ function glow(g, x, y, r, hex, a = 1) {
 }
 
 /** Layered ridgelines from y0 down, with a little noise. */
-function ridges(g, rnd, y0, layers, colors, amp = 18) {
+export function ridges(g, rnd, y0, layers, colors, amp = 18) {
   for (let l = 0; l < layers; l++) {
     const base = y0 + l * 12;
     g.beginPath();

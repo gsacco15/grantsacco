@@ -7,15 +7,17 @@
 import '../shared/base.css';
 import './style.css';
 import { mountChrome, mountSwitcher, prefersReducedMotion } from '../shared/chrome.js';
-import { items, modes } from '../content.js';
+import { items, modes, albums } from '../content.js';
 import { systems } from '../coordinates/systems.js';
 import { loadLand } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
 import { render } from './render.js';
-import { layout } from './layout.js';
+import { layout, wallCells } from './layout.js';
 import { overlay } from './overlay.js';
 import { createPage } from './page.js';
 import { RENDER, metaFor } from './meta.js';
+import { createStacks } from './stacks.js';
+import { createDarkroom } from './darkroom.js';
 
 mountChrome('lens');
 
@@ -47,6 +49,7 @@ body.appendChild(dyn);
 const field = div('lx-field', body);
 field.setAttribute('role', 'list');
 field.setAttribute('aria-label', 'Work');
+const stacks = createStacks({ albums, parent: body, onOpen: (a, frame, el) => darkroom.open(a.id, frame, el) });
 const sweep = div('lx-sweep', body, '<span class="lx-sweep__tag"></span>');
 sweep.setAttribute('aria-hidden', 'true');
 const sweepTag = sweep.firstElementChild;
@@ -62,6 +65,7 @@ const lg = {
   render: legend.querySelector('.lx-legend__render'),
 };
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
+const HINT = { image: 'Hover a roll to skim it · click to open the roll' };
 
 /* ── Tiles ────────────────────────────────────────────────────────────────── */
 
@@ -169,7 +173,7 @@ function setMode(id) {
 
   // An interrupted sweep: each tile keeps whichever render it mostly showed.
   for (const t of tiles) {
-    if (t.ready && t.reveal >= 0.5) {
+    if (t.ready && t.reveal >= 0.5 && !t.to?.hidden) {
       t.show = t.next;
       t.pics[t.show].style.clipPath = 'none';
     }
@@ -180,10 +184,19 @@ function setMode(id) {
     t.pics[t.next].style.clipPath = dir > 0 ? 'inset(0 100% 0 0)' : 'inset(0 0 0 100%)';
     t.pics[t.next].style.zIndex = '2';
     if (t.show >= 0) t.pics[t.show].style.zIndex = '1';
-    t.from = first ? { ...L.tiles.get(t.it.id) } : { x: t.x, y: t.y, w: t.w, h: t.h };
-    t.to = L.tiles.get(t.it.id);
+    const target = L.tiles.get(t.it.id);
+    // Sections only show their own work: tiles step out where they are as
+    // the line passes, and step back in at their new place.
+    t.arriving = !!t.hidden && !target.hidden;
+    t.from = first || t.arriving ? { ...target } : { x: t.x, y: t.y, w: t.w, h: t.h };
+    t.to = target.hidden ? { ...t.from, hidden: true, cap: false, focus: false } : target;
+    if (target.hidden && (t.hidden || first)) {
+      setOut(t, true);
+      t.reveal = 1;
+    }
   }
   const order = [...tiles].sort((a, b) => (a.to.x - b.to.x) * dir);
+  stacks.layout(wallCells(W, H));
   order.forEach((t, k) => (t.delay = first ? 0 : (k / tiles.length) * STAGGER));
 
   // The outgoing drawing and background stay put on the side the line hasn't reached.
@@ -196,17 +209,20 @@ function setMode(id) {
 
   const md = modes.find((m) => m.id === id);
   lg.kicker.textContent = `${String(MODE_IDS.indexOf(id) + 1).padStart(2, '0')} · ${md.section}`;
-  lg.title.textContent = systems[id].title;
-  lg.axes.textContent = systems[id].readout;
-  lg.render.textContent = `render · ${RENDER[id]}`;
+  const total = albums.reduce((n, a) => n + a.count, 0);
+  lg.title.textContent = id === 'image' ? 'The rolls' : systems[id].title;
+  lg.axes.textContent = id === 'image' ? `${albums.length} rolls · ${total} frames · hover to skim, click to open` : systems[id].readout;
+  hint.textContent = HINT[id] ?? 'Click any piece of work to open it';
+  const renderName = id === 'image' ? 'prints · film grain' : RENDER[id];
+  lg.render.textContent = `render · ${renderName}`;
   legend.classList.remove('is-in');
   void legend.offsetWidth;
   legend.classList.add('is-in');
-  sweepTag.textContent = `render ▸ ${RENDER[id]}`;
+  sweepTag.textContent = `render ▸ ${renderName}`;
 
   dyn.classList.remove('is-on');
   body.dataset.mode = id;
-  T = { t0: now, dir, first };
+  T = { t0: now, dir, first, prev };
   page.setMode(id, dir);
   kick();
 }
@@ -235,6 +251,29 @@ function frame(ms) {
     if (tl.reveal < 1) {
       const left = tl.x - tl.w / 2;
       const f = clamp(T.dir > 0 ? (X - left) / tl.w : (left + tl.w - X) / tl.w);
+      if (tl.to.hidden) {
+        // Leaving: fade out where it stands once the line reaches it.
+        tl.reveal = s >= 1 ? 1 : Math.max(tl.reveal, f);
+        if (tl.reveal >= 0.5 && !tl.flipped) {
+          tl.flipped = true;
+          setOut(tl, true);
+        }
+        continue;
+      }
+      if (tl.arriving) {
+        // Arriving: appear whole, already in the new render, as the line passes.
+        if (f >= 0.35 || s >= 1) {
+          paint(tl, tl.next, mode);
+          tl.pics[tl.next].style.clipPath = 'none';
+          if (tl.show >= 0) tl.pics[tl.show].style.zIndex = '0';
+          tl.show = tl.next;
+          tl.reveal = 1;
+          tl.arriving = false;
+          flip(tl);
+          setOut(tl, false);
+        }
+        continue;
+      }
       // Render just ahead of the line so the work is spread across frames.
       if (!tl.ready && (f > 0 || Math.abs(X - tl.x) < W * 0.22 || s >= 1)) {
         paint(tl, tl.next, mode);
@@ -260,6 +299,7 @@ function frame(ms) {
   sweep.style.transform = `translateX(${X.toFixed(1)}px)`;
   sweep.classList.toggle('is-back', T.dir < 0);
   page.sweep(X, T.dir, s >= 1);
+  stacks.sweep(X, T.dir, s >= 1, mode === 'image', T.prev === 'image' && mode !== 'image');
   sweep.classList.toggle('is-on', s > 0 && s < 1 && !T.first);
 
   if (busy) {
@@ -295,6 +335,12 @@ function flip(tl) {
   tl.meta.textContent = metaFor(tl.it, mode);
 }
 
+function setOut(tl, out) {
+  tl.hidden = out;
+  tl.el.classList.toggle('is-out', out);
+  tl.el.inert = out;
+}
+
 /* ── Leaders, anchors, links (drawn once a section settles) ───────────────── */
 
 function drawDyn() {
@@ -303,6 +349,7 @@ function drawDyn() {
   const parts = [];
   for (const tl of tiles) {
     const p = L.tiles.get(tl.it.id);
+    if (p.hidden || mode === 'image') continue;
     const [ax, ay] = [p.ax, p.ay];
     // Nearest point on the picture to the anchor.
     const nx = clamp(ax, p.x - p.w / 2, p.x + p.w / 2);
@@ -347,7 +394,7 @@ let warmQueue = [];
 let warmTimer = 0;
 function warm() {
   const order = [...MODE_IDS].sort((a, b) => Math.abs(MODE_IDS.indexOf(a) - MODE_IDS.indexOf(mode)) - Math.abs(MODE_IDS.indexOf(b) - MODE_IDS.indexOf(mode)));
-  warmQueue = order.flatMap((m) => tiles.map((t) => [t.it.id, m, pxW(layouts[m].tiles.get(t.it.id).w)]));
+  warmQueue = order.flatMap((m) => tiles.filter((t) => !layouts[m].tiles.get(t.it.id).hidden).map((t) => [t.it.id, m, pxW(layouts[m].tiles.get(t.it.id).w)]));
   clearTimeout(warmTimer);
   const step = () => {
     if (T) return; // never compete with a running transition
@@ -378,6 +425,13 @@ function openProject(id, el) {
   page.open(id, el?.querySelector('.lx-tile__frame') ?? null);
 }
 
+/* ── Darkroom ─────────────────────────────────────────────────────────────── */
+
+const darkroom = createDarkroom({
+  albums,
+  onClose: (id, from) => (from ? from.focus({ preventScroll: true }) : stacks.focus(id)),
+});
+
 /* ── Boot ─────────────────────────────────────────────────────────────────── */
 
 const switcher = mountSwitcher({
@@ -388,8 +442,12 @@ const switcher = mountSwitcher({
 });
 page.bindSwitcher(switcher);
 
-const fromQuery = new URLSearchParams(location.search).get('p');
+const query = new URLSearchParams(location.search);
+const fromQuery = query.get('p');
 if (fromQuery && items.some((i) => i.id === fromQuery)) openProject(fromQuery, null);
+const rollQuery = query.get('roll');
+if (rollQuery && albums.some((a) => a.id === rollQuery)) darkroom.open(rollQuery, 0, null);
+stacks.warm();
 
 loadLand().then((l) => {
   land = l;
@@ -404,8 +462,14 @@ window.addEventListener('resize', () => {
     H = innerHeight;
     computeLayouts();
     const L = layouts[mode];
+    stacks.layout(wallCells(W, H));
     for (const t of tiles) {
-      t.to = L.tiles.get(t.it.id);
+      const target = L.tiles.get(t.it.id);
+      if (target.hidden) {
+        t.to = { ...t.to, hidden: true };
+        continue;
+      }
+      t.to = target;
       t.from = t.to;
       Object.assign(t, { x: t.to.x, y: t.to.y, w: t.to.w, h: t.to.h });
       place(t);
