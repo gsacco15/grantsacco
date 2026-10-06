@@ -25,7 +25,7 @@ body.concept-viewport .switcher:focus-within {
   translate: -50% 0;
   text-align: center;
   pointer-events: none;
-  opacity: var(--w-chrome, 1);
+  opacity: calc(1 - var(--w-image, 0));
 }
 
 .vp-header__kicker,
@@ -125,6 +125,10 @@ body.concept-viewport .switcher:focus-within {
   color: var(--muted);
 }
 
+.vp-label.is-below {
+  translate: -50% 6px;
+}
+
 .vp-label.is-selected .vp-label__title {
   color: var(--accent);
 }
@@ -198,7 +202,8 @@ body.concept-viewport .switcher:focus-within {
   color: var(--ink);
 }
 
-.vp-pin--home {
+.vp-pin--home,
+.vp-pin--tour {
   translate: -50% 0;
 }
 

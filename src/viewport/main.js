@@ -27,7 +27,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'hi
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.type = THREE.PCFShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.domElement.className = 'stage';
@@ -66,7 +66,7 @@ scene.add(hemi, amb, key, key.target);
 
 /* ── Table, grid, map ─────────────────────────────────────────────────────── */
 
-const TABLE = { w: 7.2, d: 3.8 };
+const TABLE = { w: 6.8, d: 3.3 };
 const MAP = { w: 6.8, d: 3.4 };
 const tableMat = new THREE.MeshStandardMaterial({ color: '#d9ccb6', roughness: 0.82, metalness: 0 });
 const table = new THREE.Mesh(new RoundedBoxGeometry(TABLE.w, 0.14, TABLE.d, 4, 0.05), tableMat);
@@ -100,15 +100,18 @@ const lonLatToTable = (lat, lon) => new THREE.Vector3((lon / 180) * (MAP.w / 2),
 /* ── Objects ──────────────────────────────────────────────────────────────── */
 
 const screenTex = screenTexture();
+// Two rows on the table. `shot` is how the Image camera frames each one.
 const OBJECTS = [
-  { key: 'facility', item: 'facility', make: build.facility, pos: [-2.55, -0.45], rot: 0.35, name: 'Facility maquette' },
-  { key: 'robot', item: 'cell', make: build.robot, pos: [-1.55, 0.55], rot: -0.6, name: 'Robot arm' },
-  { key: 'flange', item: 'fixtures', make: build.flange, pos: [-0.62, -0.5], rot: 0, name: 'Fixture flange' },
-  { key: 'console', item: 'g64', make: build.consoleBox, pos: [0.22, 0.58], rot: -0.25, name: 'Console' },
-  { key: 'laptop', item: 'site', make: () => build.laptop(screenTex), pos: [1.12, -0.42], rot: -0.18, name: 'Laptop' },
-  { key: 'led', item: 'led', make: build.ledPanel, pos: [2.0, 0.5], rot: -0.35, name: 'LED matrix' },
-  { key: 'camera', item: 'film', make: build.filmCamera, pos: [2.72, -0.52], rot: -0.5, name: 'Film camera' },
+  { key: 'facility', item: 'facility', make: build.facility, pos: [-2.3, -0.6], rot: 0.35, name: 'Facility maquette', shot: { az: 32, el: 22, box: [2.1, 1.3] } },
+  { key: 'robot', item: 'cell', make: build.robot, pos: [-1.45, 0.62], rot: -0.6, name: 'Robot arm', shot: { az: -40, el: 8, box: [1.5, 1.2] } },
+  { key: 'flange', item: 'fixtures', make: build.flange, pos: [-0.65, -0.6], rot: 0, name: 'Fixture flange', shot: { az: 24, el: 26, box: [1.1, 0.7] } },
+  { key: 'console', item: 'g64', make: build.consoleBox, pos: [0.15, 0.62], rot: -0.25, name: 'Console', shot: { az: -34, el: 9, box: [1.15, 0.72] } },
+  { key: 'laptop', item: 'site', make: () => build.laptop(screenTex), pos: [0.95, -0.6], rot: -0.18, name: 'Laptop', shot: { az: -22, el: 16, box: [1.25, 0.8] } },
+  { key: 'camera', item: 'film', make: build.filmCamera, pos: [1.75, 0.62], rot: -0.45, name: 'Film camera', shot: { az: -30, el: 5, box: [1.3, 0.8] } },
+  { key: 'led', item: 'led', make: build.ledPanel, pos: [2.45, -0.55], rot: -0.35, name: 'LED matrix', shot: { az: -24, el: 12, box: [1.3, 0.85] } },
 ];
+const S = 1.4; // object scale on the table
+const S_MAP = 0.42; // object scale as map tokens
 
 const edgeMat = new THREE.LineBasicMaterial({ color: '#15191e', transparent: true, opacity: 0 });
 const edgeSelMat = new THREE.LineBasicMaterial({ color: '#e0362c', transparent: true, opacity: 0 });
@@ -122,11 +125,15 @@ const objects = OBJECTS.map((def, index) => {
   group.traverse((o) => {
     if (!o.isMesh) return;
     const m = o.material;
+    // Push solids back a hair so their outlines never z-fight in hidden-line mode.
+    m.polygonOffset = true;
+    m.polygonOffsetFactor = 1;
+    m.polygonOffsetUnits = 1;
     o.userData.real = { color: m.color.clone(), metalness: m.metalness, roughness: m.roughness };
     o.userData.isAccent = built.parts.some((p) => p.accent && (p.obj === o || p.obj.getObjectById(o.id)));
     meshes.push(o);
     if (!o.userData.glass && !o.isInstancedMesh) {
-      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry, 28), edgeMat);
+      const edges = new THREE.LineSegments(new THREE.EdgesGeometry(o.geometry.userData.edgeSource ?? o.geometry, 28), edgeMat);
       edges.raycast = () => {};
       o.add(edges);
       o.userData.edges = edges;
@@ -161,7 +168,7 @@ const homeBase = (() => {
 })();
 homeObjs.forEach((o, i) => {
   const a = (i / homeObjs.length) * Math.PI * 2 - Math.PI / 2;
-  o.placePos.set(homeBase.x + Math.cos(a) * 0.36, 0, homeBase.z + Math.sin(a) * 0.3);
+  o.placePos.set(homeBase.x + Math.cos(a) * 0.4, 0, homeBase.z + Math.sin(a) * 0.32);
 });
 const route = travel.map((it) => lonLatToTable(it.place.lat, it.place.lon));
 
@@ -204,7 +211,7 @@ const routeMat = new THREE.LineDashedMaterial({ color: '#ffb648', dashSize: 0.05
 
 /* ── Digital: floating windows + network ──────────────────────────────────── */
 
-const panelGeo = new THREE.PlaneGeometry(0.78, 0.49);
+const panelGeo = new THREE.PlaneGeometry(0.64, 0.4);
 const STACK = {
   facility: 'layout.dwg → mes.db',
   robot: 'plc ↔ vision ↔ hmi',
@@ -279,6 +286,9 @@ const labelLayer = el('div', 'vp-labels');
 labelLayer.setAttribute('aria-hidden', 'true');
 for (const o of objects) {
   o.label = el('button', 'vp-label', labelLayer, `<span class="vp-label__title"></span><span class="vp-label__meta"></span>`);
+  // Front-row labels hang below their object so they never cover the back row.
+  o.below = o.pos[1] > 0;
+  o.label.classList.toggle('is-below', o.below);
   o.label.type = 'button';
   o.label.tabIndex = -1;
   o.label.addEventListener('click', () => select(o.key));
@@ -406,7 +416,7 @@ const parallax = { x: 0, y: 0, tx: 0, ty: 0 };
 function shotTarget() {
   const o = objByKey.get(shotKey);
   const p = o.group.position;
-  return [p.x + o.anchor.x * 0.4, 0.12 + o.anchor.y * 0.25, p.z];
+  return [p.x + o.anchor.x * S * 0.4, (0.08 + o.anchor.y * 0.42) * S, p.z];
 }
 
 function insetsFor(id) {
@@ -419,8 +429,11 @@ const camState = { az: 0, el: 0, fov: 30, fh: 4, tx: 0, ty: 0, tz: 0, top: 0, bo
 function updateCamera(dt) {
   const { W, H } = view;
   const c = camState;
-  c.az = blend((cfg) => cfg.cam.az);
-  c.el = blend((cfg) => cfg.cam.el);
+  const shot = objByKey.get(shotKey).shot;
+  // Portrait screens look down the length of the table instead of across it.
+  const cam = (cfg) => (W / H < 0.8 && cfg.cam.mobile ? { ...cfg.cam, ...cfg.cam.mobile } : cfg.cam);
+  c.az = blend((cfg, id) => (id === 'image' ? shot.az : cam(cfg).az));
+  c.el = blend((cfg, id) => (id === 'image' ? shot.el : cam(cfg).el));
   c.fov = Math.exp(blend((cfg) => Math.log(cfg.cam.fov)));
   const st = shotTarget();
   c.tx = blend((cfg, id) => (id === 'image' ? st[0] : cfg.cam.target[0]));
@@ -434,8 +447,8 @@ function updateCamera(dt) {
   const freeH = Math.max(200, H - c.top - c.bottom);
   // Frame height needed so each mode's box fits the free area, blended in log space.
   c.fh = Math.exp(
-    blend((cfg) => {
-      const [bw, bh] = cfg.cam.box;
+    blend((cfg, id) => {
+      const [bw, bh] = id === 'image' ? shot.box : cam(cfg).box;
       return Math.log(Math.max((bh * H) / freeH, (bw * H) / freeW) * 1.04);
     }),
   );
@@ -472,7 +485,8 @@ function updateCamera(dt) {
 const v3 = new THREE.Vector3();
 const v3b = new THREE.Vector3();
 const out3 = [0, 0, 0];
-const clock = new THREE.Clock();
+let last = performance.now();
+let elapsed = 0;
 
 function updateScene(t) {
   const wR = w[0];
@@ -530,7 +544,7 @@ function updateScene(t) {
     const pz = o.home.z * (1 - wP) + place.z * wP;
     o.group.position.set(px, wD * 0.14, pz);
     o.group.rotation.y = o.rot * (1 - wP * 0.5);
-    o.group.scale.setScalar(1 - wP * 0.7);
+    o.group.scale.setScalar(S * (1 - wP) + S_MAP * wP);
 
     // Exploded parts
     for (const p of o.parts) p.obj.position.copy(p.base).addScaledVector(p.explode, wB);
@@ -542,6 +556,16 @@ function updateScene(t) {
       const mat = m.material;
       if (m.userData.glass) {
         mat.opacity = 0.18 * (1 - wS - wD);
+        continue;
+      }
+      if (m.isInstancedMesh) {
+        mat.color.setScalar(0.08 + 0.8 * Math.min(1, emissive));
+        continue;
+      }
+      if (m.userData.screen) {
+        // Screens go dark glass in the drawing and the clay model.
+        mat.color.setScalar(1 - 0.9 * (wS + wB * 0.6));
+        mat.emissiveIntensity = emissive;
         continue;
       }
       let cr = 0;
@@ -576,7 +600,7 @@ function updateScene(t) {
     if (o.panel) {
       o.panel.material.opacity = Math.pow(wD, 1.5);
       o.panel.visible = wD > 0.01;
-      o.panel.position.set(o.group.position.x, 0.95 + o.anchor.y * 0.2 + (o.index % 2) * 0.32, o.group.position.z);
+      o.panel.position.set(o.group.position.x, 1.0 + o.anchor.y * 0.25 + (o.index % 2) * 0.46, o.group.position.z);
       o.panel.scale.setScalar(0.7 + 0.3 * wD);
       o.panel.lookAt(camera.position);
     }
@@ -667,10 +691,15 @@ function toScreen(p) {
   return [(proj.x * 0.5 + 0.5) * view.W, (-proj.y * 0.5 + 0.5) * view.H, proj.z < 1];
 }
 
-function place(elm, p, opacity, dx = 0, dy = 0) {
-  const [x, y, ok] = toScreen(p);
+function place(elm, p, opacity, clampToView = false) {
+  let [x, y, ok] = toScreen(p);
+  if (clampToView) {
+    // Keep centred labels fully on screen (narrow phones especially).
+    const half = (elm._w ??= elm.offsetWidth) / 2 + 8;
+    x = clamp(x, half, view.W - half);
+  }
   elm.style.opacity = ok ? opacity.toFixed(3) : '0';
-  elm.style.transform = `translate3d(${(x + dx).toFixed(1)}px, ${(y + dy).toFixed(1)}px, 0)`;
+  elm.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
 }
 
 function updateLabels() {
@@ -682,9 +711,9 @@ function updateLabels() {
   const labelOpacity = 1 - Math.min(1, wI * 1.6 + wP * 1.6 + wD * 1.6);
   for (const o of objects) {
     o.group.updateWorldMatrix(true, true);
-    const a = o.anchor.clone().applyMatrix4(o.group.matrixWorld);
-    a.y += 0.05 + wB * 0.32;
-    place(o.label, a, labelOpacity);
+    const a = o.below ? v3b.set(0, 0, 0.3).applyMatrix4(o.group.matrixWorld) : o.anchor.clone().applyMatrix4(o.group.matrixWorld);
+    if (!o.below) a.y += 0.05 + wB * 0.32;
+    place(o.label, a, labelOpacity, true);
     o.label.classList.toggle('is-hover', hovered === o.key);
     o.label.classList.toggle('is-selected', selected === o.key);
   }
@@ -702,7 +731,7 @@ function updateLabels() {
   const pinVis = Math.pow(wP, 3);
   pins.forEach((p, i) => place(pinLabels[i], v3.copy(p.group.position).setY(0.25), pinVis));
   place(homeLabel, v3.copy(homeBase).setZ(homeBase.z + 0.42), pinVis);
-  place(tourLabel, v3.copy(objByKey.get('camera').group.position).setY(0.12), pinVis);
+  place(tourLabel, v3.copy(objByKey.get('camera').group.position).setZ(objByKey.get('camera').group.position.z + 0.2), pinVis);
 }
 
 /* ── Header, inspector, caption ───────────────────────────────────────────── */
@@ -749,6 +778,7 @@ function swap() {
   for (const o of objects) {
     o.label.querySelector('.vp-label__title').textContent = mode === 'structure' ? `${String(o.index + 1).padStart(2, '0')} ${o.name}` : o.it.title;
     o.label.querySelector('.vp-label__meta').textContent = metaFor(o, mode);
+    o.label._w = undefined;
   }
   if (mode === 'image') {
     if (!SHOT_ORDER.includes(selected)) selected = 'camera';
@@ -866,6 +896,7 @@ canvas.addEventListener('pointerup', (e) => {
 });
 
 addEventListener('resize', () => {
+  for (const o of objects) o.label._w = undefined;
   view.W = innerWidth;
   view.H = innerHeight;
   renderer.setSize(view.W, view.H);
@@ -875,9 +906,12 @@ addEventListener('resize', () => {
 /* ── Loop ─────────────────────────────────────────────────────────────────── */
 
 function tick() {
-  const dt = Math.min(0.05, clock.getDelta());
-  const t = clock.elapsedTime;
-  const now = performance.now() / 1000;
+  const nowMs = performance.now();
+  const dt = Math.min(0.05, (nowMs - last) / 1000);
+  last = nowMs;
+  elapsed += dt;
+  const t = elapsed;
+  const now = nowMs / 1000;
   const p = clamp((now - trans.t0) / trans.dur);
   const k = ease.inOutCubic(p);
   for (let i = 0; i < w.length; i++) w[i] = lerp(wFrom[i], wTo[i], k);
@@ -895,7 +929,7 @@ function tick() {
 
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) {
-    clock.getDelta();
+    last = performance.now();
     requestAnimationFrame(tick);
   }
 });

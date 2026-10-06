@@ -19,7 +19,13 @@ function mesh(geometry, material, pos = V(), rot = null) {
   return m;
 }
 
-const rbox = (w, h, d, r = 0.01, s = 3) => new RoundedBoxGeometry(w, h, d, s, Math.min(r, w / 2, h / 2, d / 2));
+// Rounded boxes are too smooth for EdgesGeometry to find an outline, so each one
+// carries a sharp box of the same size to draw its hidden-line edges from.
+const rbox = (w, h, d, r = 0.01, s = 3) => {
+  const g = new RoundedBoxGeometry(w, h, d, s, Math.min(r, w / 2, h / 2, d / 2));
+  g.userData.edgeSource = new THREE.BoxGeometry(w, h, d);
+  return g;
+};
 const cyl = (r, h, seg = 40, r2 = r) => new THREE.CylinderGeometry(r2, r, h, seg);
 
 class Builder {
@@ -205,7 +211,8 @@ export function ledPanel() {
   b.parts.push({ obj: back, base: back.position.clone(), explode: V(0, 0, -0.14), label: 'Back plate' });
 
   const N = 16;
-  const led = new THREE.InstancedMesh(new THREE.BoxGeometry(0.022, 0.022, 0.006), new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', roughness: 0.4 }), N * N);
+  // Unlit so each LED shows its own colour; brightness is driven per mode.
+  const led = new THREE.InstancedMesh(new THREE.BoxGeometry(0.022, 0.022, 0.006), new THREE.MeshBasicMaterial({ color: '#ffffff', toneMapped: false }), N * N);
   const m4 = new THREE.Matrix4();
   const c = new THREE.Color();
   for (let i = 0; i < N; i++)
