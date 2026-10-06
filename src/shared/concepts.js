@@ -1,4 +1,5 @@
-// The six concept mocks, in ranked order. Used by the gallery and the shared chrome.
+// The concept mocks: the original six in ranked order, then the follow-ups.
+// Used by the gallery and the shared chrome.
 export const concepts = [
   {
     id: 'scale',
@@ -47,5 +48,13 @@ export const concepts = [
     line: 'One object of twenty parts becomes everything.',
     detail:
       'Twenty triangular plates. Closed, they are a simple object. They explode into an assembly, rebuild into an arch, fan into a sculpture, unfold into a world map, and tile into a screen.',
+  },
+  {
+    id: 'lens',
+    name: 'Lens',
+    score: 'new',
+    line: 'The work, re-plotted and re-rendered for every section.',
+    detail:
+      'Coordinates decide where each piece of work sits; viewport modes decide how it looks. A render line sweeps across and redraws everything: linework for Engineering, clay for Projects, film stills for Art, a map for Travel, ASCII for Apps. Open any project and the same tabs translate it.',
   },
 ];

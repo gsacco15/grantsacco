@@ -1,8 +1,8 @@
 # Grant Sacco — personal site concepts
 
-**Same person. Different lens.** Six working, interactive concept mocks for a personal site. Each one is a different answer to the same question: what if the sections (About, Engineering, Projects, Art, Travel, Apps) weren't separate pages, but different ways of looking at the same work?
+**Same person. Different lens.** Seven working, interactive concept mocks for a personal site. Each one is a different answer to the same question: what if the sections (About, Engineering, Projects, Art, Travel, Apps) weren't separate pages, but different ways of looking at the same work?
 
-All six mocks share one content file, so the only thing that changes between them is the concept.
+All seven mocks share one content file, so the only thing that changes between them is the concept.
 
 | # | Concept | What switching sections does |
 |---|---|---|
@@ -12,6 +12,7 @@ All six mocks share one content file, so the only thing that changes between the
 | 04 | **Layers** (`/layers/`) | Keeps the camera still and turns CAD-style layers on and off over one modelled film camera: shell ⇄ x-ray, internals, edges, dimensions, process marks, light, handwritten notes, a film strip of places, and a software graph. Visitors can mix their own. |
 | 05 | **Translation** (`/translation/`) | Shows one project at a time, seen as a Person, Engineer, Maker, Artist, Traveller or System. Each lens is a completely different form: a story, a technical drawing, a build log, a print, a map, or live data. |
 | 06 | **Object Morphing** (`/morph/`) | Rearranges twenty triangular plates into everything: a closed icosahedron, an exploded assembly, an arch, robot arm or workbench, a bronze sculpture, an unfolded (Dymaxion-style) world map, or a tiled screen. |
+| 07 | **Lens** (`/lens/`) | Coordinates × Viewport Modes. Every project is a picture on one field. Switching section moves the pictures onto that section's axes while a render line sweeps across and redraws everything in its visual language: photographs, hidden-line drawings, clay, film stills, a map duotone, ASCII. Click a project to open it; the same tabs then translate that one project. |
 
 Inside every mock: `1`–`6` or `←` `→` switch sections, and the URL hash (`#structure`, `#place`, …) links straight to a state.
 
@@ -49,6 +50,7 @@ src/shared/                  chrome (top bar, contact card, liquid section switc
 src/content.js               the content every mock reads
 src/anim.js                  small interruption-safe tween helpers
 public/previews/             gallery thumbnails
+src/lens/pictures.js         placeholder project pictures (swap for real photos)
 ```
 
 ## Deploy

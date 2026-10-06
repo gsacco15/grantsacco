@@ -10,8 +10,8 @@ root.innerHTML = `
     <p class="g-kicker">${site.name} — personal site concepts</p>
     <h1 class="g-title">Same person.<br /><em>Different lens.</em></h1>
     <p class="g-lede">
-      Six working mocks, one idea: the sections of the site aren't separate pages. They're different ways of looking
-      at the same work. All six use identical sample content, so the only thing that changes is the concept.
+      Seven working mocks, one idea: the sections of the site aren't separate pages. They're different ways of looking
+      at the same work. All seven use identical sample content, so the only thing that changes is the concept.
     </p>
     <p class="g-keys">Inside every mock: <kbd>1</kbd>–<kbd>6</kbd> or <kbd>←</kbd> <kbd>→</kbd> to switch sections.</p>
   </header>
@@ -48,7 +48,7 @@ root.innerHTML = `
       <div><dt>Coordinates</dt><dd>decide <em>how the work is arranged</em>.</dd></div>
       <div><dt>Translation</dt><dd>is the idea that explains why all of it works.</dd></div>
     </dl>
-    <p class="g-small">Play with each mock, note what you like, then the final site can combine the best parts.</p>
+    <p class="g-small">Concept 07, <a href="./lens/">Lens</a>, is a first try at that: Coordinates decide where the work sits, Viewport Modes decide how it looks.</p>
   </section>
 
   <footer class="g-foot">
