@@ -1,0 +1,293 @@
+/* Shared foundation for every concept mock. Each mock overrides the tokens. */
+
+:root {
+  --bg: #ecebe7;
+  --ink: #161616;
+  --muted: #6f6c66;
+  --line: rgb(22 22 22 / 0.14);
+  --accent: #d2491f;
+  --panel: rgb(255 255 255 / 0.72);
+  --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --hand: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --gutter: clamp(16px, 2.4vw, 32px);
+  color-scheme: light dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.app {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.stage {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Chrome: identity + concept navigation ───────────────────────────────── */
+
+.chrome {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 40;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: var(--gutter);
+  pointer-events: none;
+  transition: color 0.6s var(--ease);
+}
+
+.chrome > * {
+  pointer-events: auto;
+}
+
+.chrome__id {
+  display: grid;
+  gap: 2px;
+}
+
+.chrome__name {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.chrome__concept {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.chrome__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.chrome__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  text-decoration: none;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.chrome__nav a:hover {
+  border-color: var(--ink);
+}
+
+.chrome__draft {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Concept note: what this mock is demonstrating. */
+.note {
+  position: fixed;
+  left: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 30;
+  max-width: 340px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted);
+  transition: opacity 0.4s;
+}
+
+.note strong {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.note__toggle {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.note.is-collapsed p {
+  display: none;
+}
+
+/* ── Section switcher ─────────────────────────────────────────────────────── */
+
+.switcher {
+  position: fixed;
+  left: 50%;
+  bottom: var(--gutter);
+  z-index: 35;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  transition: background 0.6s var(--ease), border-color 0.6s var(--ease);
+  max-width: calc(100vw - 2 * var(--gutter));
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.switcher::-webkit-scrollbar {
+  display: none;
+}
+
+.switcher__btn {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 1px;
+  min-width: 96px;
+  padding: 8px 12px 9px;
+  border-radius: 10px;
+  text-align: left;
+  color: var(--muted);
+  transition: color 0.25s, background 0.25s;
+  flex: 0 0 auto;
+}
+
+.switcher__btn:hover {
+  color: var(--ink);
+}
+
+.switcher__btn[aria-pressed='true'] {
+  color: var(--bg);
+  background: var(--ink);
+}
+
+.switcher__key {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+}
+
+.switcher__label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.switcher__sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  opacity: 0.7;
+}
+
+@media (max-width: 760px) {
+  .note {
+    display: none;
+  }
+  .switcher {
+    left: var(--gutter);
+    right: var(--gutter);
+    transform: none;
+  }
+  .switcher__btn {
+    min-width: 84px;
+    padding: 7px 10px 8px;
+  }
+  .chrome__nav .chrome__all-label {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
