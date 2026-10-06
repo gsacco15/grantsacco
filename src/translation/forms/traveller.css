@@ -1,0 +1,278 @@
+/* TRAVELLER — night navy, amber pins, coordinates in degrees and minutes. */
+
+.tv-map {
+  background: radial-gradient(80% 70% at 60% 40%, #0f1d36, #091222 70%);
+}
+
+.tv-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.tv-grat path {
+  fill: none;
+  stroke: rgb(129 145 168 / 0.16);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.tv-land {
+  fill: #1b2c49;
+  stroke: rgb(170 192 224 / 0.6);
+  stroke-width: 0.8;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  transition: opacity calc(var(--k) * 1.2s) var(--ease);
+}
+
+.tv.is-in .tv-land {
+  opacity: 1;
+}
+
+/* Non-scaling strokes can't draw on with pathLength dashes, so routes fade in. */
+.tv-routes path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+  transition: opacity calc(var(--k) * 0.9s) var(--ease) calc(var(--k) * (1.5s + var(--i) * 0.25s));
+}
+
+.tv.is-in .tv-routes path {
+  opacity: 0.9;
+}
+
+.tv-pins {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tv-pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  grid-template-columns: auto;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.tv-pin i {
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.tv-pin b,
+.tv-pin small {
+  position: relative;
+  left: 12px;
+  top: -8px;
+}
+
+.tv-pin b {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tv-pin small {
+  top: -6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.tv-pin.is-other i {
+  width: 4px;
+  height: 4px;
+  left: -2px;
+  top: -2px;
+  opacity: 0.6;
+}
+
+.tv-pin.is-main i {
+  left: -6px;
+  top: -6px;
+  width: 12px;
+  height: 12px;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 rgb(255 182 72 / 0.6);
+  animation: tv-pulse 2.4s ease-out infinite;
+}
+
+@keyframes tv-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(255 182 72 / 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 26px rgb(255 182 72 / 0);
+  }
+}
+
+.tv-pin.is-main b {
+  color: var(--accent);
+}
+
+.tv-pin.is-rel {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.tv-pin.is-rel i {
+  background: var(--ink);
+}
+
+.tv-pin.is-rel:hover b {
+  color: var(--accent);
+}
+
+.tv-pin b,
+.tv-pin small,
+.tv-pin i {
+  opacity: 0;
+  transition: opacity calc(var(--k) * 0.6s) var(--ease) calc(var(--k) * 1.4s);
+}
+
+.tv.is-in .tv-pin b,
+.tv.is-in .tv-pin small,
+.tv.is-in .tv-pin i {
+  opacity: 1;
+}
+
+/* Info card */
+.tv-wrap {
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.tv-card {
+  width: min(380px, 100%);
+  padding: 24px 24px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--panel);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  pointer-events: auto;
+}
+
+.tv-kicker {
+  margin: 0 0 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.tv-title {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.tv-place,
+.tv-coords,
+.tv-line,
+.tv-facts {
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity calc(var(--k) * 0.7s) var(--ease) calc(var(--k) * var(--d, 0.5s)),
+    transform calc(var(--k) * 0.8s) var(--ease) calc(var(--k) * var(--d, 0.5s));
+}
+
+.tv.is-in .tv-place,
+.tv.is-in .tv-coords,
+.tv.is-in .tv-line,
+.tv.is-in .tv-facts {
+  opacity: 1;
+  transform: none;
+}
+
+.tv-place {
+  margin: 14px 0 6px;
+  font-family: var(--serif);
+  font-size: clamp(34px, 3.2vw, 46px);
+  line-height: 1;
+}
+
+.tv-coords {
+  --d: 0.7s;
+  margin: 0 0 14px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.tv-line {
+  --d: 0.9s;
+  margin: 0 0 16px;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.tv-facts {
+  --d: 1.1s;
+  margin: 0;
+  border-top: 1px solid var(--line);
+}
+
+.tv-facts div {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.tv-facts dt {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tv-facts dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .tv-wrap {
+    align-items: flex-end;
+  }
+  .tv-card {
+    padding: 16px;
+  }
+  .tv-place {
+    font-size: 30px;
+    margin-top: 8px;
+  }
+  .tv-line {
+    display: none;
+  }
+  .tv-pin.is-rel small,
+  .tv-pin.is-main small {
+    display: none;
+  }
+}
