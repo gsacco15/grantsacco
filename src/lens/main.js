@@ -12,7 +12,7 @@ import { systems } from '../coordinates/systems.js';
 import { loadLand } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
 import { render } from './render.js';
-import { layout, wallCells } from './layout.js';
+import { layout } from './layout.js';
 import { overlay } from './overlay.js';
 import { createPage } from './page.js';
 import { RENDER, metaFor } from './meta.js';
@@ -65,7 +65,7 @@ const lg = {
   render: legend.querySelector('.lx-legend__render'),
 };
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
-const HINT = { image: 'Hover a roll to skim it · click to open the roll' };
+const HINT = { image: 'Hover a film to skim · click to open' };
 
 /* ── Tiles ────────────────────────────────────────────────────────────────── */
 
@@ -104,7 +104,8 @@ const tiles = items.map((it) => {
     to: null,
     delay: 0,
   };
-  el.addEventListener('click', () => openProject(it.id, el));
+  // The film series is the photographs themselves: it opens straight into the films.
+  el.addEventListener('click', () => (it.id === 'film' ? darkroom.open('all', 0, el) : openProject(it.id, el)));
   el.addEventListener('pointerenter', () => setHover(it.id));
   el.addEventListener('pointerleave', () => setHover(null));
   el.addEventListener('focus', () => setHover(it.id));
@@ -196,7 +197,7 @@ function setMode(id) {
     }
   }
   const order = [...tiles].sort((a, b) => (a.to.x - b.to.x) * dir);
-  stacks.layout(wallCells(W, H));
+  stacks.layout(layouts.image);
   order.forEach((t, k) => (t.delay = first ? 0 : (k / tiles.length) * STAGGER));
 
   // The outgoing drawing and background stay put on the side the line hasn't reached.
@@ -209,11 +210,10 @@ function setMode(id) {
 
   const md = modes.find((m) => m.id === id);
   lg.kicker.textContent = `${String(MODE_IDS.indexOf(id) + 1).padStart(2, '0')} · ${md.section}`;
-  const total = albums.reduce((n, a) => n + a.count, 0);
-  lg.title.textContent = id === 'image' ? 'The rolls' : systems[id].title;
-  lg.axes.textContent = id === 'image' ? `${albums.length} rolls · ${total} frames · hover to skim, click to open` : systems[id].readout;
+  lg.title.textContent = systems[id].title;
+  lg.axes.textContent = systems[id].readout;
   hint.textContent = HINT[id] ?? 'Click any piece of work to open it';
-  const renderName = id === 'image' ? 'prints · film grain' : RENDER[id];
+  const renderName = RENDER[id];
   lg.render.textContent = `render · ${renderName}`;
   legend.classList.remove('is-in');
   void legend.offsetWidth;
@@ -349,7 +349,7 @@ function drawDyn() {
   const parts = [];
   for (const tl of tiles) {
     const p = L.tiles.get(tl.it.id);
-    if (p.hidden || mode === 'image') continue;
+    if (p.hidden) continue;
     const [ax, ay] = [p.ax, p.ay];
     // Nearest point on the picture to the anchor.
     const nx = clamp(ax, p.x - p.w / 2, p.x + p.w / 2);
@@ -358,6 +358,15 @@ function drawDyn() {
     if (mode === 'place' && d < 1) continue;
     if (d > 4) parts.push(`<line x1="${ax.toFixed(1)}" y1="${ay.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="lx-leader" data-id="${tl.it.id}"/>`);
     parts.push(`<circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="${mode === 'place' ? 2.6 : 2.2}" class="lx-anchor" data-id="${tl.it.id}"/>`);
+  }
+  if (mode === 'image') {
+    for (const p of L.stacks) {
+      const top = p.y - p.w * 0.65;
+      const nx = clamp(p.ax, p.x - p.w / 2, p.x + p.w / 2);
+      const ny = clamp(p.ay, top, top + p.w * 1.3);
+      if (Math.hypot(p.ax - nx, p.ay - ny) > 4) parts.push(`<line x1="${p.ax.toFixed(1)}" y1="${p.ay.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="lx-leader"/>`);
+      parts.push(`<circle cx="${p.ax.toFixed(1)}" cy="${p.ay.toFixed(1)}" r="2.2" class="lx-anchor"/>`);
+    }
   }
   if (mode === 'digital') {
     for (const it of items) {
@@ -446,7 +455,7 @@ const query = new URLSearchParams(location.search);
 const fromQuery = query.get('p');
 if (fromQuery && items.some((i) => i.id === fromQuery)) openProject(fromQuery, null);
 const rollQuery = query.get('roll');
-if (rollQuery && albums.some((a) => a.id === rollQuery)) darkroom.open(rollQuery, 0, null);
+if (rollQuery && (rollQuery === 'all' || albums.some((a) => a.id === rollQuery))) darkroom.open(rollQuery, 0, null);
 stacks.warm();
 
 loadLand().then((l) => {
@@ -462,7 +471,7 @@ window.addEventListener('resize', () => {
     H = innerHeight;
     computeLayouts();
     const L = layouts[mode];
-    stacks.layout(wallCells(W, H));
+    stacks.layout(layouts.image);
     for (const t of tiles) {
       const target = L.tiles.get(t.it.id);
       if (target.hidden) {

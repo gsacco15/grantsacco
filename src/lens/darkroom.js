@@ -1,8 +1,9 @@
-// The darkroom: one roll laid out as an endless contact sheet you can drag and
+// The darkroom: a film laid out as an endless contact sheet you can drag and
 // scroll in any direction (after uselayouts' Infinite Canvas: a 3 × 3 wrap of
-// one block, inertia, and a slight lean with speed). The rolls sit in a side
-// bar so you can switch without leaving; click a frame to enlarge it, arrow
-// through the roll, and Esc steps back out (frame → roll → Art).
+// one block, inertia, and a slight lean with speed). Every film sits in a side
+// bar, plus "All films" mixed together, so you can switch without leaving;
+// click a frame to enlarge it, arrow through, and Esc steps back out
+// (frame → films → Art).
 import { photo, photoAspect, drawInto } from './photos.js';
 import { clamp } from '../anim.js';
 
@@ -25,6 +26,20 @@ function grainURL() {
 }
 
 export function createDarkroom({ albums, onClose }) {
+  const TOTAL = albums.reduce((n, a) => n + a.count, 0);
+
+  /** A film, or every film interleaved: { id, title, meta, frames: [{ a, i }] }. */
+  function collection(id) {
+    if (id === 'all') {
+      const frames = [];
+      const longest = Math.max(...albums.map((a) => a.count));
+      for (let i = 0; i < longest; i++) for (const a of albums) if (i < a.count) frames.push({ a, i });
+      return { id: 'all', title: 'All films', meta: `${albums.length} films · ${TOTAL} frames`, frames };
+    }
+    const a = albums.find((x) => x.id === id) ?? albums[0];
+    return { id: a.id, title: a.title, meta: `${a.place} · ${a.year} · ${a.count} frames`, frames: Array.from({ length: a.count }, (_, i) => ({ a, i })) };
+  }
+
   const root = document.createElement('div');
   root.className = 'dk';
   root.setAttribute('role', 'dialog');
@@ -38,9 +53,14 @@ export function createDarkroom({ albums, onClose }) {
       <div class="dk__title"><span class="dk__roll"></span><span class="dk__meta"></span></div>
       <span class="dk__hint">Drag or scroll to wander · click a frame</span>
     </header>
-    <nav class="dk__rolls" aria-label="Rolls">
-      <span class="dk__label">Rolls</span>
-      <ol>${albums
+    <nav class="dk__rolls" aria-label="Films">
+      <span class="dk__label">Films</span>
+      <ol><li><button type="button" data-roll="all">
+            <canvas class="dk__thumb" width="${Math.round(56 * DPR)}" height="${Math.round(40 * DPR)}"></canvas>
+            <span class="dk__rname">All films</span>
+            <span class="dk__rcount">${TOTAL}</span>
+            <span class="dk__rmeta">${albums.length} films, mixed</span>
+          </button></li>${albums
         .map(
           (a) => `<li><button type="button" data-roll="${a.id}">
             <canvas class="dk__thumb" width="${Math.round(56 * DPR)}" height="${Math.round(40 * DPR)}"></canvas>
@@ -73,9 +93,20 @@ export function createDarkroom({ albums, onClose }) {
   const lbFig = $('.dk__lb-fig');
   const lbCanvas = lbFig.querySelector('canvas');
   const rollButtons = [...root.querySelectorAll('[data-roll]')];
-  rollButtons.forEach((b) => drawInto(b.querySelector('canvas'), albums.find((a) => a.id === b.dataset.roll), 0));
+  rollButtons.forEach((b) => {
+    const c = b.querySelector('canvas');
+    if (b.dataset.roll !== 'all') return drawInto(c, albums.find((a) => a.id === b.dataset.roll), 0);
+    // "All films": a strip of three covers.
+    const strip = document.createElement('canvas');
+    strip.width = Math.ceil(c.width / 3);
+    strip.height = c.height;
+    albums.slice(0, 3).forEach((a, k) => {
+      drawInto(strip, a, a.cover);
+      c.getContext('2d').drawImage(strip, k * strip.width, 0);
+    });
+  });
 
-  let album = null;
+  let col = null;
   let open = false;
   let lbIndex = -1;
   let lbFrom = null;
@@ -89,21 +120,22 @@ export function createDarkroom({ albums, onClose }) {
 
   /* ── Building a roll ──────────────────────────────────────────────────── */
 
-  function build(a, focusFrame = 0) {
-    album = a;
+  function build(collectionToShow, focus = 0) {
+    col = collectionToShow;
+    const { frames } = col;
     const vw = canvasEl.clientWidth;
     const vh = canvasEl.clientHeight;
     const m = innerWidth < 760;
     const cardW = m ? Math.round(innerWidth * 0.4) : Math.round(clamp(innerWidth * 0.13, 150, 230));
     const gap = Math.round(cardW * 0.2);
     const cellH = Math.round(cardW * 1.05) + 28;
-    // One block holds the roll (repeated if needed) and is at least a screen
+    // One block holds the film (repeated if needed) and is at least a screen
     // in each direction, so the 3 × 3 wrap never shows an edge.
-    const n = a.count;
-    let cols = Math.max(Math.ceil(Math.sqrt(n * 1.4)), Math.ceil((vw * 1.05) / (cardW + gap)));
-    let rows = Math.max(Math.ceil(n / cols), Math.ceil((vh * 1.05) / (cellH + gap)));
+    const n = frames.length;
+    const cols = Math.max(Math.ceil(Math.sqrt(n * 1.4)), Math.ceil((vw * 1.05) / (cardW + gap)));
+    const rows = Math.max(Math.ceil(n / cols), Math.ceil((vh * 1.05) / (cellH + gap)));
     const cells = cols * rows;
-    // The roll reads in order first; any repeats that fill out the block are
+    // The film reads in order first; any repeats that fill out the block are
     // offset row by row so the same frame never stacks in a column.
     const frameAt = (k) => (k < n ? k : (k + Math.floor(k / cols) * 3) % n);
 
@@ -111,12 +143,13 @@ export function createDarkroom({ albums, onClose }) {
       `<div class="dk__block"${main ? '' : ' aria-hidden="true"'} style="grid-template-columns:repeat(${cols}, ${cardW}px);gap:${gap}px;padding:${Math.round(gap / 2)}px">${Array.from(
         { length: cells },
         (_, k) => {
-          const i = frameAt(k);
+          const fi = frameAt(k);
+          const { a, i } = frames[fi];
           const land = photoAspect(a, i) > 1;
           const w = land ? cardW : Math.round(cardW * 0.7);
           const h = land ? Math.round(cardW / 1.5) : Math.round(cardW * 1.05);
           const real = main && k < n;
-          return `<button type="button" class="dk__card" data-i="${i}"${real ? '' : ' tabindex="-1"'} style="height:${cellH}px" aria-label="Frame ${i + 1} of ${n}">
+          return `<button type="button" class="dk__card" data-k="${fi}"${real ? '' : ' tabindex="-1"'} style="height:${cellH}px" aria-label="${a.title}, frame ${i + 1} of ${a.count}">
             <span class="dk__img" style="width:${w}px;height:${h}px"><canvas width="${Math.round(w * DPR)}" height="${Math.round(h * DPR)}"></canvas></span>
             <span class="dk__cap"><b>${pad2(i + 1)}</b>${a.title}</span>
           </button>`;
@@ -124,13 +157,16 @@ export function createDarkroom({ albums, onClose }) {
       ).join('')}</div>`;
     matrix.innerHTML = Array.from({ length: 9 }, (_, b) => blockHTML(b === 4)).join('');
     matrix.style.gridTemplateColumns = 'repeat(3, max-content)';
-    for (const c of matrix.querySelectorAll('canvas')) drawInto(c, a, +c.closest('.dk__card').dataset.i);
+    for (const c of matrix.querySelectorAll('canvas')) {
+      const { a, i } = frames[+c.closest('.dk__card').dataset.k];
+      drawInto(c, a, i);
+    }
 
     const main = matrix.children[4];
     block.w = main.offsetWidth;
     block.h = main.offsetHeight;
     // Start with the chosen frame in the middle of the screen.
-    const card = main.querySelector(`.dk__card[data-i="${focusFrame}"]`) ?? main.firstElementChild;
+    const card = main.querySelector(`.dk__card[data-k="${focus}"]`) ?? main.firstElementChild;
     const cx = block.w + card.offsetLeft + card.offsetWidth / 2;
     const cy = block.h + card.offsetTop + card.offsetHeight / 2;
     pos.x = target.x = vw / 2 - cx;
@@ -138,11 +174,11 @@ export function createDarkroom({ albums, onClose }) {
     vel.x = vel.y = 0;
     apply();
 
-    $('.dk__roll').textContent = a.title;
-    $('.dk__meta').textContent = `${a.place} · ${a.year} · ${n} frames`;
-    rollButtons.forEach((b) => b.setAttribute('aria-current', String(b.dataset.roll === a.id)));
+    $('.dk__roll').textContent = col.title;
+    $('.dk__meta').textContent = col.meta;
+    rollButtons.forEach((b) => b.setAttribute('aria-current', String(b.dataset.roll === col.id)));
     const url = new URL(location.href);
-    url.searchParams.set('roll', a.id);
+    url.searchParams.set('roll', col.id);
     history.replaceState(null, '', url);
   }
 
@@ -218,7 +254,7 @@ export function createDarkroom({ albums, onClose }) {
     if (canvasEl.hasPointerCapture(e.pointerId)) canvasEl.releasePointerCapture(e.pointerId);
     if (drag.dist < 6 && e.type === 'pointerup') {
       const card = document.elementFromPoint(e.clientX, e.clientY)?.closest('.dk__card');
-      if (card) openFrame(+card.dataset.i, card);
+      if (card) openFrame(+card.dataset.k, card);
     }
   };
   canvasEl.addEventListener('pointerup', endDrag);
@@ -239,27 +275,28 @@ export function createDarkroom({ albums, onClose }) {
   // Keyboard: Enter on a focused frame opens it (pointer clicks go through pointerup).
   matrix.addEventListener('click', (e) => {
     const card = e.target.closest('.dk__card');
-    if (card && e.detail === 0) openFrame(+card.dataset.i, card);
+    if (card && e.detail === 0) openFrame(+card.dataset.k, card);
   });
 
   /* ── Enlarged frame ───────────────────────────────────────────────────── */
 
-  function showFrame(i) {
-    lbIndex = (i + album.count) % album.count;
-    const a = album;
-    const aspect = photoAspect(a, lbIndex);
+  function showFrame(k) {
+    const n = col.frames.length;
+    lbIndex = (k + n) % n;
+    const { a, i } = col.frames[lbIndex];
+    const aspect = photoAspect(a, i);
     const maxW = innerWidth * (innerWidth < 760 ? 0.92 : 0.74);
     const maxH = innerHeight * 0.72;
     const w = Math.min(maxW, maxH * aspect);
     const h = w / aspect;
     lbFig.style.width = `${w.toFixed(0)}px`;
     lbCanvas.style.height = `${h.toFixed(0)}px`;
-    const src = photo(a, lbIndex, Math.min(2000, Math.round(w * DPR)));
+    const src = photo(a, i, Math.min(2000, Math.round(w * DPR)));
     lbCanvas.width = src.width;
     lbCanvas.height = src.height;
     lbCanvas.getContext('2d').drawImage(src, 0, 0);
     $('.dk__lb-title').textContent = `${a.title} — ${a.place}, ${a.year}`;
-    $('.dk__lb-n').textContent = `${pad2(lbIndex + 1)} / ${pad2(a.count)}`;
+    $('.dk__lb-n').textContent = `${pad2(i + 1)} / ${pad2(a.count)}`;
   }
 
   function openFrame(i, fromCard) {
@@ -300,8 +337,8 @@ export function createDarkroom({ albums, onClose }) {
 
   /* ── Open, switch, close ──────────────────────────────────────────────── */
 
+  /** Open film `id` (or 'all') centred on its frame `frame`. */
   function openRoll(id, frame = 0, from = null) {
-    const a = albums.find((x) => x.id === id) ?? albums[0];
     returnTo = from;
     const wasOpen = open;
     root.hidden = false;
@@ -312,17 +349,17 @@ export function createDarkroom({ albums, onClose }) {
       void root.offsetWidth;
       root.classList.add('is-in');
     }
-    build(a, frame);
+    build(collection(id), id === 'all' ? 0 : frame);
     if (!raf) raf = requestAnimationFrame(loop);
     canvasEl.focus({ preventScroll: true });
   }
 
   function switchRoll(id) {
-    if (album?.id === id) return;
+    if (col?.id === id) return;
     matrix.classList.add('is-swapping');
     setTimeout(
       () => {
-        build(albums.find((x) => x.id === id));
+        build(collection(id));
         matrix.classList.remove('is-swapping');
       },
       reduced() ? 0 : 180,
@@ -344,7 +381,7 @@ export function createDarkroom({ albums, onClose }) {
     const url = new URL(location.href);
     url.searchParams.delete('roll');
     history.replaceState(null, '', url);
-    const id = album?.id;
+    const id = col?.id;
     onClose(id, returnTo);
   }
 
@@ -381,7 +418,7 @@ export function createDarkroom({ albums, onClose }) {
   );
 
   window.addEventListener('resize', () => {
-    if (open && album) build(album, lbIndex >= 0 ? lbIndex : 0);
+    if (open && col) build(col, lbIndex >= 0 ? lbIndex : 0);
   });
 
   return { open: openRoll, close, isOpen: () => open };

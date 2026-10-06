@@ -4,7 +4,7 @@
 import { systems, graticule, STAGES, yearToRing, travelRoute } from '../coordinates/systems.js';
 import { items } from '../content.js';
 import { landPath } from '../shared/geo.js';
-import { YEAR0, YEAR1, mapFrame, polarFrame, anchor, wallCells } from './layout.js';
+import { YEAR0, YEAR1, mapFrame, polarFrame, anchor } from './layout.js';
 
 const NS = 'http://www.w3.org/2000/svg';
 const f = (v) => v.toFixed(1);
@@ -91,18 +91,20 @@ export function overlay(mode, R, W, H, land) {
   }
 
   if (mode === 'image') {
-    // A dark gallery wall: a soft pool of light over each place on it.
-    const { cells, card } = wallCells(W, H);
-    parts.push(
-      `<defs><radialGradient id="lx-pool"><stop offset="0" stop-color="${pal.ink}" stop-opacity="0.11"/><stop offset="0.6" stop-color="${pal.ink}" stop-opacity="0.035"/><stop offset="1" stop-color="${pal.ink}" stop-opacity="0"/></radialGradient></defs>`,
-    );
-    for (const c of cells) {
-      const cx = c.x + c.w / 2;
-      const cy = c.y + c.h * 0.4;
-      parts.push(`<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(Math.min(c.w * 0.48, card * 1.9))}" ry="${f(c.h * 0.55)}" fill="url(#lx-pool)"/>`);
-      parts.push(`<circle cx="${f(cx)}" cy="${f(c.y + 4)}" r="1.6" fill="${ink(0.35)}"/>`);
+    const cx = U(0.5);
+    const cy = V(0.5);
+    ln(R.x, cy, R.x + R.w, cy, ink(0.28));
+    ln(cx, R.y, cx, R.y + R.h, ink(0.28));
+    for (const [x, y, a] of [[R.x + R.w, cy, 0], [R.x, cy, 180], [cx, R.y, -90], [cx, R.y + R.h, 90]]) {
+      parts.push(`<path d="M-7,-4 L0,0 L-7,4" transform="translate(${f(x)} ${f(y)}) rotate(${a})" fill="none" stroke="${ink(0.5)}" stroke-width="1.2"/>`);
     }
+    const it = { size: mob ? 13 : 16, cls: 'ov-serif', fill: ink(0.7) };
+    text(R.x + R.w - 4, cy - 14, 'expressive', { ...it, anchor: 'end' });
+    text(R.x + 4, cy - 14, 'functional', it);
+    text(cx + 10, R.y + 8, 'experimental', it);
+    text(cx + 10, R.y + R.h - 8, 'controlled', it);
   }
+
 
   if (mode === 'place') {
     const F = mapFrame(R);

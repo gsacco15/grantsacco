@@ -1,8 +1,8 @@
-// Photo rolls on the Art wall, as piles of prints. Hover fans the pile out from
+// Photo rolls on Art's plot, as piles of prints. Hover fans the pile out from
 // one hand-held corner (after uselayouts' Polaroid Stack) and skims the roll:
 // moving across the pile flips the top print through every frame. Click opens
-// the roll in the darkroom. The render line deals the piles onto the wall as it
-// passes, and picks them up again on the way out.
+// the film straight into the darkroom. The render line deals the piles onto
+// the plot as it passes, and picks them up again on the way out.
 import { drawInto } from './photos.js';
 import { clamp, mulberry32, hashString } from '../anim.js';
 
@@ -17,7 +17,7 @@ export function createStacks({ albums, parent, onOpen }) {
   const wall = document.createElement('div');
   wall.className = 'pk-wall';
   wall.setAttribute('role', 'list');
-  wall.setAttribute('aria-label', 'Photo rolls');
+  wall.setAttribute('aria-label', 'Films');
   parent.appendChild(wall);
 
   const stacks = albums.map((a, ai) => {
@@ -26,7 +26,7 @@ export function createStacks({ albums, parent, onOpen }) {
     el.type = 'button';
     el.className = 'pk';
     el.setAttribute('role', 'listitem');
-    el.setAttribute('aria-label', `${a.title} — ${a.place}, ${a.year}. ${a.count} photos. Open roll`);
+    el.setAttribute('aria-label', `${a.title} — ${a.place}, ${a.year}. ${a.count} photos. Open film`);
     el.style.setProperty('--d', `${ai * 70}ms`);
     // Bottom of the pile first; the last card is the one on top.
     const frames = [3, 2, 1, 4, a.cover].map((k) => k % a.count);
@@ -46,7 +46,7 @@ export function createStacks({ albums, parent, onOpen }) {
           .join('')}
       </span>
       <span class="pk__skim" aria-hidden="true"><span></span></span>
-      <span class="pk__cap"><span class="pk__title">${a.title}</span><span class="pk__meta">${a.place} · ${a.year}</span></span>`;
+      <span class="pk__cap"><span class="pk__title">${a.title}</span><span class="pk__meta">${shortPlace(a.place)} · ${a.year}</span></span>`;
     wall.appendChild(el);
     const cards = [...el.querySelectorAll('.pk__card')];
     const s = {
@@ -105,17 +105,19 @@ export function createStacks({ albums, parent, onOpen }) {
     });
   }
 
-  /** Place every pile in its wall cell. */
-  function layout({ cells, card }) {
-    stacks.forEach((s, i) => {
-      const c = cells[i];
-      s.cx = c.x + c.w / 2;
+  /** Place every pile at its spot on the Art plot ({ stacks: [{ id, x, y }], card }). */
+  function layout({ stacks: spots, card }) {
+    for (const s of stacks) {
+      const p = spots.find((q) => q.id === s.a.id);
+      if (!p) continue;
+      s.cx = p.x;
       const resized = Math.abs(s.size - card) > 0.5;
       s.size = card;
       s.el.style.setProperty('--w', `${card.toFixed(1)}px`);
-      s.el.style.transform = `translate(${(s.cx - card / 2).toFixed(1)}px, ${(c.y + c.h * 0.42 - card * 0.65).toFixed(1)}px)`;
+      s.el.style.transform = `translate(${(p.x - card / 2).toFixed(1)}px, ${(p.y - card * 0.65).toFixed(1)}px)`;
+      s.el.classList.toggle('cap-end', p.x > innerWidth * 0.8);
       if (resized) paintCards(s);
-    });
+    }
   }
 
   /** Deal piles in as the line passes them (entering), or pick them up (leaving). */

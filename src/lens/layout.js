@@ -100,54 +100,22 @@ export function tileSize(it, mode, R, W) {
 export const CAPTION_H = 30;
 const hasCaption = (it, mode, W) => isFocus(it, mode) && !(W < 760 && mode === 'reality');
 
-/**
- * Layout for a section: for each item { x, y (tile centre), w, h, ax, ay
- * (anchor), cap (caption shown) }. Tiles start on their anchors and are pushed
- * apart until nothing overlaps, pulled back towards their anchors as they go.
- */
-/** Items hung on the Art wall beside the photo rolls (everything else steps out). */
-export const WALL = ['renders'];
+/** Trips step out of Art: their photographs are the rolls. */
+const ART_HIDE = ['travel'];
 
 /**
- * The Art wall: a grid of cells, one per roll, then the WALL items. Each cell
- * is { x, y, w, h } (top-left and size); `card` is the print size for a stack.
+ * Push overlapping marks apart, pulling each back towards its anchor as it
+ * goes. Marks are { x, y (centre), w, h, ax, ay, cap | capH, focus }; `bw`
+ * widens a mark's box for a caption wider than its picture.
  */
-export function wallCells(W, H) {
-  const R = plotRect(W, H);
-  const n = albums.length + WALL.length;
-  const m = W < 760;
-  const cols = m ? 2 : n > 6 ? 4 : 3;
-  const rows = Math.ceil(n / cols);
-  const top = R.y + (m ? 4 : 18);
-  const cw = R.w / cols;
-  const ch = (R.y + R.h - top) / rows;
-  const card = Math.max(m ? 56 : 84, Math.min(m ? 96 : 150, cw * 0.4, (ch - (m ? 44 : 64)) / 1.3));
-  const cells = [];
-  for (let i = 0; i < n; i++) {
-    const r = Math.floor(i / cols);
-    // Centre a short last row.
-    const inRow = r === rows - 1 ? n - r * cols : cols;
-    const c = i - r * cols + (cols - inRow) / 2;
-    cells.push({ x: R.x + c * cw, y: top + r * ch, w: cw, h: ch });
-  }
-  return { R, cells, card };
-}
-
-export function layout(mode, W, H) {
-  if (mode === 'image') return wallLayout(W, H);
-  const R = plotRect(W, H);
+function relax(L, R, mode, W) {
   const gap = W < 760 ? 4 : 8;
-  const L = items.map((it) => {
-    const [ax, ay] = anchor(it, mode, R);
-    const [w, h] = tileSize(it, mode, R, W);
-    const cap = hasCaption(it, mode, W);
-    return { id: it.id, it, ax, ay, x: ax, y: ay, w, h, cap, focus: isFocus(it, mode) };
-  });
   // Collision boxes include the caption under the picture.
-  const box = (t) => ({ hw: t.w / 2, top: t.h / 2, bottom: t.h / 2 + (t.cap ? CAPTION_H : 0) });
+  const box = (t) => ({ hw: (t.bw ?? t.w) / 2, top: t.h / 2, bottom: t.h / 2 + (t.capH ?? (t.cap ? CAPTION_H : 0)) });
   // Keep the "you" origin clear in the polar view.
   const P = polarFrame(R);
-  const bounds = { x0: R.x - 12, x1: R.x + R.w + 12, y0: R.y - 10, y1: R.y + R.h + 16 };
+  // Art's "controlled" label sits on the bottom edge, so captions stay above it.
+  const bounds = { x0: R.x - 12, x1: R.x + R.w + 12, y0: R.y - 10, y1: R.y + R.h + (mode === 'image' ? -18 : 16) };
 
   for (let iter = 0; iter < 220; iter++) {
     let moved = false;
@@ -197,25 +165,59 @@ export function layout(mode, W, H) {
     }
     if (!moved && iter > 160) break;
   }
+  return L;
+}
+
+/**
+ * Layout for a section: for each item { x, y (tile centre), w, h, ax, ay
+ * (anchor), cap (caption shown) }. Art also returns `stacks`: one photo roll
+ * per entry, plotted on the same axes.
+ */
+export function layout(mode, W, H) {
+  if (mode === 'image') return artLayout(W, H);
+  const R = plotRect(W, H);
+  const L = items.map((it) => {
+    const [ax, ay] = anchor(it, mode, R);
+    const [w, h] = tileSize(it, mode, R, W);
+    const cap = hasCaption(it, mode, W);
+    return { id: it.id, it, ax, ay, x: ax, y: ay, w, h, cap, focus: isFocus(it, mode) };
+  });
+  relax(L, R, mode, W);
   return { R, tiles: new Map(L.map((t) => [t.id, t])) };
 }
 
-/** Art: the rolls take the wall; the WALL items hang beside them, the rest step out. */
-function wallLayout(W, H) {
-  const { R, cells, card } = wallCells(W, H);
+/** Print width of a photo-roll stack on the Art plot. */
+export const stackCard = (W, H) => {
+  const R = plotRect(W, H);
+  return W < 760 ? 46 : Math.min(108, Math.max(66, Math.min(R.w, R.h * 1.7) * 0.07));
+};
+
+/**
+ * Art keeps its axes (functional ↔ expressive, controlled ↔ experimental).
+ * The photo rolls are plotted on them as stacks of prints, in focus with the
+ * art; the rest of the work stays small on the functional side for contrast.
+ */
+function artLayout(W, H) {
+  const R = plotRect(W, H);
+  const card = stackCard(W, H);
+  const L = [];
+  for (const it of items) {
+    if (ART_HIDE.includes(it.kind)) continue;
+    const [ax, ay] = anchor(it, 'image', R);
+    const [w, h] = tileSize(it, 'image', R, W);
+    L.push({ id: it.id, it, ax, ay, x: ax, y: ay, w, h, cap: hasCaption(it, 'image', W), focus: isFocus(it, 'image') });
+  }
+  for (const a of albums) {
+    const [ax, ay] = toPx(R, pad(a.axes.expressive, 0.08), pad(a.axes.experimental, 0.08));
+    const m = W < 760;
+    L.push({ id: a.id, album: a, ax, ay, x: ax, y: ay, w: card, h: card * 1.3, bw: Math.max(card * 1.15, m ? 76 : 132), capH: m ? 30 : 62, focus: true, stack: true });
+  }
+  relax(L, R, 'image', W);
   const tiles = new Map();
   for (const it of items) {
-    const k = WALL.indexOf(it.id);
-    if (k < 0) {
-      tiles.set(it.id, { id: it.id, it, hidden: true, x: 0, y: 0, w: 1, h: 1, ax: 0, ay: 0, cap: false, focus: false });
-      continue;
-    }
-    const cell = cells[albums.length + k];
-    const w = Math.min(cell.w * 0.78, card * 1.9);
-    const h = w / ASPECT.image;
-    const x = cell.x + cell.w / 2;
-    const y = cell.y + cell.h * 0.42;
-    tiles.set(it.id, { id: it.id, it, x, y, w, h, ax: x, ay: y, cap: true, focus: true });
+    const t = L.find((m) => m.id === it.id);
+    tiles.set(it.id, t ?? { id: it.id, it, hidden: true, x: 0, y: 0, w: 1, h: 1, ax: 0, ay: 0, cap: false, focus: false });
   }
-  return { R, tiles };
+  const stacks = L.filter((m) => m.stack).map(({ id, x, y, w, ax, ay }) => ({ id, x, y, w, ax, ay }));
+  return { R, tiles, stacks, card };
 }
