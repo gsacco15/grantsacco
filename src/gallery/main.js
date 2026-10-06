@@ -24,7 +24,7 @@ root.innerHTML = `
         <a class="g-card" href="./${c.id}/">
           <span class="g-num">${String(i + 1).padStart(2, '0')}</span>
           <span class="g-preview" aria-hidden="true">
-            <img src="previews/${c.id}.png" alt="" loading="lazy" onerror="this.remove()" />
+            <img src="previews/${c.id}.jpg" alt="" loading="lazy" onerror="this.remove()" />
           </span>
           <span class="g-body">
             <span class="g-name">${c.name}<span class="g-score">${c.score}</span></span>
