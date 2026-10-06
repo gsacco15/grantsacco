@@ -1,0 +1,361 @@
+body.concept-scale {
+  background: var(--bg);
+}
+
+.sc-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 46%, transparent 38%, rgb(0 0 0 / calc(var(--vig, 0) * 0.95)) 100%);
+}
+
+/* ── In view ──────────────────────────────────────────────────────────────── */
+
+.sc-readout {
+  text-shadow: 0 0 18px var(--bg), 0 0 4px var(--bg);
+  position: fixed;
+  top: var(--gutter);
+  left: 50%;
+  z-index: 20;
+  translate: -50% 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.sc-readout__k {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.sc-readout__what {
+  margin: 4px 0 2px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(28px, 3.4vw, 44px);
+  line-height: 1;
+}
+
+.sc-readout__size {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Powers-of-ten rail ───────────────────────────────────────────────────── */
+
+.sc-rail {
+  position: fixed;
+  left: calc(var(--gutter) + 34px);
+  top: 130px;
+  bottom: 150px;
+  z-index: 20;
+  width: 110px;
+}
+
+.sc-rail__track {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+.sc-rail__tick {
+  position: absolute;
+  left: -10px;
+  top: calc(var(--y) * 100%);
+  translate: -100% -50%;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.sc-rail__tick::before {
+  content: '';
+  position: absolute;
+  right: -10px;
+  top: 50%;
+  width: 6px;
+  height: 1px;
+  background: var(--muted);
+}
+
+.sc-rail__tick sup {
+  font-size: 7.5px;
+}
+
+.sc-rail__stop {
+  position: absolute;
+  left: -5px;
+  top: calc(var(--y) * 100%);
+  translate: 0 -50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.sc-rail__stop i {
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+  background: var(--bg);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.sc-rail__stop span {
+  margin-left: 4px;
+  translate: 0 var(--nudge, 0px);
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+.sc-rail__stop:hover span,
+.sc-rail__stop.is-active span {
+  opacity: 1;
+}
+
+.sc-rail__stop.is-active i {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.15);
+}
+
+.sc-rail__now {
+  position: absolute;
+  left: -14px;
+  top: calc(var(--y) * 100%);
+  width: 28px;
+  height: 2px;
+  translate: 0 -50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+}
+
+.sc-rail__now span {
+  position: absolute;
+  left: 34px;
+  top: 50%;
+  translate: 0 -50%;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--bg) !important;
+  z-index: 2;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Globe pins ───────────────────────────────────────────────────────────── */
+
+.sc-pin {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  gap: 1px;
+  padding-left: 12px;
+  translate: 0 -50%;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.sc-pin {
+  text-shadow: 0 0 6px var(--bg), 0 0 2px var(--bg);
+}
+
+.sc-pin b {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+/* ── Section panel ────────────────────────────────────────────────────────── */
+
+.sc-panel {
+  position: fixed;
+  top: 110px;
+  right: var(--gutter);
+  bottom: 120px;
+  z-index: 18;
+  width: 330px;
+  padding: 20px 20px 18px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  transition: opacity 0.5s var(--ease), translate 0.5s var(--ease);
+  scrollbar-width: thin;
+}
+
+body.is-flying .sc-panel {
+  opacity: 0;
+  translate: 16px 0;
+  pointer-events: none;
+}
+
+.sc-panel__kicker {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.sc-panel__title {
+  margin: 6px 0 8px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 1.05;
+}
+
+.sc-panel__blurb {
+  margin: 0 0 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.sc-panel__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.sc-panel__list li {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.sc-panel__list b {
+  display: block;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sc-panel__yr {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding-top: 2px;
+}
+
+.sc-frame {
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 12px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.sc-frame button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 18px;
+}
+
+.sc-frame button:hover {
+  border-color: var(--ink);
+}
+
+.sc-frame p {
+  margin: 0;
+}
+
+.sc-frame__n {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+
+.sc-frame__t {
+  font-weight: 600;
+}
+
+.sc-frame__c {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+@media (max-width: 760px) {
+  .sc-readout {
+    top: 96px;
+  }
+  .sc-readout__what {
+    font-size: 28px;
+  }
+  .sc-rail {
+    top: 170px;
+    bottom: 290px;
+    width: 30px;
+  }
+  .sc-rail__stop span,
+  .sc-rail__tick {
+    display: none;
+  }
+  .sc-rail {
+    left: var(--gutter);
+  }
+  .sc-panel {
+    top: auto;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: 104px;
+    width: auto;
+    max-height: 160px;
+    padding: 14px 16px;
+  }
+  .sc-panel__title {
+    font-size: 24px;
+  }
+  .sc-panel__blurb {
+    display: none;
+  }
+}
