@@ -8,7 +8,7 @@ import '../shared/base.css';
 import './style.css';
 import { mountChrome, mountSwitcher, prefersReducedMotion } from '../shared/chrome.js';
 import { modes } from '../content.js';
-import { artifacts as items, films as albums, quiet, dogs, inMore } from './artifacts.js';
+import { artifacts as items, films as albums, quiet, dogs, races, inMore } from './artifacts.js';
 import { systems } from '../coordinates/systems.js';
 import { loadLand, loadCountries, loadDetail } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
@@ -67,6 +67,8 @@ const lg = {
   render: legend.querySelector('.lx-legend__render'),
 };
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
+// Lens reads some axes differently from the Coordinates mock.
+const READOUT = { reality: 'r = year · θ = time of year · origin = you' };
 const HINT = { image: 'Hover a film to skim · click to open', place: 'Click a trip for photos · scroll or pinch to zoom' };
 
 // About's one quiet line.
@@ -80,9 +82,19 @@ const dogsEl = div(
 );
 dogsEl.setAttribute('role', 'img');
 dogsEl.setAttribute('aria-label', `${dogs.names}, ${dogs.year}`);
+// Races as their logos, small, on the wheel at their year and month (named on hover).
+const raceEls = races.map((rc) => {
+  const el = div('lx-race', body, `<img class="lx-race__pic" src="${rc.logo}" alt="" /><span class="lx-race__cap"><span>${rc.name}</span><span>${rc.when}</span></span>`);
+  el.setAttribute('role', 'img');
+  el.setAttribute('aria-label', `${rc.name}, ${rc.when}`);
+  return el;
+});
+
+/** Jaylee and Helga and the race logos take their spots on About's wheel. */
 function placeDogs() {
   const p = layouts.reality.dogs;
   dogsEl.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`;
+  layouts.reality.races.forEach((k, i) => (raceEls[i].style.transform = `translate(${k.x.toFixed(1)}px, ${k.y.toFixed(1)}px)`));
 }
 
 // The section's "+ more" list: work that belongs here but isn't on stage.
@@ -263,11 +275,12 @@ function setMode(id) {
   const md = modes.find((m) => m.id === id);
   lg.kicker.textContent = `${String(MODE_IDS.indexOf(id) + 1).padStart(2, '0')} · ${md.section}`;
   lg.title.textContent = systems[id].title;
-  lg.axes.textContent = systems[id].readout;
+  lg.axes.textContent = READOUT[id] ?? systems[id].readout;
   hint.textContent = HINT[id] ?? 'Click any piece of work to open it';
   quietEl.classList.toggle('is-on', id === 'reality');
   placeDogs();
   dogsEl.classList.toggle('is-on', id === 'reality');
+  for (const el of raceEls) el.classList.toggle('is-on', id === 'reality');
   fillMore(id);
   const renderName = RENDER[id];
   lg.render.textContent = `render · ${renderName}`;
@@ -686,7 +699,8 @@ mapHit.addEventListener('dblclick', (e) => {
 /* ── Boot ─────────────────────────────────────────────────────────────────── */
 
 const switcher = mountSwitcher({
-  items: modes.map((m) => ({ id: m.id, label: m.section, sub: m.name.toLowerCase() })),
+  // "Digital · digital" would repeat itself; that tab's look is seen as a system.
+  items: modes.map((m) => ({ id: m.id, label: m.section, sub: m.id === 'digital' ? 'system' : m.name.toLowerCase() })),
   initial: 'reality',
   label: 'Sections',
   onChange: (id) => setMode(id),

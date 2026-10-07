@@ -2,7 +2,7 @@
 // from the Coordinates mock; what's new here is that the marks are pictures of
 // real artifacts, each section shows only its own (plus deliberate crossovers),
 // and marks are relaxed apart while keeping a leader to their exact coordinate.
-import { artifacts, films, countries, dogs, inSection } from './artifacts.js';
+import { artifacts, films, countries, dogs, races, inSection } from './artifacts.js';
 import { STAGES } from '../coordinates/systems.js';
 import { ASPECT } from './render.js';
 import { metaFor } from './meta.js';
@@ -24,11 +24,16 @@ export const isFocus = (a, mode) => {
 /** Radius (0–1) of a year's ring in the About orbit. */
 export const ringRadius = (year) => 0.18 + 0.82 * ((year - YEAR0 + 0.5) / (YEAR1 - YEAR0));
 
-// About: radius = start year, angle = golden angle in chronological order.
+/**
+ * About is a calendar wheel: radius = the year, angle = the time of year, with
+ * January at the top and the months running clockwise. Work sits mid-month.
+ */
+export const monthAngle = (month) => -Math.PI / 2 + ((month - 1) / 12) * Math.PI * 2;
 const polar = (() => {
-  const list = artifacts.filter((a) => inSection(a, 'reality')).sort((a, b) => a.years[0] - b.years[0] || a.id.localeCompare(b.id));
   const out = new Map();
-  list.forEach((a, i) => out.set(a.id, { r: ringRadius(a.years[0] ?? YEAR0), theta: -Math.PI / 2 + i * 2.39996 }));
+  for (const a of artifacts.filter((x) => inSection(x, 'reality'))) {
+    out.set(a.id, { r: ringRadius(a.years[0] ?? YEAR0), theta: monthAngle((a.month ?? 7) + 0.5) });
+  }
   return out;
 })();
 
@@ -331,11 +336,23 @@ export function layout(mode, W, H) {
   if (mode === 'place') return mapLayout(W, H);
   const R = plotRect(W, H);
   const L = artifacts.filter((a) => inSection(a, mode)).map((it) => mark(it, mode, R, W));
-  // In About, captions and logos also keep clear of the "Grant · origin · now" marker.
+  // In About, captions and logos also keep clear of the "Grant · origin · now"
+  // marker, the race logos and the time-of-year labels.
   const P = polarFrame(R);
-  relax(L, R, mode, W, mode === 'reality' ? [{ x0: P.cx - 44, x1: P.cx + 44, y0: P.cy - 16, y1: P.cy + 46 }] : []);
+  const obstacles = [];
+  let marks = [];
+  if (mode === 'reality') {
+    obstacles.push({ x0: P.cx - 44, x1: P.cx + 44, y0: P.cy - 16, y1: P.cy + 46 });
+    marks = raceMarks(R, W);
+    for (const k of marks) obstacles.push({ x0: k.x - k.w / 2 - 4, x1: k.x + k.w / 2 + 4, y0: k.y - k.h / 2 - 4, y1: k.y + k.h / 2 + 4 });
+    for (const b of yearCues(R, W)) obstacles.push(b);
+  }
+  relax(L, R, mode, W, obstacles);
   const out = { R, tiles: withHidden(L) };
-  if (mode === 'reality') out.dogs = dogSpot(L, R, W);
+  if (mode === 'reality') {
+    out.races = marks;
+    out.dogs = dogSpot(L, R, W, obstacles);
+  }
   return out;
 }
 
@@ -345,7 +362,7 @@ export function layout(mode, W, H) {
  * point furthest from every tile and caption, and off the axes the year
  * labels run along (left on desktop, up on phones).
  */
-function dogSpot(L, R, W) {
+function dogSpot(L, R, W, fixed = []) {
   const P = polarFrame(R);
   const r = ringRadius(dogs.year);
   const m = W < 760;
@@ -354,8 +371,8 @@ function dogSpot(L, R, W) {
     const x0 = t.capAlign === 'end' ? t.x + t.w / 2 - Math.max(t.w, t.cw ?? 0) : t.x - t.w / 2;
     return { x0, x1: x0 + Math.max(t.w, t.cw ?? 0), y0: t.y - t.h / 2, y1: t.y + t.h / 2 + (t.capH ?? 0) };
   });
-  // The "Grant · origin · now" label under the centre.
-  boxes.push({ x0: P.cx - 40, x1: P.cx + 40, y0: P.cy - 14, y1: P.cy + 46 });
+  // The centre marker, the race logos and the time-of-year labels.
+  boxes.push(...fixed);
   const gap = (a, b) => Math.hypot(Math.max(0, a.x0 - b.x1, b.x0 - a.x1), Math.max(0, a.y0 - b.y1, b.y0 - a.y1));
   let best = null;
   for (let deg = -140; deg <= 140; deg += 2.5) {
@@ -372,6 +389,41 @@ function dogSpot(L, R, W) {
     }
   }
   return { x: best.x, y: best.y };
+}
+
+/** Race logo height on About's wheel (small, but readable as the race). */
+export const raceHeight = (W) => (W < 760 ? 15 : 20);
+
+/** The race logos on About's wheel: centred exactly on their year and month. */
+function raceMarks(R, W) {
+  const P = polarFrame(R);
+  const h = raceHeight(W);
+  return races.map((rc) => {
+    const a = monthAngle(rc.month + 0.5);
+    const r = ringRadius(rc.year);
+    return { id: rc.id, x: P.cx + Math.cos(a) * r * P.rx, y: P.cy + Math.sin(a) * r * P.ry, w: h * rc.ratio, h };
+  });
+}
+
+/**
+ * The time-of-year cue on About's wheel: "Jan" at the top, where the year
+ * starts, and an arrow running clockwise "through the year". Returns the
+ * label boxes (the overlay draws them from the same numbers).
+ */
+export const YEAR_CUE = { from: -84, to: -38 };
+export function yearCues(R, W) {
+  const P = polarFrame(R);
+  const m = W < 760;
+  const r1 = ringRadius(YEAR1 - 1);
+  const top = P.cy - r1 * P.ry - (m ? 19 : 14);
+  const mid = ((YEAR_CUE.from + YEAR_CUE.to) / 2) * (Math.PI / 180);
+  const off = m ? 18 : 24;
+  const tx = P.cx + Math.cos(mid) * (r1 * P.rx + off);
+  const ty = P.cy + Math.sin(mid) * (r1 * P.ry + off);
+  return [
+    { x0: P.cx - 14, x1: P.cx + 14, y0: top - 7, y1: top + 7 },
+    { x0: tx - 4, x1: tx + (m ? 86 : 104), y0: ty - 8, y1: ty + 8 },
+  ];
 }
 
 /** Print width of a photo-roll stack on the Art plot. */

@@ -14,6 +14,8 @@ export const RENDER = {
 // Years as a label: "2021–24", "2025 – now", "until 2014"; "~" marks placeholder dates.
 const NOW = 2026;
 const yrs = (it) => {
+  // Work in separate stints reads as each stint: "2018–19, 2021–24".
+  if (it.periods) return it.periods.map((p) => yrs({ ...it, periods: null, years: p.years })).join(', ');
   const [a, b] = it.years;
   const t = it.tbd ? '~' : '';
   if (a == null) return `until ${b}`;

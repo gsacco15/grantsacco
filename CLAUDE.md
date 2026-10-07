@@ -21,9 +21,10 @@ This is **not a resume on a website**. It should feel like:
 
 ## Lens decisions so far
 
-- Company names and logos: project first, company second. Logos are small and sparing: company and school logos (Enovis, MAPEI, OnlyChargeEV, KU, in `src/lens/img/logos/`) sit under the work in About only; an app's icon (ContactFlow) sits beside its name in Apps only. No big branded tiles. Check what can be shown publicly about Enovis before launch.
+- Company names and logos: project first, company second. Logos are small and sparing: company and school logos (Enovis, MAPEI, OnlyChargeEV, KU, in `src/lens/img/logos/`) sit under the work in About only; an app's icon (ContactFlow) sits beside its name in Digital only. No big branded tiles. Check what can be shown publicly about Enovis before launch.
 
-- Sections keep their coordinate systems; a render line re-renders everything when switching.
+- Sections keep their coordinate systems; a render line re-renders everything when switching. The sixth section is called **Digital** (was Apps): apps, code, electronics and controls.
+- About is a calendar wheel: rings are years, the angle is the time of year (January at the top, clockwise), each piece at its start month. Only career, school and a few key projects live there (no trips, no AWC; MAPEI Corp's card carries both stints, Chicago 2018–19 and Dallas 2021–24). The time of year is cued simply ("Jan" at the top and a "through the year" arrow), with no month names. Races are their logos, small, on the wheel at their year and month, named on hover (Austin Marathon, Feb 2024; IRONMAN 70.3 Texas, spring 2026).
 - Axis labels, ticks and year marks are part of the look: phones keep them too, just fewer and smaller (never drop them entirely).
 - Sections show only their own work; tiles step out and back in at the render line.
 - Art: the 35mm films are photo stacks plotted on Art's axes; clicking one opens the infinite grid with that film selected ("All films" in the sidebar).

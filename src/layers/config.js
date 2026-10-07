@@ -29,7 +29,7 @@ export const SECTIONS = [
   { id: 'build', label: 'Projects', sub: 'process' },
   { id: 'image', label: 'Art', sub: 'light' },
   { id: 'place', label: 'Travel', sub: 'places' },
-  { id: 'digital', label: 'Apps', sub: 'connections' },
+  { id: 'digital', label: 'Digital', sub: 'connections' },
 ];
 
 /*

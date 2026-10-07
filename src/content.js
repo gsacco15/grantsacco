@@ -74,7 +74,7 @@ export const modes = [
   {
     id: 'digital',
     name: 'Digital',
-    section: 'Apps',
+    section: 'Digital',
     blurb: 'Physical to digital, experimental to finished — and the connections between all of it.',
   },
 ];

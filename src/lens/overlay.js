@@ -4,7 +4,7 @@
 import { systems, STAGES } from '../coordinates/systems.js';
 import { artifacts, homes, countries } from './artifacts.js';
 import { planarRings } from '../shared/geo.js';
-import { YEAR0, YEAR1, mapFrame, mapZoom, polarFrame, anchor, ringRadius } from './layout.js';
+import { YEAR0, YEAR1, mapFrame, mapZoom, polarFrame, anchor, ringRadius, YEAR_CUE } from './layout.js';
 import { scaleTicks } from './meta.js';
 
 const byId = new Map(artifacts.map((a) => [a.id, a]));
@@ -46,8 +46,34 @@ export function overlay(mode, R, W, H, geo) {
       if (mob) text(P.cx, P.cy - r * P.ry, String(y), { anchor: 'middle', size: 8.5, fill: ink(0.5), halo: true });
       else text(P.cx - r * P.rx, P.cy, String(y), { anchor: 'middle', size: 9.5, fill: ink(0.45) });
     }
-    ln(P.cx - P.rx, P.cy, P.cx + P.rx, P.cy, ink(0.08), 1, 'stroke-dasharray="2 5"');
-    ln(P.cx, P.cy - P.ry, P.cx, P.cy + P.ry, ink(0.08), 1, 'stroke-dasharray="2 5"');
+    // Time of year, kept simple: the year starts at the top ("Jan") and runs
+    // clockwise, shown by one arrow outside the wheel.
+    const r1 = ringRadius(YEAR1 - 1);
+    const r0 = ringRadius(YEAR0);
+    ln(P.cx, P.cy - r0 * P.ry, P.cx, P.cy - r1 * P.ry - (mob ? 4 : 6), ink(0.16), 1, 'stroke-dasharray="2 5"');
+    // (On phones the years also run up this axis, so "Jan" sits a little higher.)
+    text(P.cx, P.cy - r1 * P.ry - (mob ? 19 : 14), 'Jan', { anchor: 'middle', size: mob ? 8.5 : 9.5, fill: ink(0.6), halo: true });
+    {
+      const off = mob ? 8 : 10;
+      const pt = (deg) => {
+        const a = (deg * Math.PI) / 180;
+        return [P.cx + Math.cos(a) * (r1 * P.rx + off), P.cy + Math.sin(a) * (r1 * P.ry + off)];
+      };
+      let d = '';
+      for (let deg = YEAR_CUE.from; deg <= YEAR_CUE.to + 1e-6; deg += 2) {
+        const [x, y] = pt(deg);
+        d += `${d ? 'L' : 'M'}${f(x)},${f(y)}`;
+      }
+      parts.push(`<path d="${d}" fill="none" stroke="${ink(0.45)}" stroke-width="1.1"/>`);
+      // Arrowhead along the curve's direction at its end.
+      const [x1, y1] = pt(YEAR_CUE.to);
+      const [x0, y0] = pt(YEAR_CUE.to - 3);
+      const ang = (Math.atan2(y1 - y0, x1 - x0) * 180) / Math.PI;
+      parts.push(`<path d="M-6,-3.5 L0,0 L-6,3.5" transform="translate(${f(x1)} ${f(y1)}) rotate(${f(ang)})" fill="none" stroke="${ink(0.55)}" stroke-width="1.2"/>`);
+      const mid = ((YEAR_CUE.from + YEAR_CUE.to) / 2) * (Math.PI / 180);
+      const lo = mob ? 18 : 24;
+      text(P.cx + Math.cos(mid) * (r1 * P.rx + lo), P.cy + Math.sin(mid) * (r1 * P.ry + lo), 'through the year', { size: mob ? 8.5 : 9.5, fill: ink(0.55), halo: true });
+    }
     parts.push(`<circle cx="${f(P.cx)}" cy="${f(P.cy)}" r="5" fill="${pal.accent}"/>`);
     parts.push(`<circle cx="${f(P.cx)}" cy="${f(P.cy)}" r="12" fill="none" stroke="${hexA(pal.accent, 0.4)}"/>`);
     text(P.cx, P.cy + 24, 'Grant', { anchor: 'middle', size: 13, fill: ink(0.9), cls: 'ov-sans' });

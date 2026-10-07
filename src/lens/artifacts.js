@@ -10,9 +10,11 @@
  *  photos, CAD and the logo arrive. Years marked `tbd` are placeholders too.
  *
  *  Sections (mode ids): reality = About, structure = Engineering,
- *  build = Projects, image = Art, place = Travel, digital = Apps.
+ *  build = Projects, image = Art, place = Travel, digital = Digital.
  *  `main` is the artifact's own section; `also` lists crossovers.
- *  featured: 'yes' = on stage · 'maybe' = in the section's "+ more" list.
+ *  featured: 'yes' = on stage · 'maybe' = in the section's "+ more" list ·
+ *  'no' = kept as data only. `month` is the start month, the angle in About
+ *  (`monthTbd` marks a placeholder month).
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import dogBlackTan from './img/dog-black-tan.png';
@@ -21,11 +23,13 @@ import enovisLogo from './img/logos/enovis.png';
 import mapeiLogo from './img/logos/mapei.png';
 import onlychargeLogo from './img/logos/onlychargeev.png';
 import kuLogo from './img/logos/ku.png';
+import austinMarathonLogo from './img/logos/austin-marathon.png';
+import ironmanTexasLogo from './img/logos/ironman-703-texas.png';
 import contactflowIcon from './img/logos/contactflow.svg';
 
 /*
  * Logos, used sparingly: project first, company second. Company logos sit small
- * under the work in About; an app's icon sits beside its name in Apps.
+ * under the work in About; an app's icon sits beside its name in Digital.
  * `ratio` is width / height; `in` lists the sections that show it.
  */
 const about = (src, alt, ratio) => ({ src, alt, ratio, in: ['reality'] });
@@ -42,6 +46,16 @@ export const quiet = { line: 'Based in Austin · English, Italian, learning Port
 
 /** Jaylee and Helga, sitting on About's 2021 ring (one frame from each sprite sheet). */
 export const dogs = { src: [dogBlackTan, dogTan], names: 'Jaylee & Helga', year: 2021 };
+
+/**
+ * Races, as their logos (small) on About's wheel at their year and month,
+ * named on hover. `ratio` is the logo's width / height; `monthTbd` marks a
+ * placeholder month.
+ */
+export const races = [
+  { id: 'austin-marathon', name: 'Austin Marathon', year: 2024, month: 2, when: 'February 2024', logo: austinMarathonLogo, ratio: 600 / 261 },
+  { id: 'ironman-texas', name: 'IRONMAN 70.3 Texas', year: 2026, month: 4, monthTbd: true, when: 'Spring 2026', logo: ironmanTexasLogo, ratio: 280 / 120 },
+];
 
 /**
  * Places lived, in order (the Travel map draws the moves between them).
@@ -127,21 +141,23 @@ const ax = (scale, complexity, expressive = 0.2, experimental = 0.3, digital = 0
 export const artifacts = [
   /* ── About: where the time went ─────────────────────────────────────────── */
   {
-    id: 'enovis', title: 'Enovis', kind: 'role', org: 'Sr. Project Engineer, Advanced Manufacturing', years: [2025, 2026],
+    id: 'enovis', title: 'Enovis', kind: 'role', org: 'Sr. Project Engineer, Advanced Manufacturing', years: [2025, 2026], month: 4,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.9),
     summary: 'Owner rep and engineering lead for a new operations facility and an additive manufacturing center.',
     lens: { reality: '2025 – now · Austin. A 200K sq ft facility and an additive manufacturing center.' },
     picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-am'],
   },
   {
-    id: 'mapei-dallas', title: 'MAPEI Corp', kind: 'role', org: 'Project Engineering Manager', years: [2021, 2024],
+    id: 'mapei-dallas', title: 'MAPEI Corp', kind: 'role', org: 'Project Engineering Manager', years: [2021, 2024], month: 7, monthTbd: true,
     place: { name: 'Dallas, TX', lat: 32.78, lon: -96.8 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.85),
     summary: 'Industrial construction and manufacturing capital projects, over $30M in total.',
-    lens: { reality: '2021 – 2024 · Dallas. Over $30M of plants, expansions and equipment.' },
+    // MAPEI Corp in two stints: Chicago out of school, then Dallas after Milan.
+    periods: [{ years: [2018, 2019], place: 'Chicago' }, { years: [2021, 2024], place: 'Dallas' }],
+    lens: { reality: 'Chicago 2018 – 19, then Dallas 2021 – 24. Over $30M of plants, expansions and equipment.' },
     picture: { scene: 'badge', label: 'MAPEI', sub: 'Dallas · 2021 – 24', accent: '#2b5aa6' }, logo: LOGO.mapei, related: ['drymix', 'palletizer', 'sitedev', 'staticmix', 'liquid'],
   },
   {
-    id: 'mapei-milan', title: 'MAPEI SpA', kind: 'role', org: 'Project Engineer', years: [2019, 2021],
+    id: 'mapei-milan', title: 'MAPEI SpA', kind: 'role', org: 'Project Engineer', years: [2019, 2021], month: 3, monthTbd: true,
     place: { name: 'Milan, Italy', lat: 45.46, lon: 9.19 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.6),
     summary: 'Manufacturing operations, capital projects and static mixing R&D at the Milan headquarters.',
     lens: { reality: '2019 – 2021 · Milan. Prototyped the static mixing process that later ran in Dallas.' },
@@ -149,20 +165,14 @@ export const artifacts = [
   },
   {
     id: 'mapei-chicago', title: 'MAPEI Corp (Chicago)', kind: 'role', org: 'Junior Project Engineer', years: [2018, 2019],
-    place: { name: 'Chicago, IL', lat: 41.88, lon: -87.63 }, main: 'reality', also: [], featured: 'maybe', stage: 'built', axes: ax(0.5, 0.4),
+    // Shown on the MAPEI Corp card (its Chicago stint); kept for the Chicago home's page and "worked" mark.
+    place: { name: 'Chicago, IL', lat: 41.88, lon: -87.63 }, main: 'reality', also: [], featured: 'no', stage: 'built', axes: ax(0.5, 0.4),
     summary: 'Technical studies and medium-scale capital projects for the Chicago site.',
     lens: { reality: '2018 – 2019 · Chicago. First job out of school.' },
     picture: { scene: 'badge', label: 'MAPEI', sub: 'Chicago · 2018 – 19', accent: '#5a7fb8' }, logo: LOGO.mapei, related: [],
   },
   {
-    id: 'awc', title: 'AWC Industries', kind: 'role', org: 'Mechanical Engineering Intern', years: [2016, 2016],
-    place: { name: 'Chicago, IL', lat: 41.88, lon: -87.63 }, main: 'reality', also: [], featured: 'maybe', stage: 'built', axes: ax(0.3, 0.3),
-    summary: 'Designed parts for manufacture and replacement components for broken equipment.',
-    lens: { reality: 'Summer 2016 · Chicago. Parts, assemblies and drawings in SolidWorks.' },
-    picture: { scene: 'badge', label: 'AWC', sub: 'Chicago · 2016', accent: '#7a6a52' }, related: [],
-  },
-  {
-    id: 'ku', title: 'University of Kansas', kind: 'education', org: 'B.S. Mechanical Engineering', years: [2014, 2018],
+    id: 'ku', title: 'University of Kansas', kind: 'education', org: 'B.S. Mechanical Engineering', years: [2014, 2018], month: 8, monthTbd: true,
     place: { name: 'Lawrence, KS', lat: 38.97, lon: -95.24 }, main: 'reality', also: [], featured: 'yes', stage: 'shipped', axes: ax(0.4, 0.55),
     summary: 'BSME. Formula SAE electric powertrain and biomechanical research.',
     lens: { reality: '2014 – 2018 · Lawrence. A racecar and a piano-pedal device on the way to a BSME.' },
@@ -171,7 +181,7 @@ export const artifacts = [
 
   /* ── Engineering ────────────────────────────────────────────────────────── */
   {
-    id: 'enovis-facility', title: 'Operations facility build-out', kind: 'engineering', org: 'Enovis', years: [2025, 2026],
+    id: 'enovis-facility', title: 'Operations facility build-out', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 6, monthTbd: true,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['reality'], featured: 'yes', stage: 'built', axes: ax(m(140), 0.95),
     summary: 'A 200K sq ft facility combining office, automated distribution, clean pack, sterilization and additive manufacturing, delivered as owner rep.',
     facts: ['200K sq ft', 'Budget over $10M', 'Utilities, equipment integration, controls, life safety', 'Next-phase expansion planning'],
@@ -258,7 +268,7 @@ export const artifacts = [
 
   /* ── Projects ───────────────────────────────────────────────────────────── */
   {
-    id: 'onlycharge', title: 'OnlyChargeEV', kind: 'startup', org: 'Founder', years: [2022, 2024],
+    id: 'onlycharge', title: 'OnlyChargeEV', kind: 'startup', org: 'Founder', years: [2022, 2024], month: 5, monthTbd: true,
     place: { name: 'Dallas, TX', lat: 32.78, lon: -96.8 }, main: 'build', also: ['reality', 'structure', 'digital'], featured: 'yes', stage: 'shipped',
     axes: { scale: m(30), complexity: 0.45, expressive: 0.3, experimental: 0.5, digital: 0.42, finished: 0.9 },
     summary: 'A commercial EV charging company across Austin, Houston, San Antonio and Dallas.',
@@ -272,7 +282,7 @@ export const artifacts = [
     picture: { scene: 'charger', logo: true }, logo: LOGO.onlycharge, related: ['ev-fedex', 'ev-stallion', 'ev-fortworth', 'ev-gateway'],
   },
   {
-    id: 'fsae', title: 'Formula SAE electric racecar', kind: 'project', org: 'University of Kansas', years: [2017, 2018],
+    id: 'fsae', title: 'Formula SAE electric racecar', kind: 'project', org: 'University of Kansas', years: [2017, 2018], month: 9, monthTbd: true,
     place: { name: 'Lawrence, KS', lat: 38.97, lon: -95.24 }, main: 'build', also: ['structure', 'reality'], featured: 'yes', stage: 'built', axes: ax(m(3), 0.8, 0.3, 0.6),
     summary: 'The electric powertrain for KU\'s Formula SAE racecar.',
     facts: ['Led 5 electrical engineers', 'In-house motor controller', 'Battery storage and management system', 'Raced at Formula SAE Electric'],
@@ -284,7 +294,7 @@ export const artifacts = [
     picture: { scene: 'racecar' }, related: ['ku'],
   },
   {
-    id: 'pedal', title: 'Assistive piano-pedal device', kind: 'project', org: 'KU biomechanical research', years: [2016, 2017],
+    id: 'pedal', title: 'Assistive piano-pedal device', kind: 'project', org: 'KU biomechanical research', years: [2016, 2017], month: 1, monthTbd: true,
     place: { name: 'Lawrence, KS', lat: 38.97, lon: -95.24 }, main: 'build', also: ['structure', 'reality'], featured: 'yes', stage: 'shipped', axes: ax(m(0.5), 0.45, 0.45, 0.55),
     summary: 'Devices that let a paraplegic pianist operate the piano pedals.',
     facts: ['First time playing the pedals', 'Two additive prototypes, final part machined', 'Team of 4', 'National news coverage'],
@@ -332,7 +342,7 @@ export const artifacts = [
     picture: { scene: 'led' }, related: ['atmos'],
   },
 
-  /* ── Apps ───────────────────────────────────────────────────────────────── */
+  /* ── Digital (apps) ───────────────────────────────────────────────────────────── */
   {
     id: 'contactflow', title: 'ContactFlow', kind: 'app', org: 'Personal', years: [2026, 2026],
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'digital', also: [], featured: 'yes', stage: 'shipped', axes: ax(0.05, 0.7, 0.3, 0.5, 0.88, 0.86),
@@ -396,9 +406,9 @@ export const artifacts = [
 for (const f of films) {
   artifacts.push({
     id: f.id, title: f.title, kind: 'film', org: '35mm film', years: [f.year, f.year],
-    place: { name: f.place, lat: f.lat, lon: f.lon }, main: 'image', also: f.id === 'film-newmexico' ? ['place', 'reality'] : ['place'],
+    place: { name: f.place, lat: f.lat, lon: f.lon }, main: 'image', also: ['place'],
     featured: 'yes', stage: 'shipped', axes: ax(0.6, 0.3, f.axes.expressive, f.axes.experimental, 0.1, 0.9),
-    summary: `${f.count} photographs on 35mm film.`, lens: { image: `${f.count} frames.`, place: f.place, reality: 'A father-and-son trip.' },
+    summary: `${f.count} photographs on 35mm film.`, lens: { image: `${f.count} frames.`, place: f.place },
     picture: { film: f.id }, related: [], film: f,
   });
 }
