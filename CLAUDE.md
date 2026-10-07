@@ -21,7 +21,7 @@ This is **not a resume on a website**. It should feel like:
 
 ## Lens decisions so far
 
-- Company names and logos: project first, company second. Logos are small and sparing: company logos (Enovis, MAPEI, OnlyChargeEV, in `src/lens/img/logos/`) sit under the work in About only; an app's icon (ContactFlow) sits beside its name in Apps only. No big branded tiles. Check what can be shown publicly about Enovis before launch.
+- Company names and logos: project first, company second. Logos are small and sparing: company and school logos (Enovis, MAPEI, OnlyChargeEV, KU, in `src/lens/img/logos/`) sit under the work in About only; an app's icon (ContactFlow) sits beside its name in Apps only. No big branded tiles. Check what can be shown publicly about Enovis before launch.
 
 - Sections keep their coordinate systems; a render line re-renders everything when switching.
 - Axis labels, ticks and year marks are part of the look: phones keep them too, just fewer and smaller (never drop them entirely).

@@ -331,7 +331,9 @@ export function layout(mode, W, H) {
   if (mode === 'place') return mapLayout(W, H);
   const R = plotRect(W, H);
   const L = artifacts.filter((a) => inSection(a, mode)).map((it) => mark(it, mode, R, W));
-  relax(L, R, mode, W);
+  // In About, captions and logos also keep clear of the "Grant · origin · now" marker.
+  const P = polarFrame(R);
+  relax(L, R, mode, W, mode === 'reality' ? [{ x0: P.cx - 44, x1: P.cx + 44, y0: P.cy - 16, y1: P.cy + 46 }] : []);
   const out = { R, tiles: withHidden(L) };
   if (mode === 'reality') out.dogs = dogSpot(L, R, W);
   return out;
