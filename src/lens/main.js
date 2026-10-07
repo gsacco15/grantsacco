@@ -8,7 +8,7 @@ import '../shared/base.css';
 import './style.css';
 import { mountChrome, mountSwitcher, prefersReducedMotion } from '../shared/chrome.js';
 import { modes } from '../content.js';
-import { artifacts as items, films as albums, quiet, inMore } from './artifacts.js';
+import { artifacts as items, films as albums, quiet, dogs, inMore } from './artifacts.js';
 import { systems } from '../coordinates/systems.js';
 import { loadLand, loadCountries } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
@@ -69,12 +69,21 @@ const lg = {
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
 const HINT = { image: 'Hover a film to skim · click to open', place: 'Click a trip to see its photos' };
 
-// About's one quiet line, with Jaylee and Helga sitting beside it.
-const quietEl = div(
-  'lx-quiet',
+// About's one quiet line.
+const quietEl = div('lx-quiet', body, `<span>${quiet.line}</span>`);
+
+// Jaylee and Helga, sitting on their year's ring in About (named on hover).
+const dogsEl = div(
+  'lx-dogs',
   body,
-  `<span>${quiet.line}</span><span class="lx-quiet__dogs" title="${quiet.dogs.alt}">${quiet.dogs.src.map((src) => `<img src="${src}" alt="" />`).join('')}<span class="sr-only">${quiet.dogs.alt}</span></span>`,
+  `<span class="lx-dogs__pics">${dogs.src.map((src) => `<img src="${src}" alt="" />`).join('')}</span><span class="lx-dogs__cap"><span>${dogs.names}</span><span>${dogs.year}</span></span>`,
 );
+dogsEl.setAttribute('role', 'img');
+dogsEl.setAttribute('aria-label', `${dogs.names}, ${dogs.year}`);
+function placeDogs() {
+  const p = layouts.reality.dogs;
+  dogsEl.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`;
+}
 
 // The section's "+ more" list: work that belongs here but isn't on stage.
 const more = div('lx-more', body, `<button class="lx-more__btn" type="button" aria-expanded="false"></button><ul class="lx-more__list" hidden></ul>`);
@@ -249,6 +258,8 @@ function setMode(id) {
   lg.axes.textContent = systems[id].readout;
   hint.textContent = HINT[id] ?? 'Click any piece of work to open it';
   quietEl.classList.toggle('is-on', id === 'reality');
+  placeDogs();
+  dogsEl.classList.toggle('is-on', id === 'reality');
   fillMore(id);
   const renderName = RENDER[id];
   lg.render.textContent = `render · ${renderName}`;
@@ -522,6 +533,7 @@ window.addEventListener('resize', () => {
     computeLayouts();
     const L = layouts[mode];
     stacks.layout(layouts.image);
+    placeDogs();
     for (const t of tiles) {
       const target = L.tiles.get(t.it.id);
       if (target.hidden) {

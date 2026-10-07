@@ -9,7 +9,7 @@ This is **not a resume on a website**. It should feel like:
 - **Show, don't tell.** The five themes (builder, field-oriented engineer, problem solver, internationally curious, active/adventurous) are proven by the projects, photography, travel, languages, sports, startup and apps. Don't add more personality words or adjectives to the site.
 - **Not a resume.** No PMP, no HOA board, no skill lists as content. Personal context (family, sports, travel) supports the work quietly and never crowds it.
 - **Uncluttered.** Each section shows a few hand-picked artifacts; everything else lives in a "+ more" list.
-- **One quiet line, at most.** About carries "Based in Austin · English, Italian, learning Portuguese" and nothing more like it. Jaylee and Helga (the family dogs) are named and sit beside that line as one small sprite each, not in the orbit.
+- **One quiet line, at most.** About carries "Based in Austin · English, Italian, learning Portuguese" and nothing more like it. Jaylee and Helga (the family dogs) sit on the 2021 ring in About as one small sprite each (named on hover), never as a tile.
 - **Keep personal tags off the work.** No languages on the Travel map; no sports on films or trips.
 
 ## Where things are
@@ -22,6 +22,7 @@ This is **not a resume on a website**. It should feel like:
 ## Lens decisions so far
 
 - Sections keep their coordinate systems; a render line re-renders everything when switching.
+- Axis labels, ticks and year marks are part of the look: phones keep them too, just fewer and smaller (never drop them entirely).
 - Sections show only their own work; tiles step out and back in at the render line.
 - Art: the 35mm films are photo stacks plotted on Art's axes; clicking one opens the infinite grid with that film selected ("All films" in the sidebar).
 - Travel is a clean map of small dots, not pictures: places lived (Wilmette → Lawrence 2014–18 → Chicago 2018–19 → Milan 2019–21 → Dallas 2021–25 → Austin since April 2025), trips (one per film, "photos") and the Houston work sites. Not every project. The only lines are the moves between places lived. Homes are labelled; trips and work sites are labelled on hover, and clicking a trip opens its photos. Each home's page lists what happened while living there.

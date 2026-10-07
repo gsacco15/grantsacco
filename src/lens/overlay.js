@@ -23,9 +23,10 @@ export function overlay(mode, R, W, H, geo) {
   const pal = systems[mode].palette;
   const ink = (a) => hexA(pal.ink, a);
   const parts = [];
-  const text = (x, y, s, { anchor: ta = 'start', size = 10, fill = ink(0.55), cls = 'ov-mono', base = 'middle' } = {}) =>
+  // `halo` outlines the text in the background colour, for labels drawn over lines.
+  const text = (x, y, s, { anchor: ta = 'start', size = 10, fill = ink(0.55), cls = 'ov-mono', base = 'middle', halo = false } = {}) =>
     parts.push(
-      `<text class="${cls}" x="${f(x)}" y="${f(y)}" text-anchor="${ta}" dominant-baseline="${base}" font-size="${size}" fill="${fill}">${s}</text>`,
+      `<text class="${cls}" x="${f(x)}" y="${f(y)}" text-anchor="${ta}" dominant-baseline="${base}" font-size="${size}" fill="${fill}"${halo ? ` paint-order="stroke" stroke="${pal.bg}" stroke-width="3" stroke-linejoin="round"` : ''}>${s}</text>`,
     );
   const ln = (x1, y1, x2, y2, stroke, w = 1, extra = '') =>
     parts.push(`<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}" stroke="${stroke}" stroke-width="${w}" ${extra}/>`);
@@ -41,7 +42,10 @@ export function overlay(mode, R, W, H, geo) {
       parts.push(
         `<ellipse cx="${f(P.cx)}" cy="${f(P.cy)}" rx="${f(r * P.rx)}" ry="${f(r * P.ry)}" fill="none" stroke="${ink(y % 5 === 0 ? 0.2 : 0.09)}" stroke-width="1"/>`,
       );
-      if (y % 2 === 0 && !mob) text(P.cx - r * P.rx, P.cy, String(y), { anchor: 'middle', size: 9.5, fill: ink(0.45) });
+      if (y % 2) continue;
+      // Phones get a tall, narrow ellipse, so the years run up the vertical axis instead.
+      if (mob) text(P.cx, P.cy - r * P.ry, String(y), { anchor: 'middle', size: 8.5, fill: ink(0.5), halo: true });
+      else text(P.cx - r * P.rx, P.cy, String(y), { anchor: 'middle', size: 9.5, fill: ink(0.45) });
     }
     ln(P.cx - P.rx, P.cy, P.cx + P.rx, P.cy, ink(0.08), 1, 'stroke-dasharray="2 5"');
     ln(P.cx, P.cy - P.ry, P.cx, P.cy + P.ry, ink(0.08), 1, 'stroke-dasharray="2 5"');
@@ -65,15 +69,19 @@ export function overlay(mode, R, W, H, geo) {
     for (const tk of mode === 'structure' ? scaleTicks() : s.x.ticks ?? []) {
       const x = U(pad(tk.at));
       ln(x, R.y + R.h, x, R.y + R.h + 5, ink(0.5));
-      if (!mob) text(x, R.y + R.h + 15, tk.label, { anchor: 'middle', size: 9.5 });
+      text(x, R.y + R.h + (mob ? 13 : 15), tk.label, { anchor: 'middle', size: mob ? 8.5 : 9.5 });
     }
     for (const tk of s.y.ticks ?? []) {
       const y = V(pad(tk.at));
       ln(R.x - 5, y, R.x, y, ink(0.5));
-      if (!mob) text(R.x - 9, y, tk.label, { anchor: 'end', size: 9.5 });
+      // Phones have no margin beside the plot, so these sit just inside it.
+      if (mob) text(R.x + 5, y - 7, tk.label, { size: 8.5, halo: true });
+      else text(R.x - 9, y, tk.label, { anchor: 'end', size: 9.5 });
     }
-    text(R.x + R.w, R.y + R.h + (mob ? 14 : 30), s.x.label, { anchor: 'end', size: 10, fill: pal.accent });
-    if (s.x.start) text(R.x, R.y + R.h + (mob ? 14 : 30), `← ${s.x.start}`, { size: 10, fill: ink(0.55) });
+    // On phones the x axis title moves above the plot, clear of the tick labels.
+    if (mob) text(R.x + R.w, R.y - 12, s.x.label, { anchor: 'end', size: 10, fill: pal.accent });
+    else text(R.x + R.w, R.y + R.h + 30, s.x.label, { anchor: 'end', size: 10, fill: pal.accent });
+    if (s.x.start) text(R.x, R.y + R.h + (mob ? 13 : 30), `← ${s.x.start}`, { size: mob ? 9 : 10, fill: ink(0.55) });
     text(R.x, R.y - 12, s.y.label, { size: 10, fill: pal.accent });
     if (s.y.start) text(R.x + 8, R.y + R.h - 10, `↓ ${s.y.start}`, { size: 10, fill: ink(0.55) });
   }
@@ -88,10 +96,12 @@ export function overlay(mode, R, W, H, geo) {
     for (let y = YEAR0; y <= YEAR1; y++) {
       const x = U((y - YEAR0) / (YEAR1 - YEAR0));
       ln(x, R.y, x, R.y + R.h, ink(y % 5 === 0 ? 0.18 : 0.07));
-      if (y % 2 === 1 && y < YEAR1 && !mob) text(x + R.w / (YEAR1 - YEAR0) / 2, R.y + R.h + 15, String(y), { anchor: 'middle', size: 9.5 });
+      // Every other year; every fourth on phones.
+      if (y < YEAR1 && y % (mob ? 4 : 2) === (mob ? 3 : 1)) text(x + R.w / (YEAR1 - YEAR0) / 2, R.y + R.h + (mob ? 13 : 15), String(y), { anchor: 'middle', size: mob ? 8.5 : 9.5 });
     }
     ln(R.x, R.y + R.h, R.x + R.w, R.y + R.h, ink(0.5));
-    text(R.x + R.w, R.y + R.h + (mob ? 14 : 30), 'Time →', { anchor: 'end', size: 10, fill: pal.accent });
+    if (mob) text(R.x + R.w, R.y - 12, 'Time →', { anchor: 'end', size: 10, fill: pal.accent });
+    else text(R.x + R.w, R.y + R.h + 30, 'Time →', { anchor: 'end', size: 10, fill: pal.accent });
     text(R.x, R.y - 12, 'Completion ↑', { size: 10, fill: pal.accent });
   }
 
@@ -156,15 +166,24 @@ export function overlay(mode, R, W, H, geo) {
         text(x + 9, y, label, { size, fill: ink(0.6) });
         x += w;
       };
-      key((x0, y0) => `<circle cx="${f(x0)}" cy="${f(y0)}" r="4" fill="${pal.accent}" stroke="${pal.bg}" stroke-width="1.5"/>`, 'lived', mob ? 40 : 50);
-      key((x0, y0) => `<circle cx="${f(x0)}" cy="${f(y0)}" r="3.2" fill="${pal.ink}"/>`, 'photos', mob ? 48 : 60);
-      key((x0, y0) => `<rect x="${f(x0 - 3.5)}" y="${f(y0 - 3.5)}" width="7" height="7" fill="none" stroke="${pal.ink}" stroke-width="1.4"/>`, 'worked', mob ? 50 : 62);
-      key((x0, y0) => `<line x1="${f(x0 - 6)}" y1="${f(y0)}" x2="${f(x0 + 5)}" y2="${f(y0)}" stroke="${hexA(pal.ink, 0.6)}" stroke-width="1.3"/>`, 'moved', mob ? 46 : 58);
+      key((x0, y0) => `<circle cx="${f(x0)}" cy="${f(y0)}" r="4" fill="${pal.accent}" stroke="${pal.bg}" stroke-width="1.5"/>`, 'lived', mob ? 45 : 50);
+      key((x0, y0) => `<circle cx="${f(x0)}" cy="${f(y0)}" r="3.2" fill="${pal.ink}"/>`, 'photos', mob ? 54 : 60);
+      key((x0, y0) => `<rect x="${f(x0 - 3.5)}" y="${f(y0 - 3.5)}" width="7" height="7" fill="none" stroke="${pal.ink}" stroke-width="1.4"/>`, 'worked', mob ? 54 : 62);
+      key((x0, y0) => `<line x1="${f(x0 - 6)}" y1="${f(y0)}" x2="${f(x0 + 5)}" y2="${f(y0)}" stroke="${hexA(pal.ink, 0.6)}" stroke-width="1.3"/>`, 'moved', mob ? 52 : 58);
       key((x0, y0) => `<rect x="${f(x0 - 5)}" y="${f(y0 - 3.5)}" width="10" height="7" fill="${hexA(pal.accent, 0.17)}" stroke="${hexA(pal.accent, 0.45)}" stroke-width="0.7"/>`, `${countries.length} countries`, 0);
     }
+    const lonLabel = (lon) => `${Math.abs(lon)}°${lon < 0 ? 'W' : lon > 0 ? 'E' : ''}`;
+    const latLabel = (lat) => `${Math.abs(lat)}°${lat < 0 ? 'S' : lat > 0 ? 'N' : ''}`;
     if (!mob) {
-      for (const lon of g.lons) text(F.x + (lon - b.west) * sx, F.y + F.h + 14, `${Math.abs(lon)}°${lon < 0 ? 'W' : lon > 0 ? 'E' : ''}`, { anchor: 'middle', size: 9 });
-      for (const lat of g.lats) text(F.x - 8, F.y + (b.north - lat) * sy, `${Math.abs(lat)}°${lat < 0 ? 'S' : lat > 0 ? 'N' : ''}`, { anchor: 'end', size: 9 });
+      for (const lon of g.lons) text(F.x + (lon - b.west) * sx, F.y + F.h + 14, lonLabel(lon), { anchor: 'middle', size: 9 });
+      for (const lat of g.lats) text(F.x - 8, F.y + (b.north - lat) * sy, latLabel(lat), { anchor: 'end', size: 9 });
+    } else {
+      // Phones: every 30°, longitudes under the map and latitudes just inside it (clear of the key).
+      for (const lon of g.lons) if (lon % 30 === 0) text(F.x + (lon - b.west) * sx, F.y + F.h + 12, lonLabel(lon), { anchor: 'middle', size: 8 });
+      for (const lat of g.lats) {
+        const y = F.y + (b.north - lat) * sy;
+        if (lat % 30 === 0 && y < F.y + F.h - 26) text(F.x + 4, y - 6, latLabel(lat), { size: 8, halo: true });
+      }
     }
   }
 

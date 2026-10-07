@@ -46,7 +46,7 @@ export function createStacks({ albums, parent, onOpen }) {
           .join('')}
       </span>
       <span class="pk__skim" aria-hidden="true"><span></span></span>
-      <span class="pk__cap"><span class="pk__title">${a.title}</span><span class="pk__meta">${shortPlace(a.place)} · ${a.year}</span></span>`;
+      <span class="pk__cap"><span class="pk__title"><span class="pk__long">${a.title}</span><span class="pk__short">${a.short ?? a.title}</span></span><span class="pk__meta">${shortPlace(a.place)} · ${a.year}</span></span>`;
     wall.appendChild(el);
     const cards = [...el.querySelectorAll('.pk__card')];
     const s = {

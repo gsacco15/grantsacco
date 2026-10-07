@@ -18,11 +18,11 @@
 import dogBlackTan from './img/dog-black-tan.png';
 import dogTan from './img/dog-tan.png';
 
-/** One quiet line in About, and the dogs beside it (one frame from each sprite sheet). */
-export const quiet = {
-  line: 'Based in Austin · English, Italian, learning Portuguese',
-  dogs: { src: [dogBlackTan, dogTan], alt: 'Jaylee and Helga' },
-};
+/** One quiet line in About. */
+export const quiet = { line: 'Based in Austin · English, Italian, learning Portuguese' };
+
+/** Jaylee and Helga, sitting on About's 2021 ring (one frame from each sprite sheet). */
+export const dogs = { src: [dogBlackTan, dogTan], names: 'Jaylee & Helga', year: 2021 };
 
 /** Places lived, in order (the Travel map draws the moves between them). */
 export const homes = [
@@ -78,20 +78,21 @@ export const countries = [
 
 /*
  * 35mm films. Frames are procedural placeholders in each film's `look` until
- * the albums are linked. `axes` places the film on Art's plot.
+ * the albums are linked. `axes` places the film on Art's plot; `short` is the
+ * caption on phones.
  */
 export const films = [
-  { id: 'film-spain', title: 'Mallorca, Ibiza & Formentera', place: 'Spain', year: 2026, count: 65, look: 'tuscan', cover: 0, lat: 39.57, lon: 2.65, axes: { expressive: 0.82, experimental: 0.5 } },
-  { id: 'film-portugal', title: 'Lagos, Algarve & Lisbon', place: 'Portugal', year: 2026, count: 64, look: 'lake', cover: 1, lat: 38.72, lon: -9.14, axes: { expressive: 0.74, experimental: 0.14 } },
-  { id: 'film-acp', title: 'Argentina–Chile–Peru', place: 'Argentina, Chile, Peru', year: 2025, count: 267, look: 'nordic', cover: 0, lat: -33.45, lon: -70.67, approx: true, axes: { expressive: 0.94, experimental: 0.72 } },
-  { id: 'film-mexico', title: 'Mexico', place: 'Mexico', year: 2025, count: 84, look: 'lake', cover: 0, lat: 20.6, lon: -105.2, approx: true, axes: { expressive: 0.64, experimental: 0.52 } },
-  { id: 'film-newmexico', title: 'New Mexico (Father & Son)', place: 'New Mexico, USA', year: 2025, count: 39, look: 'tuscan', cover: 2, lat: 35.69, lon: -105.94, approx: true, axes: { expressive: 0.4, experimental: 0.88 } },
-  { id: 'film-brazil', title: 'Brazil', place: 'Brazil', year: 2024, count: 177, look: 'lake', cover: 2, lat: -22.97, lon: -43.18, axes: { expressive: 0.76, experimental: 0.9 } },
-  { id: 'film-peru', title: 'Peru', place: 'Peru', year: 2023, count: 106, look: 'nordic', cover: 3, lat: -13.53, lon: -71.97, approx: true, axes: { expressive: 0.56, experimental: 0.12 } },
-  { id: 'film-palmbeach', title: 'Palm Beach', place: 'Florida, USA', year: 2023, count: 39, look: 'lake', cover: 3, lat: 26.71, lon: -80.04, axes: { expressive: 0.46, experimental: 0.5 } },
-  { id: 'film-mexicocity', title: 'Mexico City', place: 'Mexico', year: 2022, count: 59, look: 'city', cover: 0, lat: 19.43, lon: -99.13, axes: { expressive: 0.58, experimental: 0.9 } },
-  { id: 'film-italy', title: 'Italy', place: 'Italy', year: 2021, count: 59, look: 'tuscan', cover: 1, lat: 41.89, lon: 12.49, axes: { expressive: 0.38, experimental: 0.12 } },
-  { id: 'film-colombia', title: 'Colombia', place: 'Colombia', year: 2022, count: 53, look: 'city', cover: 2, lat: 4.71, lon: -74.07, approx: true, axes: { expressive: 0.94, experimental: 0.26 } },
+  { id: 'film-spain', title: 'Mallorca, Ibiza & Formentera', short: 'Spain', place: 'Spain', year: 2026, count: 65, look: 'tuscan', cover: 0, lat: 39.57, lon: 2.65, axes: { expressive: 0.82, experimental: 0.5 } },
+  { id: 'film-portugal', title: 'Lagos, Algarve & Lisbon', short: 'Portugal', place: 'Portugal', year: 2026, count: 64, look: 'lake', cover: 1, lat: 38.72, lon: -9.14, axes: { expressive: 0.74, experimental: 0.14 } },
+  { id: 'film-acp', title: 'Argentina–Chile–Peru', short: 'Arg · Chile · Peru', place: 'Argentina, Chile, Peru', year: 2025, count: 267, look: 'nordic', cover: 0, lat: -33.45, lon: -70.67, approx: true, axes: { expressive: 0.94, experimental: 0.72 } },
+  { id: 'film-mexico', title: 'Mexico', short: 'Mexico', place: 'Mexico', year: 2025, count: 84, look: 'lake', cover: 0, lat: 20.6, lon: -105.2, approx: true, axes: { expressive: 0.64, experimental: 0.52 } },
+  { id: 'film-newmexico', title: 'New Mexico (Father & Son)', short: 'New Mexico', place: 'New Mexico, USA', year: 2025, count: 39, look: 'tuscan', cover: 2, lat: 35.69, lon: -105.94, approx: true, axes: { expressive: 0.4, experimental: 0.88 } },
+  { id: 'film-brazil', title: 'Brazil', short: 'Brazil', place: 'Brazil', year: 2024, count: 177, look: 'lake', cover: 2, lat: -22.97, lon: -43.18, axes: { expressive: 0.76, experimental: 0.9 } },
+  { id: 'film-peru', title: 'Peru', short: 'Peru', place: 'Peru', year: 2023, count: 106, look: 'nordic', cover: 3, lat: -13.53, lon: -71.97, approx: true, axes: { expressive: 0.56, experimental: 0.12 } },
+  { id: 'film-palmbeach', title: 'Palm Beach', short: 'Palm Beach', place: 'Florida, USA', year: 2023, count: 39, look: 'lake', cover: 3, lat: 26.71, lon: -80.04, axes: { expressive: 0.46, experimental: 0.5 } },
+  { id: 'film-mexicocity', title: 'Mexico City', short: 'Mexico City', place: 'Mexico', year: 2022, count: 59, look: 'city', cover: 0, lat: 19.43, lon: -99.13, axes: { expressive: 0.58, experimental: 0.9 } },
+  { id: 'film-italy', title: 'Italy', short: 'Italy', place: 'Italy', year: 2021, count: 59, look: 'tuscan', cover: 1, lat: 41.89, lon: 12.49, axes: { expressive: 0.38, experimental: 0.12 } },
+  { id: 'film-colombia', title: 'Colombia', short: 'Colombia', place: 'Colombia', year: 2022, count: 53, look: 'city', cover: 2, lat: 4.71, lon: -74.07, approx: true, axes: { expressive: 0.94, experimental: 0.26 } },
 ];
 
 /** Engineering's x axis: characteristic size on a log scale, 10 cm → 1 km. */

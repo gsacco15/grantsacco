@@ -1234,6 +1234,10 @@ body.lx-page-open .lx-hint {
   color: var(--ink);
 }
 
+.pk__short {
+  display: none;
+}
+
 .pk__meta {
   font-family: var(--mono);
   font-size: 9.5px;
@@ -1604,6 +1608,13 @@ body.lx-page-open .lx-hint {
   .pk__title {
     font-size: 13px;
   }
+  /* Phones: the short name (the print already says where and when). */
+  .pk__long {
+    display: none;
+  }
+  .pk__short {
+    display: inline;
+  }
   .pk__meta {
     display: none;
   }
@@ -1682,26 +1693,80 @@ body.lx-page-open .lx-hint {
   transition-delay: 0.35s;
 }
 
-.lx-quiet__dogs {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 1px;
-  margin-bottom: -3px;
-  pointer-events: auto;
+body.lx-page-open .lx-quiet {
+  opacity: 0;
 }
 
-.lx-quiet__dogs img {
+/* Jaylee and Helga sit on their year's ring (the layout finds a clear spot). */
+.lx-dogs {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.lx-dogs.is-on {
+  pointer-events: auto;
+  opacity: 1;
+  transition-delay: 0.5s;
+}
+
+body.lx-page-open .lx-dogs {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lx-dogs__pics {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  translate: -50% 1px;
+}
+
+.lx-dogs__pics img {
   display: block;
   height: 30px;
   width: auto;
 }
 
-.lx-quiet__dogs img + img {
+.lx-dogs__pics img + img {
   height: 32px;
 }
 
-body.lx-page-open .lx-quiet {
+.lx-dogs__cap {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  width: max-content;
+  padding: 3px 6px 4px;
+  border-radius: 4px;
+  translate: -50% 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
   opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.lx-dogs__cap span + span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.lx-dogs:hover .lx-dogs__cap {
+  opacity: 1;
 }
 
 /* ── "+ more": the rest of a section, one click away ──────────────────────── */
@@ -1799,11 +1864,11 @@ body.lx-page-open .lx-more {
     bottom: calc(var(--gutter) + 82px);
     font-size: 9.5px;
   }
-  .lx-quiet__dogs img {
-    height: 24px;
+  .lx-dogs__pics img {
+    height: 23px;
   }
-  .lx-quiet__dogs img + img {
-    height: 26px;
+  .lx-dogs__pics img + img {
+    height: 25px;
   }
   .lx-more {
     top: 60px;

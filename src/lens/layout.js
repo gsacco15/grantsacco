@@ -2,7 +2,7 @@
 // from the Coordinates mock; what's new here is that the marks are pictures of
 // real artifacts, each section shows only its own (plus deliberate crossovers),
 // and marks are relaxed apart while keeping a leader to their exact coordinate.
-import { artifacts, films, countries, inSection } from './artifacts.js';
+import { artifacts, films, countries, dogs, inSection } from './artifacts.js';
 import { STAGES } from '../coordinates/systems.js';
 import { ASPECT } from './render.js';
 import { metaFor } from './meta.js';
@@ -177,7 +177,7 @@ function stackCaption(f, card, W) {
   const m = W < 760;
   const size = m ? 13 : Math.min(17, Math.max(13, card * 0.17));
   const max = m ? 110 : 220; // .pk__cap max-width
-  const tw = textWidth(f.title, `italic 400 ${size}px 'Instrument Serif', Georgia, serif`);
+  const tw = textWidth(m ? f.short ?? f.title : f.title, `italic 400 ${size}px 'Instrument Serif', Georgia, serif`);
   const mw = m ? 0 : textWidth(`${f.place.split(',')[0]} · ${f.year}`.toUpperCase(), FONTS.meta, 0.76);
   const lines = Math.ceil(tw / max);
   return { cw: Math.min(max, Math.max(tw, mw)) + 6, capH: (m ? 10 : 20) + lines * size * 1.1 + (m ? 2 : 17) };
@@ -198,7 +198,7 @@ function withHidden(L) {
  * under the picture: `cw` × `capH`, hung from the picture's left edge, right
  * edge (`capAlign: 'end'`) or centre. `bw` widens a mark's box symmetrically.
  */
-function relax(L, R, mode, W) {
+function relax(L, R, mode, W, obstacles = []) {
   // Map dots only need nudging off each other; pictures need breathing room.
   const gap = mode === 'place' ? 2 : W < 760 ? 4 : 8;
   const box = (t) => {
@@ -217,7 +217,8 @@ function relax(L, R, mode, W) {
   // Keep the "you" origin clear in the polar view.
   const P = polarFrame(R);
   // Art's "controlled" label sits on the bottom edge, so captions stay above it.
-  const bounds = { x0: R.x - 12, x1: R.x + R.w + 12, y0: R.y - 10, y1: R.y + R.h + (mode === 'image' ? -18 : 16) };
+  // On phones the x axis title sits just above the plot, so marks stay below it.
+  const bounds = { x0: R.x - 12, x1: R.x + R.w + 12, y0: R.y + (W < 760 ? 4 : -10), y1: R.y + R.h + (mode === 'image' ? -18 : 16) };
   const boxes = L.map(box);
 
   for (let iter = 0; iter < 260; iter++) {
@@ -247,6 +248,18 @@ function relax(L, R, mode, W) {
         }
       }
     }
+    // Fixed labels (Art's axis names) push marks off without moving.
+    L.forEach((a, i) => {
+      const A = boxes[i];
+      for (const o of obstacles) {
+        const ox = Math.min(a.x + A.r, o.x1) - Math.max(a.x + A.l, o.x0) + gap;
+        const oy = Math.min(a.y + A.bottom, o.y1) - Math.max(a.y - A.top, o.y0) + gap;
+        if (ox <= 0 || oy <= 0) continue;
+        moved = true;
+        if (ox < oy) a.x += (a.x + (A.l + A.r) / 2 < (o.x0 + o.x1) / 2 ? -1 : 1) * ox;
+        else a.y += (a.y + (A.bottom - A.top) / 2 < (o.y0 + o.y1) / 2 ? -1 : 1) * oy;
+      }
+    });
     L.forEach((t, i) => {
       const k = iter < 190 ? 0.03 : 0;
       t.x += (t.ax - t.x) * k;
@@ -294,7 +307,44 @@ export function layout(mode, W, H) {
   const R = plotRect(W, H);
   const L = artifacts.filter((a) => inSection(a, mode)).map((it) => mark(it, mode, R, W));
   relax(L, R, mode, W);
-  return { R, tiles: withHidden(L) };
+  const out = { R, tiles: withHidden(L) };
+  if (mode === 'reality') out.dogs = dogSpot(L, R, W);
+  return out;
+}
+
+/**
+ * Where Jaylee and Helga sit on their year's ring in About: near the top or
+ * bottom of the ellipse, where the ring runs flat enough to sit on, at the
+ * point furthest from every tile and caption, and off the axes the year
+ * labels run along (left on desktop, up on phones).
+ */
+function dogSpot(L, R, W) {
+  const P = polarFrame(R);
+  const r = ringRadius(dogs.year);
+  const m = W < 760;
+  const [w, h] = m ? [40, 26] : [52, 34];
+  const boxes = L.map((t) => {
+    const x0 = t.capAlign === 'end' ? t.x + t.w / 2 - Math.max(t.w, t.cw ?? 0) : t.x - t.w / 2;
+    return { x0, x1: x0 + Math.max(t.w, t.cw ?? 0), y0: t.y - t.h / 2, y1: t.y + t.h / 2 + (t.capH ?? 0) };
+  });
+  // The "Grant · origin · now" label under the centre.
+  boxes.push({ x0: P.cx - 40, x1: P.cx + 40, y0: P.cy - 14, y1: P.cy + 46 });
+  const gap = (a, b) => Math.hypot(Math.max(0, a.x0 - b.x1, b.x0 - a.x1), Math.max(0, a.y0 - b.y1, b.y0 - a.y1));
+  let best = null;
+  for (let deg = -140; deg <= 140; deg += 2.5) {
+    // Around the bottom (90°) and the top (270°) of the ellipse.
+    for (const base of [90, 270]) {
+      const a = base + (deg / 140) * 50;
+      if (m && Math.abs(a - 270) < 12) continue;
+      const th = (a * Math.PI) / 180;
+      const x = P.cx + Math.cos(th) * r * P.rx;
+      const y = P.cy + Math.sin(th) * r * P.ry;
+      const box = { x0: x - w / 2, x1: x + w / 2, y0: y - h, y1: y };
+      const score = Math.min(...boxes.map((b) => gap(box, b))) - Math.abs(deg) * 0.02;
+      if (!best || score > best.score) best = { x, y, score };
+    }
+  }
+  return { x: best.x, y: best.y };
 }
 
 /** Print width of a photo-roll stack on the Art plot. */
@@ -322,7 +372,23 @@ function artLayout(W, H) {
     const capAlign = ax > W * 0.8 ? 'end' : 'center';
     L.push({ id: f.id, film: f, ax, ay, x: ax, y: ay, w: card * 1.1, h: card * 1.3, capAlign, ...stackCaption(f, card, W), focus: true, stack: true });
   }
-  relax(L, R, 'image', W);
+  // Keep the axis names readable: functional, expressive, experimental, controlled.
+  const size = W < 760 ? 13 : 16;
+  const font = `italic 400 ${size}px 'Instrument Serif', Georgia, serif`;
+  const cx = R.x + R.w / 2;
+  const cy = R.y + R.h / 2;
+  const name = (s, x, y, end = false) => {
+    const w = textWidth(s, font) + 6;
+    const x0 = end ? x - w : x - 3;
+    return { x0, x1: x0 + w, y0: y - size * 0.7, y1: y + size * 0.6 };
+  };
+  const names = [
+    name('functional', R.x + 4, cy - 14),
+    name('expressive', R.x + R.w - 4, cy - 14, true),
+    name('experimental', cx + 10, R.y + 8),
+    name('controlled', cx + 10, R.y + R.h - 8),
+  ];
+  relax(L, R, 'image', W, names);
   const stacks = L.filter((t) => t.stack).map(({ id, x, y, ax, ay, capAlign }) => ({ id, x, y, w: card, ax, ay, capAlign }));
   return { R, tiles: withHidden(L.filter((t) => !t.stack)), stacks, card };
 }
