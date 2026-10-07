@@ -362,6 +362,15 @@ export const artifacts = [
     lens: { digital: 'Scrape → clean → fine-tune → quantize: a construction-focused model, running locally.', structure: 'Thousands of datasheets as training data.' },
     picture: { scene: 'app', label: 'construction-llm', layout: 'terminal', accent: '#9b5cff' }, related: ['jobpaper', 'roomai'],
   },
+  {
+    // Details to come from Grant (what it models, tech, year, link); wording kept general until then.
+    id: 'twin', title: 'Factory digital twin', kind: 'app', org: 'Personal', years: [2026, 2026], tbd: true,
+    place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'digital', also: [], featured: 'yes', stage: 'prototype', axes: ax(0.05, 0.8, 0.3, 0.6, 0.56, 0.56),
+    summary: 'A live digital model of a factory: equipment, layout and flow.',
+    tech: '', link: '',
+    lens: { digital: 'The factory floor as software: equipment, layout and flow in one model.' },
+    picture: { scene: 'app', label: 'Factory twin', layout: 'twin', accent: '#3fd0ff' }, related: [],
+  },
 ];
 
 // Every film is an artifact too: a stack in Art, a trip on the Travel map.

@@ -239,6 +239,28 @@ const extra = {
       rr(g, 100, 74, 44, 22, 2, 'rgb(255 210 63 / 0.6)', '#c9a227');
       rr(g, 190, 100, 24, 60, 2, 'rgb(196 61 123 / 0.45)', '#c43d7b');
       label(g, '412 sq ft · $2,180', 150, 168, { size: 9, color: '#161616', family: 'JetBrains Mono, monospace', align: 'center' });
+    } else if (L === 'twin') {
+      // An isometric factory floor: machines on a line, a conveyor, live status tags.
+      rect(g, 24, 64, 252, 118, '#11161d');
+      const iso = (x, y, z = 0) => [150 + (x - y) * 0.87 * 9, 92 + (x + y) * 0.5 * 9 - z * 9];
+      for (let i = 0; i <= 10; i++) {
+        line(g, ...iso(i, 0), ...iso(i, 10), 'rgb(255 255 255 / 0.07)', 0.6);
+        line(g, ...iso(0, i), ...iso(10, i), 'rgb(255 255 255 / 0.07)', 0.6);
+      }
+      const box = (x, y, w, d, h, c) => {
+        poly(g, [iso(x, y, h), iso(x + w, y, h), iso(x + w, y + d, h), iso(x, y + d, h)], rgba(c, 0.55), c, 0.8);
+        poly(g, [iso(x, y + d, 0), iso(x + w, y + d, 0), iso(x + w, y + d, h), iso(x, y + d, h)], rgba(c, 0.3), c, 0.8);
+        poly(g, [iso(x + w, y, 0), iso(x + w, y + d, 0), iso(x + w, y + d, h), iso(x + w, y, h)], rgba(c, 0.18), c, 0.8);
+      };
+      poly(g, [iso(1, 5.6), iso(9, 5.6), iso(9, 6.4), iso(1, 6.4)], 'rgb(255 255 255 / 0.12)');
+      [[1.5, 3, 1.6, 2, 1.6], [4.2, 2.6, 1.4, 2.4, 2.4], [6.8, 3, 1.6, 2, 1.2]].forEach(([x, y, w, d, h]) => box(x, y, w, d, h, a));
+      box(3.6, 7.2, 2.4, 1.6, 0.9, '#9aa7b6');
+      [[2.3, 4, 1.6, '#61c554'], [4.9, 3.8, 2.4, '#61c554'], [7.6, 4, 1.2, '#f4bf4f']].forEach(([x, y, h, c]) => {
+        const [px, py] = iso(x, y, h + 0.9);
+        circle(g, px, py, 2.4, c);
+        rr(g, px + 4, py - 5, 30, 9, 2, 'rgb(255 255 255 / 0.1)');
+        rect(g, px + 7, py - 2, 16 + rnd() * 6, 2.4, 'rgb(255 255 255 / 0.5)');
+      });
     } else if (L === 'terminal') {
       rect(g, 24, 64, 252, 118, '#0f1114');
       for (let r = 0; r < 8; r++) {
