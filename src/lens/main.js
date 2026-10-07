@@ -7,14 +7,14 @@
 import '../shared/base.css';
 import './style.css';
 import { mountChrome, mountSwitcher, prefersReducedMotion } from '../shared/chrome.js';
-import { modes } from '../content.js';
-import { artifacts as items, films as albums, quiet, dogs, races, inMore } from './artifacts.js';
+import { modes, site } from '../content.js';
+import { artifacts as items, films as albums, quiet, dogs, races, intro, inMore } from './artifacts.js';
 import { systems } from '../coordinates/systems.js';
 import { loadLand, loadCountries, loadDetail } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
 import { render, forget } from './render.js';
 import { preloadPictures } from './scenes.js';
-import { layout, mapFrame, mapZoom, setMapZoom, MAX_ZOOM } from './layout.js';
+import { layout, mapFrame, mapZoom, setMapZoom, MAX_ZOOM, polarFrame } from './layout.js';
 import { overlay, updateMap, DETAIL_ZOOM } from './overlay.js';
 import { createPage } from './page.js';
 import { RENDER, metaFor } from './meta.js';
@@ -70,7 +70,7 @@ const lg = {
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
 // Lens reads some axes differently from the Coordinates mock.
 const READOUT = { reality: 'r = year · θ = time of year · origin = you' };
-const HINT = { image: 'Hover a film to skim · click to open', place: 'Click a trip for photos · scroll or pinch to zoom' };
+const HINT = { reality: 'Click the centre or any piece to open it', image: 'Hover a film to skim · click to open', place: 'Click a trip for photos · scroll or pinch to zoom' };
 
 // About's one quiet line.
 const quietEl = div('lx-quiet', body, `<span>${quiet.line}</span>`);
@@ -91,8 +91,74 @@ const raceEls = races.map((rc) => {
   return el;
 });
 
-/** Jaylee and Helga and the race logos take their spots on About's wheel. */
+// The origin ("Grant" at the centre of About) opens a small card: headshot,
+// two plain sentences, and how to reach him.
+const bare = (href) => href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const originBtn = div('lx-origin', body);
+originBtn.setAttribute('role', 'button');
+originBtn.tabIndex = 0;
+originBtn.setAttribute('aria-label', `About ${site.name}`);
+originBtn.setAttribute('aria-haspopup', 'dialog');
+originBtn.setAttribute('aria-expanded', 'false');
+const introEl = div(
+  'lx-intro',
+  body,
+  `<button class="lx-intro__close" type="button" aria-label="Close">×</button>
+  <div class="lx-intro__head">
+    ${intro.headshot ? `<img class="lx-intro__photo" src="${intro.headshot}" alt="${site.name}" />` : '<span class="lx-intro__photo lx-intro__photo--todo" aria-hidden="true">headshot</span>'}
+    <span class="lx-intro__name">${site.name}</span>
+  </div>
+  ${intro.lines.map((l) => `<p class="lx-intro__line">${l}</p>`).join('')}
+  <ul class="lx-intro__links">
+    ${site.email ? `<li><a href="mailto:${site.email}"><span>Email</span><span>${site.email}</span></a></li>` : '<li class="is-todo"><span>Email</span><span>to add</span></li>'}
+    ${site.links
+      .filter((l) => l.label === 'LinkedIn')
+      .map((l) => `<li><a href="${l.href}" target="_blank" rel="noopener"><span>${l.label}</span><span>${bare(l.href)} ↗</span></a></li>`)
+      .join('')}
+  </ul>`,
+);
+introEl.setAttribute('role', 'dialog');
+introEl.setAttribute('aria-label', `About ${site.name}`);
+introEl.hidden = true;
+function setIntro(open) {
+  introEl.hidden = !open;
+  originBtn.setAttribute('aria-expanded', String(open));
+  if (open) {
+    const p = originBtn.getBoundingClientRect();
+    const w = Math.min(320, innerWidth - 32);
+    introEl.style.width = `${w}px`;
+    // Beside the origin on wide screens, centred on phones.
+    const x = innerWidth < 760 ? (innerWidth - w) / 2 : Math.min(innerWidth - w - 16, p.right + 16);
+    const y = innerWidth < 760 ? Math.max(96, p.top - 40) : Math.max(96, Math.min(innerHeight - introEl.offsetHeight - 120, p.top - 40));
+    introEl.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px)`;
+    introEl.querySelector('.lx-intro__close').focus({ preventScroll: true });
+  }
+}
+originBtn.addEventListener('click', () => setIntro(introEl.hidden));
+originBtn.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    setIntro(introEl.hidden);
+  }
+});
+introEl.querySelector('.lx-intro__close').addEventListener('click', () => {
+  setIntro(false);
+  originBtn.focus({ preventScroll: true });
+});
+document.addEventListener('pointerdown', (e) => {
+  if (!introEl.hidden && !introEl.contains(e.target) && !originBtn.contains(e.target)) setIntro(false);
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !introEl.hidden) {
+    setIntro(false);
+    originBtn.focus({ preventScroll: true });
+  }
+});
+
+/** Jaylee and Helga and the race logos take their spots on About's wheel; the origin gets its button. */
 function placeDogs() {
+  const P = polarFrame(layouts.reality.R);
+  originBtn.style.transform = `translate(${(P.cx - 46).toFixed(1)}px, ${(P.cy - 18).toFixed(1)}px)`;
   const p = layouts.reality.dogs;
   dogsEl.style.transform = `translate(${p.x.toFixed(1)}px, ${p.y.toFixed(1)}px)`;
   layouts.reality.races.forEach((k, i) => (raceEls[i].style.transform = `translate(${k.x.toFixed(1)}px, ${k.y.toFixed(1)}px)`));
@@ -291,6 +357,8 @@ function setMode(id) {
   quietEl.classList.toggle('is-on', id === 'reality');
   placeDogs();
   dogsEl.classList.toggle('is-on', id === 'reality');
+  originBtn.classList.toggle('is-on', id === 'reality');
+  if (id !== 'reality') setIntro(false);
   for (const el of raceEls) el.classList.toggle('is-on', id === 'reality');
   fillMore(id);
   const renderName = RENDER[id];

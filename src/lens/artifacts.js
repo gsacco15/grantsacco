@@ -46,6 +46,20 @@ const LOGO = {
 /** One quiet line in About. */
 export const quiet = { line: 'Based in Austin · English, Italian, learning Portuguese' };
 
+/**
+ * The card behind the origin ("Grant" at the centre of About): a headshot,
+ * two plain sentences on who he is and what he does now, and how to reach him
+ * (email and links come from `site` in src/content.js). Draft wording: facts
+ * only, no adjectives. `headshot` is empty until the photo arrives.
+ */
+export const intro = {
+  headshot: '',
+  lines: [
+    'Grant is a mechanical engineer in Austin, working on advanced manufacturing at Enovis.',
+    'Before that he built plants and production lines for MAPEI in Chicago, Milan and Dallas, and started an EV charging company.',
+  ],
+};
+
 /** Jaylee and Helga, sitting on About's 2021 ring (one frame from each sprite sheet). */
 export const dogs = { src: [dogBlackTan, dogTan], names: 'Jaylee & Helga', year: 2021 };
 
@@ -55,8 +69,8 @@ export const dogs = { src: [dogBlackTan, dogTan], names: 'Jaylee & Helga', year:
  * placeholder month.
  */
 export const races = [
-  { id: 'austin-marathon', name: 'Austin Marathon', year: 2024, month: 2, when: 'February 2024', logo: austinMarathonLogo, ratio: 600 / 261 },
-  { id: 'ironman-texas', name: 'IRONMAN 70.3 Texas', year: 2026, month: 4, monthTbd: true, when: 'Spring 2026', logo: ironmanTexasLogo, ratio: 280 / 120 },
+  { id: 'austin-marathon', name: 'Austin Marathon', year: 2024, month: 2, when: '26.2 mi · February 2024', logo: austinMarathonLogo, ratio: 600 / 261 },
+  { id: 'ironman-texas', name: 'IRONMAN 70.3 Texas', year: 2026, month: 4, monthTbd: true, when: '70.3 mi · spring 2026', logo: ironmanTexasLogo, ratio: 280 / 120 },
 ];
 
 /**
