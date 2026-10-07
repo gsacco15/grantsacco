@@ -316,7 +316,43 @@ const extra = {
 
 const all = { ...base, ...extra };
 
-/** Draw artifact `a`'s placeholder picture into a new w × h canvas (3:2). */
+/*
+ * Real pictures. An artifact whose `picture` has a `src` shows that image
+ * (cover-cropped to 3:2) instead of a generated scene. Images load once, up
+ * front; until one arrives its picture is the plain `bg` colour.
+ */
+const images = new Map();
+
+/** Load every real picture. Each promise resolves with the artifact id once its image is ready. */
+export function preloadPictures(list) {
+  return list
+    .filter((a) => a.picture?.src)
+    .map(
+      (a) =>
+        new Promise((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            images.set(a.picture.src, img);
+            resolve(a.id);
+          };
+          img.onerror = () => resolve(null);
+          img.src = a.picture.src;
+        }),
+    );
+}
+
+function drawImage(g, spec) {
+  g.fillStyle = spec.bg ?? '#1c1d1f';
+  g.fillRect(0, 0, 300, 200);
+  const img = images.get(spec.src);
+  if (!img) return;
+  const s = Math.max(300 / img.naturalWidth, 200 / img.naturalHeight);
+  const w = img.naturalWidth * s;
+  const h = img.naturalHeight * s;
+  g.drawImage(img, (300 - w) / 2, (200 - h) / 2, w, h);
+}
+
+/** Draw artifact `a`'s picture (a real image, or a placeholder scene) into a new w × h canvas (3:2). */
 export function drawArtifact(a, w, h) {
   const c = document.createElement('canvas');
   c.width = w;
@@ -324,6 +360,10 @@ export function drawArtifact(a, w, h) {
   const g = c.getContext('2d');
   g.scale(w / 300, h / 200);
   const spec = a.picture ?? { scene: a.id };
+  if (spec.src) {
+    drawImage(g, spec);
+    return c;
+  }
   const rnd = mulberry32(hashString(a.id));
   (all[spec.scene] ?? base.film)(g, rnd, spec);
   return c;

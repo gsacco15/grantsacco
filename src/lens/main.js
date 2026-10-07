@@ -12,7 +12,8 @@ import { artifacts as items, films as albums, quiet, dogs, races, inMore } from 
 import { systems } from '../coordinates/systems.js';
 import { loadLand, loadCountries, loadDetail } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
-import { render } from './render.js';
+import { render, forget } from './render.js';
+import { preloadPictures } from './scenes.js';
 import { layout, mapFrame, mapZoom, setMapZoom, MAX_ZOOM } from './layout.js';
 import { overlay, updateMap, DETAIL_ZOOM } from './overlay.js';
 import { createPage } from './page.js';
@@ -171,6 +172,16 @@ const tiles = items.map((it) => {
   return t;
 });
 const tileById = new Map(tiles.map((t) => [t.it.id, t]));
+
+// Real pictures load once; as each arrives, its renders are redone and its tile repainted.
+for (const ready of preloadPictures(items)) {
+  ready.then((id) => {
+    if (!id) return;
+    forget(id);
+    const t = tileById.get(id);
+    if (t && t.show >= 0 && !T && mode) paint(t, t.show, mode);
+  });
+}
 
 const pxW = (w) => Math.max(24, Math.ceil((w * DPR) / 24) * 24);
 

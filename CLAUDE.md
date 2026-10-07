@@ -15,13 +15,13 @@ This is **not a resume on a website**. It should feel like:
 ## Where things are
 
 - `planning/site-artifacts.xlsx`: the master list of artifacts and decisions (sections, crossovers, featured, open questions, places, films, profile). Grant edits it; keep it in sync when he answers questions.
-- `src/lens/artifacts.js`: Lens's real content (roles, engineering, projects, apps, films, places lived), taken from the workbook. Pictures are placeholders until real photos, CAD and the logo arrive; `tbd` marks placeholder dates.
+- `src/lens/artifacts.js`: Lens's real content (roles, engineering, projects, apps, films, places lived), taken from the workbook. Pictures are placeholders until real photos, CAD and the logo arrive; `tbd` marks placeholder dates. A real image goes in as `picture: { src, bg }` (cover-cropped to 3:2 and re-rendered in every lens); the KU tile is the first.
 - `src/content.js`: sample content for mocks 1–6 (Lens only takes the section names from it).
 - Concept mocks: `/scale`, `/viewport`, `/coordinates`, `/layers`, `/translation`, `/morph`, `/lens`. Lens (Coordinates × Viewport Modes) is the direction being developed.
 
 ## Lens decisions so far
 
-- Company names and logos: project first, company second. Logos are small and sparing: company and school logos (Enovis, MAPEI, OnlyChargeEV, KU, in `src/lens/img/logos/`) sit under the work in About only; an app's icon (ContactFlow) sits beside its name in Digital only. No big branded tiles. Check what can be shown publicly about Enovis before launch.
+- Company names and logos: project first, company second. Logos are small and sparing: company logos (Enovis, MAPEI, OnlyChargeEV, in `src/lens/img/logos/`) sit under the work in About only (KU's tile already is the school's mark, so it carries no logo underneath; the small KU logo stays in the folder for use elsewhere); an app's icon (ContactFlow) sits beside its name in Digital only. No big branded tiles. Check what can be shown publicly about Enovis before launch.
 
 - Sections keep their coordinate systems; a render line re-renders everything when switching. The sixth section is called **Digital** (was Apps): apps, code, electronics and controls.
 - About is a calendar wheel: rings are years, the angle is the time of year (January at the top, clockwise), each piece at its start month. Only career, school and a few key projects live there (no trips, no AWC; MAPEI Corp's card carries both stints, Chicago 2018–19 and Dallas 2021–24). The time of year is cued simply ("Jan" at the top and a "through the year" arrow), with no month names. Races are their logos, small, on the wheel at their year and month, named on hover (Austin Marathon, Feb 2024; IRONMAN 70.3 Texas, spring 2026).

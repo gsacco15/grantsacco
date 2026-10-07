@@ -23,6 +23,7 @@ import enovisLogo from './img/logos/enovis.png';
 import mapeiLogo from './img/logos/mapei.png';
 import onlychargeLogo from './img/logos/onlychargeev.png';
 import kuLogo from './img/logos/ku.png';
+import kuEngineering from './img/ku-engineering.png';
 import austinMarathonLogo from './img/logos/austin-marathon.png';
 import ironmanTexasLogo from './img/logos/ironman-703-texas.png';
 import contactflowIcon from './img/logos/contactflow.svg';
@@ -37,6 +38,7 @@ const LOGO = {
   enovis: about(enovisLogo, 'Enovis', 900 / 219),
   mapei: about(mapeiLogo, 'MAPEI', 900 / 209),
   onlycharge: about(onlychargeLogo, 'OnlyChargeEV', 900 / 271),
+  // Not shown under KU's tile (its picture is the school's mark); here if needed elsewhere.
   ku: about(kuLogo, 'University of Kansas School of Engineering', 540 / 125),
   contactflow: { src: contactflowIcon, alt: '', ratio: 1, in: ['digital'], icon: true },
 };
@@ -176,7 +178,7 @@ export const artifacts = [
     place: { name: 'Lawrence, KS', lat: 38.97, lon: -95.24 }, main: 'reality', also: [], featured: 'yes', stage: 'shipped', axes: ax(0.4, 0.55),
     summary: 'BSME. Formula SAE electric powertrain and biomechanical research.',
     lens: { reality: '2014 – 2018 · Lawrence. A racecar and a piano-pedal device on the way to a BSME.' },
-    picture: { scene: 'badge', label: 'KU', sub: 'BSME · 2014 – 18', accent: '#1f4fa0' }, logo: LOGO.ku, related: ['fsae', 'pedal'],
+    picture: { src: kuEngineering, bg: '#0167b1' }, related: ['fsae', 'pedal'],
   },
 
   /* ── Engineering ────────────────────────────────────────────────────────── */
