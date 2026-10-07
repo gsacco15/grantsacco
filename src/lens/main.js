@@ -10,7 +10,7 @@ import { mountChrome, mountSwitcher, prefersReducedMotion } from '../shared/chro
 import { modes } from '../content.js';
 import { artifacts as items, films as albums, quiet, inMore } from './artifacts.js';
 import { systems } from '../coordinates/systems.js';
-import { loadLand } from '../shared/geo.js';
+import { loadLand, loadCountries } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
 import { render } from './render.js';
 import { layout } from './layout.js';
@@ -167,7 +167,7 @@ let W = innerWidth;
 let H = innerHeight;
 let layouts = {};
 let mode = null;
-let land = null;
+let geo = null; // { land, countries } for the Travel map
 let T = null; // the running transition
 let raf = 0;
 let hovered = null;
@@ -237,7 +237,7 @@ function setMode(id) {
 
   // The outgoing drawing and background stay put on the side the line hasn't reached.
   ovOld.replaceChildren(...ovNew.childNodes);
-  ovNew.replaceChildren(overlay(id, L.R, W, H, land));
+  drawOverlay(id);
   bgOld.style.background = first ? systems[id].palette.bg : rgbToCss(palette.bg.value);
 
   const pal = systems[id].palette;
@@ -344,10 +344,18 @@ function frame(ms) {
   } else {
     T = null;
     ovOld.replaceChildren();
+    // The map data may have arrived mid-sweep; draw the map with it now.
+    if (mode === 'place' && geo && !ovNew.dataset.geo) drawOverlay(mode);
     bgOld.style.clipPath = 'inset(0 0 0 100%)';
     drawDyn();
     warm();
   }
+}
+
+/** The incoming section's drawing (noting whether the map had its data yet). */
+function drawOverlay(id) {
+  ovNew.replaceChildren(overlay(id, layouts[id].R, W, H, geo));
+  ovNew.dataset.geo = geo ? '1' : '';
 }
 
 function kick() {
@@ -368,6 +376,9 @@ function flip(tl) {
   tl.el.classList.toggle('has-cap', tl.to.cap);
   tl.el.classList.toggle('is-focus', tl.to.focus);
   tl.el.classList.toggle('cap-end', tl.to.capAlign === 'end');
+  tl.el.dataset.cap = tl.to.capSide ?? '';
+  tl.el.style.setProperty('--cap-dx', `${(tl.to.capDx ?? 0).toFixed(1)}px`);
+  tl.el.style.setProperty('--cap-dy', `${(tl.to.capDy ?? 0).toFixed(1)}px`);
   tl.meta.textContent = metaFor(tl.it, mode);
 }
 
@@ -391,7 +402,8 @@ function drawDyn() {
     const nx = clamp(ax, p.x - p.w / 2, p.x + p.w / 2);
     const ny = clamp(ay, p.y - p.h / 2, p.y + p.h / 2);
     const d = Math.hypot(ax - nx, ay - ny);
-    if (mode === 'place' && d < 1) continue;
+    // On the map the dot is the coordinate.
+    if (mode === 'place') continue;
     if (d > 4) parts.push(`<line x1="${ax.toFixed(1)}" y1="${ay.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}" class="lx-leader" data-id="${tl.it.id}"/>`);
     parts.push(`<circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="${mode === 'place' ? 2.6 : 2.2}" class="lx-anchor" data-id="${tl.it.id}"/>`);
   }
@@ -496,9 +508,9 @@ const rollQuery = query.get('roll');
 if (rollQuery && (rollQuery === 'all' || albums.some((a) => a.id === rollQuery))) darkroom.open(rollQuery, 0, null);
 stacks.warm();
 
-loadLand().then((l) => {
-  land = l;
-  if (mode === 'place' && !T) ovNew.replaceChildren(overlay('place', layouts.place.R, W, H, land));
+Promise.all([loadLand(), loadCountries()]).then(([land, countries]) => {
+  geo = { land, countries };
+  if (mode === 'place' && !T) drawOverlay('place');
 });
 
 let resizeTimer = 0;
@@ -523,8 +535,11 @@ window.addEventListener('resize', () => {
       if (t.show >= 0) paint(t, t.show, mode);
       t.el.classList.toggle('has-cap', t.to.cap);
       t.el.classList.toggle('cap-end', t.to.capAlign === 'end');
+      t.el.dataset.cap = t.to.capSide ?? '';
+      t.el.style.setProperty('--cap-dx', `${(t.to.capDx ?? 0).toFixed(1)}px`);
+      t.el.style.setProperty('--cap-dy', `${(t.to.capDy ?? 0).toFixed(1)}px`);
     }
-    ovNew.replaceChildren(overlay(mode, L.R, W, H, land));
+    drawOverlay(mode);
     if (!T) drawDyn();
     warm();
   }, 160);

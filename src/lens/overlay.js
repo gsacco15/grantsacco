@@ -2,7 +2,7 @@
 // the map. Colours are baked in from the section's palette (not CSS variables)
 // so the outgoing and incoming drawings can sit side by side during a sweep.
 import { systems, graticule, STAGES } from '../coordinates/systems.js';
-import { artifacts, homes, films, homeIn } from './artifacts.js';
+import { artifacts, homes, countries } from './artifacts.js';
 import { landPath } from '../shared/geo.js';
 import { YEAR0, YEAR1, mapFrame, polarFrame, anchor, ringRadius } from './layout.js';
 import { scaleTicks } from './meta.js';
@@ -17,7 +17,9 @@ const hexA = (hex, a) => {
   return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / ${a})`;
 };
 
-export function overlay(mode, R, W, H, land) {
+/** `geo` is { land, countries } once the map data has loaded. */
+export function overlay(mode, R, W, H, geo) {
+  const land = geo?.land;
   const pal = systems[mode].palette;
   const ink = (a) => hexA(pal.ink, a);
   const parts = [];
@@ -116,14 +118,23 @@ export function overlay(mode, R, W, H, land) {
     const sy = F.h / (b.north - b.south);
     parts.push(`<clipPath id="lx-mapclip"><rect x="${f(F.x)}" y="${f(F.y)}" width="${f(F.w)}" height="${f(F.h)}"/></clipPath>`);
     parts.push(`<g clip-path="url(#lx-mapclip)">`);
-    if (land) {
-      const d = landPath(land, (lon, lat) => [F.x + (lon - b.west) * sx, F.y + (b.north - lat) * sy]);
-      parts.push(`<path d="${d}" fill="${ink(0.1)}" stroke="${ink(0.32)}" stroke-width="0.8" stroke-linejoin="round"/>`);
+    const pj = (lon, lat) => [F.x + (lon - b.west) * sx, F.y + (b.north - lat) * sy];
+    if (land) parts.push(`<path d="${landPath(land, pj)}" fill="${ink(0.1)}" stroke="${ink(0.32)}" stroke-width="0.8" stroke-linejoin="round"/>`);
+    // Every country visited, shaded; islands too small to draw get a dot.
+    if (geo?.countries) {
+      const names = new Set(countries.map((c) => c.name));
+      const visited = { type: 'FeatureCollection', features: geo.countries.features.filter((c) => names.has(c.properties.name)) };
+      parts.push(`<path d="${landPath(visited, pj)}" fill="${hexA(pal.accent, 0.17)}" fill-rule="evenodd" stroke="${hexA(pal.accent, 0.45)}" stroke-width="0.7" stroke-linejoin="round"/>`);
+    }
+    for (const c of countries) {
+      if (!c.at) continue;
+      const [x, y] = pj(c.at[1], c.at[0]);
+      parts.push(`<circle cx="${f(x)}" cy="${f(y)}" r="2.2" fill="${hexA(pal.accent, 0.55)}"/>`);
     }
     const g = graticule(b);
     for (const lon of g.lons) ln(F.x + (lon - b.west) * sx, F.y, F.x + (lon - b.west) * sx, F.y + F.h, ink(0.08));
     for (const lat of g.lats) ln(F.x, F.y + (b.north - lat) * sy, F.x + F.w, F.y + (b.north - lat) * sy, ink(0.08));
-    // The moves, in order, as one solid line between the places lived…
+    // The moves between the places lived, in order: the only lines on the map.
     const home = homes.map((h) => anchor(byId.get(h.id), 'place', R));
     let d = `M${f(home[0][0])},${f(home[0][1])}`;
     for (let i = 1; i < home.length; i++) {
@@ -132,16 +143,25 @@ export function overlay(mode, R, W, H, land) {
       const bow = Math.min(60, Math.hypot(x1 - x0, y1 - y0) * 0.22);
       d += ` Q${f((x0 + x1) / 2)},${f(Math.min(y0, y1) - bow)} ${f(x1)},${f(y1)}`;
     }
-    parts.push(`<path d="${d}" fill="none" stroke="${hexA(pal.ink, 0.55)}" stroke-width="1.4"/>`);
-    // …and each trip as a dashed arc from wherever home was at the time.
-    for (const film of films) {
-      const [x0, y0] = anchor(byId.get(homeIn(film.year).id), 'place', R);
-      const [x1, y1] = anchor(byId.get(film.id), 'place', R);
-      const bow = Math.min(90, Math.hypot(x1 - x0, y1 - y0) * 0.25);
-      parts.push(`<path d="M${f(x0)},${f(y0)} Q${f((x0 + x1) / 2)},${f(Math.min(y0, y1) - bow)} ${f(x1)},${f(y1)}" fill="none" stroke="${hexA(pal.accent, 0.5)}" stroke-width="1" stroke-dasharray="3 5"/>`);
-    }
+    parts.push(`<path d="${d}" fill="none" stroke="${hexA(pal.ink, 0.6)}" stroke-width="1.3"/>`);
     parts.push('</g>');
     parts.push(`<rect x="${f(F.x)}" y="${f(F.y)}" width="${f(F.w)}" height="${f(F.h)}" fill="none" stroke="${ink(0.3)}"/>`);
+    // Key, bottom left (the Pacific): the same marks the dots use.
+    {
+      const y = F.y + F.h - (mob ? 12 : 16);
+      let x = F.x + (mob ? 10 : 14);
+      const size = mob ? 8.5 : 9.5;
+      const key = (shape, label, w) => {
+        parts.push(shape(x, y));
+        text(x + 9, y, label, { size, fill: ink(0.6) });
+        x += w;
+      };
+      key((x0, y0) => `<circle cx="${f(x0)}" cy="${f(y0)}" r="4" fill="${pal.accent}" stroke="${pal.bg}" stroke-width="1.5"/>`, 'lived', mob ? 40 : 50);
+      key((x0, y0) => `<circle cx="${f(x0)}" cy="${f(y0)}" r="3.2" fill="${pal.ink}"/>`, 'photos', mob ? 48 : 60);
+      key((x0, y0) => `<rect x="${f(x0 - 3.5)}" y="${f(y0 - 3.5)}" width="7" height="7" fill="none" stroke="${pal.ink}" stroke-width="1.4"/>`, 'worked', mob ? 50 : 62);
+      key((x0, y0) => `<line x1="${f(x0 - 6)}" y1="${f(y0)}" x2="${f(x0 + 5)}" y2="${f(y0)}" stroke="${hexA(pal.ink, 0.6)}" stroke-width="1.3"/>`, 'moved', mob ? 46 : 58);
+      key((x0, y0) => `<rect x="${f(x0 - 5)}" y="${f(y0 - 3.5)}" width="10" height="7" fill="${hexA(pal.accent, 0.17)}" stroke="${hexA(pal.accent, 0.45)}" stroke-width="0.7"/>`, `${countries.length} countries`, 0);
+    }
     if (!mob) {
       for (const lon of g.lons) text(F.x + (lon - b.west) * sx, F.y + F.h + 14, `${Math.abs(lon)}°${lon < 0 ? 'W' : lon > 0 ? 'E' : ''}`, { anchor: 'middle', size: 9 });
       for (const lat of g.lats) text(F.x - 8, F.y + (b.north - lat) * sy, `${Math.abs(lat)}°${lat < 0 ? 'S' : lat > 0 ? 'N' : ''}`, { anchor: 'end', size: 9 });

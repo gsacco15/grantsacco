@@ -14,6 +14,17 @@ export function loadLand() {
   return landPromise;
 }
 
+let countriesPromise;
+
+/** GeoJSON FeatureCollection of the world's countries (110m), named in `properties.name`. */
+export function loadCountries() {
+  countriesPromise ??= import('world-atlas/countries-110m.json').then((m) => {
+    const topo = m.default ?? m;
+    return feature(topo, topo.objects.countries);
+  });
+  return countriesPromise;
+}
+
 /** Iterate every ring of every polygon as arrays of [lon, lat]. */
 export function forEachRing(land, fn) {
   const geoms = land.type === 'FeatureCollection' ? land.features.map((f) => f.geometry) : [land.geometry];

@@ -2,7 +2,7 @@
 // from the Coordinates mock; what's new here is that the marks are pictures of
 // real artifacts, each section shows only its own (plus deliberate crossovers),
 // and marks are relaxed apart while keeping a leader to their exact coordinate.
-import { artifacts, films, inSection } from './artifacts.js';
+import { artifacts, films, countries, inSection } from './artifacts.js';
 import { STAGES } from '../coordinates/systems.js';
 import { ASPECT } from './render.js';
 import { metaFor } from './meta.js';
@@ -32,13 +32,17 @@ const polar = (() => {
   return out;
 })();
 
-/** Fit the Travel map to the places in it, at the frame's aspect ratio. */
+/**
+ * Fit the Travel map to the places in it (with room around them) and to the
+ * countries visited (just kept on screen), at the frame's aspect ratio.
+ */
 function mapBounds(aspect) {
   const pts = artifacts.filter((a) => inSection(a, 'place')).map((a) => a.place);
-  let west = Math.min(...pts.map((p) => p.lon)) - 14;
-  let east = Math.max(...pts.map((p) => p.lon)) + 14;
-  let south = Math.min(...pts.map((p) => p.lat)) - 10;
-  let north = Math.max(...pts.map((p) => p.lat)) + 8;
+  const keep = countries.map((c) => c.near ?? c.at).filter(Boolean);
+  let west = Math.min(...pts.map((p) => p.lon - 14), ...keep.map(([, lon]) => lon - 3));
+  let east = Math.max(...pts.map((p) => p.lon + 14), ...keep.map(([, lon]) => lon + 3));
+  let south = Math.min(...pts.map((p) => p.lat - 10), ...keep.map(([lat]) => lat - 3));
+  let north = Math.max(...pts.map((p) => p.lat + 8), ...keep.map(([lat]) => lat + 3));
   const lonSpan = east - west;
   const latSpan = north - south;
   if (lonSpan / latSpan > aspect) {
@@ -124,7 +128,8 @@ export function tileSize(it, mode, R, W) {
   const base = Math.min(150, Math.max(m ? 50 : 66, Math.min(R.w, R.h * 1.7) * (m ? 0.15 : 0.092)));
   const focus = isFocus(it, mode);
   if (mode === 'place') {
-    const d = base * (focus ? 0.56 : it.kind === 'film' ? 0.42 : 0.32);
+    // The map is dots: places lived, then trips (photos), then work sites.
+    const d = (it.kind === 'place' ? 12 : it.film ? 9 : 8) * (m ? 0.85 : 1);
     return [d, d];
   }
   let w = mode === 'reality' ? base * 0.86 : focus ? base : base * 0.6;
@@ -194,7 +199,8 @@ function withHidden(L) {
  * edge (`capAlign: 'end'`) or centre. `bw` widens a mark's box symmetrically.
  */
 function relax(L, R, mode, W) {
-  const gap = W < 760 ? 4 : 8;
+  // Map dots only need nudging off each other; pictures need breathing room.
+  const gap = mode === 'place' ? 2 : W < 760 ? 4 : 8;
   const box = (t) => {
     const hw = t.w / 2;
     let l = -(t.bw ?? t.w) / 2;
@@ -284,6 +290,7 @@ function mark(it, mode, R, W) {
  */
 export function layout(mode, W, H) {
   if (mode === 'image') return artLayout(W, H);
+  if (mode === 'place') return mapLayout(W, H);
   const R = plotRect(W, H);
   const L = artifacts.filter((a) => inSection(a, mode)).map((it) => mark(it, mode, R, W));
   relax(L, R, mode, W);
@@ -318,4 +325,83 @@ function artLayout(W, H) {
   relax(L, R, 'image', W);
   const stacks = L.filter((t) => t.stack).map(({ id, x, y, ax, ay, capAlign }) => ({ id, x, y, w: card, ax, ay, capAlign }));
   return { R, tiles: withHidden(L.filter((t) => !t.stack)), stacks, card };
+}
+
+/**
+ * Travel is a map of dots at their true coordinates, nudged only where they
+ * would sit on top of each other. Places lived are labelled, each label put on
+ * the first side of its dot (right, left, above, below) that's clear of the
+ * other dots and labels; trips and work sites are labelled on hover.
+ */
+function mapLayout(W, H) {
+  const R = plotRect(W, H);
+  const F = mapFrame(R);
+  const L = artifacts.filter((a) => inSection(a, 'place')).map((it) => {
+    const [ax, ay] = anchor(it, 'place', R);
+    const [w, h] = tileSize(it, 'place', R, W);
+    return { id: it.id, it, ax, ay, x: ax, y: ay, w, h, cap: false, focus: isFocus(it, 'place') };
+  });
+  relax(L, R, 'place', W);
+
+  // Hover labels hang on the side with more room.
+  for (const t of L) t.capSide = t.x > F.x + F.w * 0.75 ? 'l' : 'r';
+
+  // Every place a label could go: beside its dot (nudged up or down), then
+  // above or below. Each keeps clear of the dots and inside the map, and reads
+  // as its own dot's when no other dot is nearer the point it hangs from.
+  const dots = L.map((t) => ({ x0: t.x - t.w / 2 - 3, y0: t.y - t.h / 2 - 1, x1: t.x + t.w / 2 + 3, y1: t.y + t.h / 2 + 1 }));
+  const hit = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+  const inside = (b) => b.x0 >= F.x + 2 && b.x1 <= F.x + F.w - 2 && b.y0 >= F.y + 2 && b.y1 <= F.y + F.h - 2;
+  const labelled = L.filter((t) => hasCaption(t.it, 'place', W)).map((t) => {
+    const { cw, capH } = captionSize(t.it, 'place', W);
+    const h = capH - 7;
+    const r = t.w / 2;
+    const raw = [];
+    for (const dy of [0, -9, 9, -16, 16]) {
+      raw.push(['r', t.x + r + 6, t.y - h / 2 + dy, 0, dy, t.x + r + 6, t.y + dy]);
+      raw.push(['l', t.x - r - 6 - cw, t.y - h / 2 + dy, 0, dy, t.x - r - 6, t.y + dy]);
+    }
+    for (const dx of [0, cw * 0.35, -cw * 0.35]) {
+      raw.push(['t', t.x - cw / 2 + dx, t.y - r - 3 - h, dx, 0, t.x + dx, t.y - r - 3]);
+      raw.push(['b', t.x - cw / 2 + dx, t.y + r + 3, dx, 0, t.x + dx, t.y + r + 3]);
+    }
+    const options = raw
+      .map(([side, x0, y0, dx, dy, px, py], i) => {
+        const box = { x0, y0, x1: x0 + cw, y1: y0 + h };
+        const mine = Math.hypot(px - t.x, py - t.y);
+        const own = !L.some((o) => o !== t && Math.hypot(px - o.x, py - o.y) < mine);
+        return { side, dx, dy, box, cost: i + (own ? 0 : 60) };
+      })
+      .filter((o) => inside(o.box) && !dots.some((d) => hit(o.box, d)))
+      .sort((a, b) => a.cost - b.cost);
+    return { t, options };
+  });
+
+  // Choose them together: a short search for the set that labels the most
+  // places at the lowest cost (own dot, preferred side), labels never touching.
+  const pad = (b) => ({ x0: b.x0 - 3, y0: b.y0 - 1, x1: b.x1 + 3, y1: b.y1 + 1 });
+  let best = { n: -1, cost: Infinity, pick: [] };
+  let steps = 0;
+  const pick = [];
+  (function search(i, n, cost) {
+    if (++steps > 40000) return;
+    if (i === labelled.length) {
+      if (n > best.n || (n === best.n && cost < best.cost)) best = { n, cost, pick: [...pick] };
+      return;
+    }
+    if (n + (labelled.length - i) < best.n) return;
+    for (const o of labelled[i].options) {
+      if (pick.some((p) => p && hit(pad(p.box), o.box))) continue;
+      pick.push(o);
+      search(i + 1, n + 1, cost + o.cost);
+      pick.pop();
+    }
+    pick.push(null);
+    search(i + 1, n, cost);
+    pick.pop();
+  })(0, 0, 0);
+  best.pick.forEach((o, i) => {
+    if (o) Object.assign(labelled[i].t, { cap: true, capSide: o.side, capDx: o.dx, capDy: o.dy });
+  });
+  return { R, tiles: withHidden(L) };
 }

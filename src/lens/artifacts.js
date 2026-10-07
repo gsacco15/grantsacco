@@ -35,6 +35,48 @@ export const homes = [
 ];
 
 /*
+ * Every country Grant has been to (34), shaded on the Travel map. `name` is the
+ * Natural Earth name the map data uses; `at` places the islands too small for
+ * its outlines as a dot instead; `near` is a point that should stay on screen.
+ */
+export const countries = [
+  { label: 'USA', name: 'United States of America' },
+  { label: 'Canada', name: 'Canada', near: [43.65, -79.38] },
+  { label: 'Mexico', name: 'Mexico' },
+  { label: 'Bahamas', name: 'Bahamas' },
+  { label: 'Dominican Republic', name: 'Dominican Rep.' },
+  { label: 'Dominica', name: 'Dominica', at: [15.41, -61.37] },
+  { label: 'Belize', name: 'Belize' },
+  { label: 'St Lucia', name: 'Saint Lucia', at: [13.91, -60.98] },
+  { label: 'Barbados', name: 'Barbados', at: [13.19, -59.54] },
+  { label: 'St Kitts', name: 'St. Kitts and Nevis', at: [17.3, -62.72] },
+  { label: 'Jamaica', name: 'Jamaica' },
+  { label: 'Honduras', name: 'Honduras' },
+  { label: 'Panama', name: 'Panama' },
+  { label: 'Guatemala', name: 'Guatemala' },
+  { label: 'Colombia', name: 'Colombia' },
+  { label: 'Peru', name: 'Peru' },
+  { label: 'Brazil', name: 'Brazil' },
+  { label: 'South Africa', name: 'South Africa', near: [-33.92, 18.42] },
+  { label: 'Spain', name: 'Spain' },
+  { label: 'Italy', name: 'Italy' },
+  { label: 'Slovenia', name: 'Slovenia' },
+  { label: 'France', name: 'France' },
+  { label: 'Croatia', name: 'Croatia' },
+  { label: 'Hungary', name: 'Hungary' },
+  { label: 'Czech Republic', name: 'Czechia' },
+  { label: 'Germany', name: 'Germany' },
+  { label: 'Switzerland', name: 'Switzerland' },
+  { label: 'Denmark', name: 'Denmark', near: [55.68, 12.57] },
+  { label: 'England (UK)', name: 'United Kingdom', near: [51.51, -0.13] },
+  { label: 'Argentina', name: 'Argentina' },
+  { label: 'Chile', name: 'Chile' },
+  { label: 'Netherlands', name: 'Netherlands' },
+  { label: 'Austria', name: 'Austria' },
+  { label: 'Portugal', name: 'Portugal' },
+];
+
+/*
  * 35mm films. Frames are procedural placeholders in each film's `look` until
  * the albums are linked. `axes` places the film on Art's plot.
  */
