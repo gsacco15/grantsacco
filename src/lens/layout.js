@@ -171,6 +171,8 @@ const textWidth = (s, font, spacing = 0) => {
   ctx.font = font;
   return ctx.measureText(s).width + s.length * spacing;
 };
+const LOGO_H = 12; // .lx-tile__logo height
+
 // .lx-tile__cap max-width (narrower on phones, where the meta line is hidden).
 const capMax = (W) => (W < 760 ? 150 : 200);
 
@@ -186,9 +188,13 @@ function captionSize(it, mode, W) {
   const font = mono ? FONTS.mono : serif ? FONTS.serif : FONTS.sans;
   const tw = textWidth(title, font, mono ? 0.42 : 0) * k;
   const mw = m ? 0 : textWidth(metaFor(it, mode), FONTS.meta, 0.38);
-  const lines = Math.ceil(tw / capMax(W));
+  // A logo in this section: an icon before the title, or a small company logo under the caption.
+  const logo = it.logo?.in.includes(mode) ? it.logo : null;
+  const iw = logo?.icon ? 20 : 0;
+  const lw = logo && !logo.icon ? LOGO_H * logo.ratio : 0;
+  const lines = Math.ceil((tw + iw) / capMax(W));
   const lineH = (serif ? 18 : mono ? 12.6 : 14.4) * k;
-  return { cw: Math.min(capMax(W), Math.max(tw, mw)) + 4, capH: 7 + lines * lineH + (m ? 0 : 12) };
+  return { cw: Math.min(capMax(W), Math.max(tw + iw, mw, lw)) + 4, capH: 7 + lines * lineH + (m ? 0 : 12) + (lw ? LOGO_H + 5 : 0) };
 }
 
 /** Caption size for a film's stack on the Art plot (title over place · year). */

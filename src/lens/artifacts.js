@@ -17,6 +17,23 @@
  */
 import dogBlackTan from './img/dog-black-tan.png';
 import dogTan from './img/dog-tan.png';
+import enovisLogo from './img/logos/enovis.png';
+import mapeiLogo from './img/logos/mapei.png';
+import onlychargeLogo from './img/logos/onlychargeev.png';
+import contactflowIcon from './img/logos/contactflow.svg';
+
+/*
+ * Logos, used sparingly: project first, company second. Company logos sit small
+ * under the work in About; an app's icon sits beside its name in Apps.
+ * `ratio` is width / height; `in` lists the sections that show it.
+ */
+const about = (src, alt, ratio) => ({ src, alt, ratio, in: ['reality'] });
+const LOGO = {
+  enovis: about(enovisLogo, 'Enovis', 900 / 219),
+  mapei: about(mapeiLogo, 'MAPEI', 900 / 209),
+  onlycharge: about(onlychargeLogo, 'OnlyChargeEV', 900 / 271),
+  contactflow: { src: contactflowIcon, alt: '', ratio: 1, in: ['digital'], icon: true },
+};
 
 /** One quiet line in About. */
 export const quiet = { line: 'Based in Austin · English, Italian, learning Portuguese' };
@@ -112,28 +129,28 @@ export const artifacts = [
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.9),
     summary: 'Owner rep and engineering lead for a new operations facility and an additive manufacturing center.',
     lens: { reality: '2025 – now · Austin. A 200K sq ft facility and an additive manufacturing center.' },
-    picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, related: ['enovis-facility', 'enovis-am'],
+    picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-am'],
   },
   {
     id: 'mapei-dallas', title: 'MAPEI Corp', kind: 'role', org: 'Project Engineering Manager', years: [2021, 2024],
     place: { name: 'Dallas, TX', lat: 32.78, lon: -96.8 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.85),
     summary: 'Industrial construction and manufacturing capital projects, over $30M in total.',
     lens: { reality: '2021 – 2024 · Dallas. Over $30M of plants, expansions and equipment.' },
-    picture: { scene: 'badge', label: 'MAPEI', sub: 'Dallas · 2021 – 24', accent: '#2b5aa6' }, related: ['drymix', 'palletizer', 'sitedev', 'staticmix', 'liquid'],
+    picture: { scene: 'badge', label: 'MAPEI', sub: 'Dallas · 2021 – 24', accent: '#2b5aa6' }, logo: LOGO.mapei, related: ['drymix', 'palletizer', 'sitedev', 'staticmix', 'liquid'],
   },
   {
     id: 'mapei-milan', title: 'MAPEI SpA', kind: 'role', org: 'Project Engineer', years: [2019, 2021],
     place: { name: 'Milan, Italy', lat: 45.46, lon: 9.19 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.6),
     summary: 'Manufacturing operations, capital projects and static mixing R&D at the Milan headquarters.',
     lens: { reality: '2019 – 2021 · Milan. Prototyped the static mixing process that later ran in Dallas.' },
-    picture: { scene: 'badge', label: 'MAPEI SpA', sub: 'Milan · 2019 – 21', accent: '#3d6fb8' }, related: ['staticmix'],
+    picture: { scene: 'badge', label: 'MAPEI SpA', sub: 'Milan · 2019 – 21', accent: '#3d6fb8' }, logo: LOGO.mapei, related: ['staticmix'],
   },
   {
     id: 'mapei-chicago', title: 'MAPEI Corp (Chicago)', kind: 'role', org: 'Junior Project Engineer', years: [2018, 2019],
     place: { name: 'Chicago, IL', lat: 41.88, lon: -87.63 }, main: 'reality', also: [], featured: 'maybe', stage: 'built', axes: ax(0.5, 0.4),
     summary: 'Technical studies and medium-scale capital projects for the Chicago site.',
     lens: { reality: '2018 – 2019 · Chicago. First job out of school.' },
-    picture: { scene: 'badge', label: 'MAPEI', sub: 'Chicago · 2018 – 19', accent: '#5a7fb8' }, related: [],
+    picture: { scene: 'badge', label: 'MAPEI', sub: 'Chicago · 2018 – 19', accent: '#5a7fb8' }, logo: LOGO.mapei, related: [],
   },
   {
     id: 'awc', title: 'AWC Industries', kind: 'role', org: 'Mechanical Engineering Intern', years: [2016, 2016],
@@ -160,7 +177,7 @@ export const artifacts = [
       structure: '200K sq ft: office, automated distribution, clean pack, sterilization and additive manufacturing under one roof.',
       reality: 'The building he walks into every day, designed and built from the ground up.',
     },
-    picture: { scene: 'facility' }, related: ['enovis', 'enovis-am'],
+    picture: { scene: 'facility' }, logo: LOGO.enovis, related: ['enovis', 'enovis-am'],
   },
   {
     id: 'enovis-am', title: 'Additive manufacturing center', kind: 'engineering', org: 'Enovis', years: [2025, 2026],
@@ -250,7 +267,7 @@ export const artifacts = [
       structure: 'Charging sites from site plan to trenching, power sharing and permits.',
       digital: 'Ran on automation: CRM, payments, accounting, estimating and proposals.',
     },
-    picture: { scene: 'charger', logo: true }, related: ['ev-fedex', 'ev-stallion', 'ev-fortworth', 'ev-gateway'],
+    picture: { scene: 'charger', logo: true }, logo: LOGO.onlycharge, related: ['ev-fedex', 'ev-stallion', 'ev-fortworth', 'ev-gateway'],
   },
   {
     id: 'fsae', title: 'Formula SAE electric racecar', kind: 'project', org: 'University of Kansas', years: [2017, 2018],
@@ -320,7 +337,7 @@ export const artifacts = [
     summary: 'Paste messy people and company data; get contacts, domains, email patterns, ranked candidates and a CSV.',
     tech: 'TypeScript, React, Vite, Tailwind, Supabase, Claude', link: 'https://contact-flow-web.vercel.app',
     lens: { digital: 'Extract → find domains → discover email patterns → rank → verify → export.' },
-    picture: { scene: 'app', label: 'ContactFlow', layout: 'table', accent: '#3d7be8' }, related: [],
+    picture: { scene: 'app', label: 'ContactFlow', layout: 'table', accent: '#3d7be8' }, logo: LOGO.contactflow, related: [],
   },
   {
     id: 'jobpaper', title: 'JobPaper', kind: 'app', org: 'Personal', years: [2026, 2026],

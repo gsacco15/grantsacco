@@ -128,7 +128,7 @@ const tiles = items.map((it) => {
       <span class="lx-tile__ghost lx-tile__ghost--1"></span>
       <span class="lx-tile__pics"><canvas></canvas><canvas></canvas></span>
     </span>
-    <span class="lx-tile__cap"><span class="lx-tile__title${it.phone != null ? ' has-phone' : ''}"><span class="lx-tile__long">${it.title}</span>${it.phone ? `<span class="lx-tile__phone">${it.phone}</span>` : ''}</span><span class="lx-tile__meta"></span></span>`;
+    <span class="lx-tile__cap"><span class="lx-tile__title${it.phone != null ? ' has-phone' : ''}">${it.logo?.icon ? `<img class="lx-tile__icon" src="${it.logo.src}" alt="" />` : ''}<span class="lx-tile__long">${it.title}</span>${it.phone ? `<span class="lx-tile__phone">${it.phone}</span>` : ''}</span><span class="lx-tile__meta"></span>${it.logo && !it.logo.icon ? `<img class="lx-tile__logo" src="${it.logo.src}" alt="${it.logo.alt}" />` : ''}</span>`;
   field.appendChild(el);
   const t = {
     it,
@@ -396,6 +396,7 @@ function flip(tl) {
   tl.el.classList.toggle('has-cap', tl.to.cap);
   tl.el.classList.toggle('is-focus', tl.to.focus);
   tl.el.classList.toggle('cap-end', tl.to.capAlign === 'end');
+  tl.el.classList.toggle('show-logo', !!tl.it.logo?.in.includes(mode));
   tl.el.dataset.cap = tl.to.capSide ?? '';
   tl.el.style.setProperty('--cap-dx', `${(tl.to.capDx ?? 0).toFixed(1)}px`);
   tl.el.style.setProperty('--cap-dy', `${(tl.to.capDy ?? 0).toFixed(1)}px`);
