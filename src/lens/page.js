@@ -3,7 +3,8 @@
 // same render line passes over it) and translates the text: an engineer's
 // spec, a build stage, a place, a set of links. Notes are a light layer of
 // handwritten annotations on the picture that can be toggled.
-import { items, modes } from '../content.js';
+import { modes } from '../content.js';
+import { artifacts as items } from './artifacts.js';
 import { systems, STAGES } from '../coordinates/systems.js';
 import { loadLand, landPath } from '../shared/geo.js';
 import { clamp } from '../anim.js';
@@ -11,6 +12,18 @@ import { render, ASPECT } from './render.js';
 import { RENDER, physicalSize, yrs } from './meta.js';
 
 const byId = new Map(items.map((it) => [it.id, it]));
+// The pager steps through everything on stage except films (they open their
+// photos). Homes step through the other homes, "+ more" work through its list.
+const pageable = items.filter((a) => a.featured === 'yes' && !a.film && a.kind !== 'place');
+const sequence = (it) =>
+  it.home ? items.filter((a) => a.home) : it.featured === 'maybe' ? items.filter((a) => a.featured === 'maybe' && a.main === it.main) : pageable;
+const step = (id, d) => {
+  const list = sequence(byId.get(id));
+  const i = Math.max(0, list.findIndex((x) => x.id === id));
+  return list[(i + d + list.length) % list.length];
+};
+const SAME = { place: 'place', role: 'chapter', education: 'chapter' };
+const short = (t, n = 34) => (t && t.length > n ? `${t.slice(0, n - 1).trimEnd()}…` : t ?? '');
 const MODE_IDS = modes.map((m) => m.id);
 const DPR = Math.min(2, window.devicePixelRatio || 1);
 const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -18,7 +31,7 @@ const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matc
 // The page shows every mode at 3:2 except the film still, which letterboxes.
 const heroAspect = (mode) => (mode === 'image' ? ASPECT.image : 1.5);
 
-const KIND = { engineering: 'Engineering', project: 'Project', art: 'Art', travel: 'Travel', app: 'App', life: 'Life' };
+const KIND = { role: 'Role', education: 'Education', engineering: 'Engineering', project: 'Project', startup: 'Startup', build: 'Build', app: 'App', film: 'Film', place: 'Place lived' };
 const SEEN = { reality: 'a person', structure: 'an engineer', build: 'a maker', image: 'an artist', place: 'a traveller', digital: 'a system' };
 
 const bar = (v) => `<span class="lx-bar"><span style="width:${Math.round(v * 100)}%"></span></span><span class="lx-num">${v.toFixed(2).replace(/^0/, '')}</span>`;
@@ -30,24 +43,22 @@ function facts(it, mode) {
     case 'reality':
       row('When', yrs(it));
       row('Where', it.place.name);
-      row('What', KIND[it.kind]);
+      if (it.org) row(KIND[it.kind] ?? 'What', it.org);
       break;
     case 'structure':
       row('Size', `≈ ${physicalSize(it.axes.scale)}`);
-      row('Complexity', bar(it.axes.complexity));
-      row('Discipline', KIND[it.kind]);
+      for (const f of (it.facts ?? []).slice(0, 4)) row('·', f);
       break;
     case 'build': {
       const at = STAGES.indexOf(it.stage);
       row('Stage', `<span class="lx-stages">${STAGES.map((s, i) => `<span class="${i <= at ? 'is-done' : ''} ${i === at ? 'is-now' : ''}">${s}</span>`).join('')}</span>`);
-      row('Started', String(it.years[0]));
-      row('Last touched', String(it.years[1]));
+      row('When', yrs(it));
+      for (const f of (it.facts ?? []).slice(0, 2)) row('·', f);
       break;
     }
     case 'image':
-      row('Expressive', bar(it.axes.expressive));
-      row('Experimental', bar(it.axes.experimental));
-      row('Year', yrs(it));
+      row('When', yrs(it));
+      row('Where', it.place.name);
       break;
     case 'place': {
       const { lat, lon, name } = it.place;
@@ -57,24 +68,25 @@ function facts(it, mode) {
       break;
     }
     case 'digital':
-      row('Digital', bar(it.axes.digital));
-      row('Finished', bar(it.axes.finished));
-      row('Links', `${(it.related ?? []).length} connected`);
+      if (it.tech) row('Built with', it.tech);
+      row('When', yrs(it));
+      row('Live', it.link ? `<a href="${it.link}" target="_blank" rel="noopener">${it.link.replace(/^https?:\/\//, '')} ↗</a>` : 'Private / local');
       break;
   }
+  for (const l of it.links ?? []) row('Link', `<a href="${l.href}">${l.label}</a>`);
   return rows.join('');
 }
 
-/** Three handwritten notes on the hero, worded for the section. */
+/** Three handwritten notes on the hero, from the artifact's own facts. */
 function notes(it, mode) {
-  const size = physicalSize(it.axes.scale);
+  const f = it.facts ?? [];
   const n = {
-    reality: [`${yrs(it)}`, it.place.name, 'me, mostly'],
-    structure: [`≈ ${size} overall`, `complexity ${it.axes.complexity.toFixed(2)}`, 'datum A'],
-    build: [`stage: ${it.stage}`, `started ${it.years[0]}`, 'v1 → v2'],
-    image: ['the light, here', `${Math.round(it.axes.expressive * 100)}% expressive`, 'crop 2.39 : 1'],
-    place: [it.place.name, `${it.place.lat.toFixed(1)}°, ${it.place.lon.toFixed(1)}°`, 'been here'],
-    digital: [`${(it.related ?? []).length} links`, `d = ${it.axes.digital.toFixed(2)}`, 'live'],
+    reality: [yrs(it), it.place.name, short(it.org)],
+    structure: [`≈ ${physicalSize(it.axes.scale)} overall`, short(f[0] ?? it.org), short(f[1] ?? yrs(it))],
+    build: [`stage: ${it.stage}`, yrs(it), short(f[0] ?? it.org)],
+    image: [yrs(it), it.place.name, short(it.org)],
+    place: [it.place.name, `${it.place.lat.toFixed(1)}°, ${it.place.lon.toFixed(1)}°`, yrs(it)],
+    digital: [short(it.tech?.split(',')[0] ?? 'software'), it.link ? 'live' : 'private / local', yrs(it)],
   };
   return n[mode];
 }
@@ -118,7 +130,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
         <p class="lx-page__line"></p>
         <dl class="lx-page__facts"></dl>
         <div class="lx-page__seen">
-          <span class="lx-page__label">The same project, seen as…</span>
+          <span class="lx-page__label lx-page__same">The same project, seen as…</span>
           <ol class="lx-page__lenses"></ol>
         </div>
         <div class="lx-page__related"></div>
@@ -141,6 +153,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
     facts: $('.lx-page__facts'),
     lenses: $('.lx-page__lenses'),
     related: $('.lx-page__related'),
+    same: $('.lx-page__same'),
     render: $('.lx-page__render'),
     notesBtn: $('.lx-page__notes'),
     noteDim: $('.lx-note--dim'),
@@ -197,15 +210,18 @@ export function createPage({ getMode, onNavigate, onClose }) {
     const md = modes.find((m) => m.id === mode);
     el.kicker.textContent = `${md.section} · seen as ${SEEN[mode]}`;
     el.title.textContent = it.title;
-    el.line.textContent = it.lens[mode];
+    el.line.textContent = it.lens[mode] ?? it.summary;
     el.facts.innerHTML = facts(it, mode);
-    el.lenses.innerHTML = MODE_IDS.map(
+    el.lenses.innerHTML = MODE_IDS.filter((m) => it.lens[m]).map(
       (m) =>
         `<li class="${m === mode ? 'is-current' : ''}"><button type="button" data-mode="${m}"><span class="lx-lens__who">${modes.find((x) => x.id === m).section}</span><span class="lx-lens__line">${it.lens[m]}</span></button></li>`,
     ).join('');
     const rel = (it.related ?? []).map((r) => byId.get(r)).filter(Boolean);
+    el.same.textContent = `The same ${SAME[it.kind] ?? 'project'}, seen as…`;
+    // With only one way of seeing it, the list would just repeat the line above.
+    el.same.parentElement.hidden = MODE_IDS.filter((m) => it.lens[m]).length < 2;
     el.related.innerHTML = rel.length
-      ? `<span class="lx-page__label">Related</span>${rel.map((r) => `<button type="button" class="lx-chip" data-id="${r.id}">${r.title}</button>`).join('')}`
+      ? `<span class="lx-page__label">${it.home ? 'While living here' : 'Related'}</span>${rel.map((r) => `<button type="button" class="lx-chip${r.film ? ' lx-chip--film' : ''}" data-id="${r.id}">${r.title}</button>`).join('')}`
       : '';
     el.render.textContent = `render · ${RENDER[mode]}`;
     const [a, b, c] = notes(it, mode);
@@ -227,9 +243,8 @@ export function createPage({ getMode, onNavigate, onClose }) {
   }
 
   function fillPager() {
-    const i = items.findIndex((x) => x.id === id);
-    el.prev.textContent = items[(i - 1 + items.length) % items.length].title;
-    el.next.textContent = items[(i + 1) % items.length].title;
+    el.prev.textContent = step(id, -1).title;
+    el.next.textContent = step(id, 1).title;
   }
 
   /** Open `pid`. `fromEl` is the tile frame to fly out of (optional). */
@@ -439,11 +454,8 @@ export function createPage({ getMode, onNavigate, onClose }) {
     if (lens && switcher) switcher.set(lens.dataset.mode);
     const chip = e.target.closest('.lx-chip');
     if (chip) onNavigate(chip.dataset.id);
-    const step = e.target.closest('[data-step]');
-    if (step) {
-      const i = items.findIndex((x) => x.id === id);
-      onNavigate(items[(i + +step.dataset.step + items.length) % items.length].id);
-    }
+    const pager = e.target.closest('[data-step]');
+    if (pager) onNavigate(step(id, +pager.dataset.step).id);
   });
   document.addEventListener('keydown', (e) => {
     if (open && e.key === 'Escape' && !document.querySelector('.contact.is-open')) closePage();

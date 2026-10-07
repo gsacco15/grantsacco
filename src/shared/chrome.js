@@ -12,7 +12,7 @@ const el = (tag, cls, html) => {
   return n;
 };
 
-export function mountChrome(conceptId) {
+export function mountChrome(conceptId, { draft } = {}) {
   const i = concepts.findIndex((c) => c.id === conceptId);
   const c = concepts[i];
   const prev = concepts[(i + concepts.length - 1) % concepts.length];
@@ -23,7 +23,7 @@ export function mountChrome(conceptId) {
     <div class="chrome__id">
       <a class="chrome__name" href="../">${site.name}</a>
       <span class="chrome__concept"><span class="chrome__concept-word">Concept </span>${String(i + 1).padStart(2, '0')} — ${c.name}</span>
-      ${site.draft ? '<span class="chrome__draft">Sample content</span>' : ''}
+      ${draft || site.draft ? `<span class="chrome__draft">${draft ?? 'Sample content'}</span>` : ''}
     </div>
     <div class="chrome__end">
       <nav class="chrome__nav" aria-label="Concepts">

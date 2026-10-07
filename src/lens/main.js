@@ -7,7 +7,8 @@
 import '../shared/base.css';
 import './style.css';
 import { mountChrome, mountSwitcher, prefersReducedMotion } from '../shared/chrome.js';
-import { items, modes, albums } from '../content.js';
+import { modes } from '../content.js';
+import { artifacts as items, films as albums, quiet, inMore } from './artifacts.js';
 import { systems } from '../coordinates/systems.js';
 import { loadLand } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
@@ -19,7 +20,8 @@ import { RENDER, metaFor } from './meta.js';
 import { createStacks } from './stacks.js';
 import { createDarkroom } from './darkroom.js';
 
-mountChrome('lens');
+// Lens carries Grant's real work; only the pictures are stand-ins so far.
+mountChrome('lens', { draft: 'Placeholder<span class="lx-wide"> images</span>' });
 
 const MODE_IDS = modes.map((m) => m.id);
 const body = document.body;
@@ -65,7 +67,39 @@ const lg = {
   render: legend.querySelector('.lx-legend__render'),
 };
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
-const HINT = { image: 'Hover a film to skim · click to open' };
+const HINT = { image: 'Hover a film to skim · click to open', place: 'Click a trip to see its photos' };
+
+// About's one quiet line, with Jaylee and Helga sitting beside it.
+const quietEl = div(
+  'lx-quiet',
+  body,
+  `<span>${quiet.line}</span><span class="lx-quiet__dogs" title="${quiet.dogs.alt}">${quiet.dogs.src.map((src) => `<img src="${src}" alt="" />`).join('')}<span class="sr-only">${quiet.dogs.alt}</span></span>`,
+);
+
+// The section's "+ more" list: work that belongs here but isn't on stage.
+const more = div('lx-more', body, `<button class="lx-more__btn" type="button" aria-expanded="false"></button><ul class="lx-more__list" hidden></ul>`);
+const moreBtn = more.querySelector('button');
+const moreList = more.querySelector('ul');
+moreBtn.addEventListener('click', () => {
+  const open = moreList.hidden;
+  moreList.hidden = !open;
+  moreBtn.setAttribute('aria-expanded', String(open));
+});
+moreList.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-id]');
+  if (!b) return;
+  moreList.hidden = true;
+  moreBtn.setAttribute('aria-expanded', 'false');
+  openProject(b.dataset.id, null);
+});
+function fillMore(mode) {
+  const list = items.filter((a) => inMore(a, mode));
+  more.hidden = !list.length;
+  moreList.hidden = true;
+  moreBtn.setAttribute('aria-expanded', 'false');
+  moreBtn.textContent = `+ ${list.length} more`;
+  moreList.innerHTML = list.map((a) => `<li><button type="button" data-id="${a.id}"><span>${a.title}</span><span>${metaFor(a, mode)}</span></button></li>`).join('');
+}
 
 /* ── Tiles ────────────────────────────────────────────────────────────────── */
 
@@ -105,7 +139,8 @@ const tiles = items.map((it) => {
     delay: 0,
   };
   // The film series is the photographs themselves: it opens straight into the films.
-  el.addEventListener('click', () => (it.id === 'film' ? darkroom.open('all', 0, el) : openProject(it.id, el)));
+  // A film opens straight into its photographs; everything else opens its page.
+  el.addEventListener('click', () => (it.film ? darkroom.open(it.film.id, it.film.cover, el) : openProject(it.id, el)));
   el.addEventListener('pointerenter', () => setHover(it.id));
   el.addEventListener('pointerleave', () => setHover(null));
   el.addEventListener('focus', () => setHover(it.id));
@@ -213,6 +248,8 @@ function setMode(id) {
   lg.title.textContent = systems[id].title;
   lg.axes.textContent = systems[id].readout;
   hint.textContent = HINT[id] ?? 'Click any piece of work to open it';
+  quietEl.classList.toggle('is-on', id === 'reality');
+  fillMore(id);
   const renderName = RENDER[id];
   lg.render.textContent = `render · ${renderName}`;
   legend.classList.remove('is-in');
@@ -330,8 +367,7 @@ function flip(tl) {
   tl.el.dataset.r = mode;
   tl.el.classList.toggle('has-cap', tl.to.cap);
   tl.el.classList.toggle('is-focus', tl.to.focus);
-  // Captions near the right edge hang to the left so they stay on screen.
-  tl.el.classList.toggle('cap-end', tl.to.x > W * 0.64);
+  tl.el.classList.toggle('cap-end', tl.to.capAlign === 'end');
   tl.meta.textContent = metaFor(tl.it, mode);
 }
 
@@ -374,7 +410,7 @@ function drawDyn() {
         if (r < it.id) continue;
         const a = L.tiles.get(it.id);
         const b = L.tiles.get(r);
-        if (!b) continue;
+        if (!a || !b || a.hidden || b.hidden) continue;
         parts.unshift(`<line x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}" class="lx-link" data-a="${it.id}" data-b="${r}"/>`);
       }
     }
@@ -420,7 +456,9 @@ const page = createPage({
   getMode: () => mode,
   onNavigate: (id) => {
     const t = tileById.get(id);
-    page.open(id, t?.el.querySelector('.lx-tile__frame'));
+    // A film opens its photographs over the page; anything else replaces the page.
+    if (t?.it.film) darkroom.open(t.it.film.id, t.it.film.cover, null);
+    else page.open(id, t?.el.querySelector('.lx-tile__frame'));
   },
   onClose: (id) => {
     field.inert = false;
@@ -484,7 +522,7 @@ window.addEventListener('resize', () => {
       place(t);
       if (t.show >= 0) paint(t, t.show, mode);
       t.el.classList.toggle('has-cap', t.to.cap);
-      t.el.classList.toggle('cap-end', t.to.x > W * 0.64);
+      t.el.classList.toggle('cap-end', t.to.capAlign === 'end');
     }
     ovNew.replaceChildren(overlay(mode, L.R, W, H, land));
     if (!T) drawDyn();

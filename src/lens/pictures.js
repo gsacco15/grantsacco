@@ -112,7 +112,7 @@ export function ridges(g, rnd, y0, layers, colors, amp = 18) {
 
 /* ── Scenes ───────────────────────────────────────────────────────────────── */
 
-const scenes = {
+export const scenes = {
   degree(g, rnd) {
     rect(g, 0, 0, 300, 200, lin(g, 0, 0, 0, 150, [[0, '#6f9ac2'], [1, '#f2dcc0']]));
     glow(g, 236, 58, 90, '#fff2d6', 0.9);

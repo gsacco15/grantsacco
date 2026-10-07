@@ -887,6 +887,20 @@ body.concept-lens {
   border-color: var(--ink);
 }
 
+/* A film chip opens the photographs: marked with a small print. */
+.lx-chip--film::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 9px;
+  margin-right: 6px;
+  border: 1px solid currentColor;
+  border-bottom-width: 2.5px;
+  border-radius: 1px;
+  vertical-align: -1px;
+  opacity: 0.7;
+}
+
 .lx-page__pager {
   display: flex;
   justify-content: space-between;
@@ -968,6 +982,9 @@ body.lx-page-open .lx-hint {
   }
   .lx-tile__meta {
     display: none;
+  }
+  .lx-tile__cap {
+    max-width: 150px;
   }
   .lx-page__back {
     top: 92px;
@@ -1136,6 +1153,7 @@ body.lx-page-open .lx-hint {
   display: grid;
   gap: 2px;
   width: max-content;
+  max-width: 220px;
   translate: -50% 0;
   text-align: center;
   opacity: 0;
@@ -1537,6 +1555,7 @@ body.lx-page-open .lx-hint {
   }
   .pk__cap {
     top: calc(100% + 10px);
+    max-width: 110px;
   }
   .dk {
     grid-template-columns: minmax(0, 1fr);
@@ -1580,5 +1599,171 @@ body.lx-page-open .lx-hint {
   .dk__lb-next {
     top: auto;
     bottom: 28px;
+  }
+}
+
+/* ── About: one quiet line, and the dogs ──────────────────────────────────── */
+
+.lx-quiet {
+  position: fixed;
+  top: 104px;
+  left: var(--gutter);
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.5s, transform 0.5s var(--ease);
+}
+
+.lx-quiet.is-on {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.35s;
+}
+
+.lx-quiet__dogs {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1px;
+  margin-bottom: -3px;
+  pointer-events: auto;
+}
+
+.lx-quiet__dogs img {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+
+.lx-quiet__dogs img + img {
+  height: 32px;
+}
+
+body.lx-page-open .lx-quiet {
+  opacity: 0;
+}
+
+/* ── "+ more": the rest of a section, one click away ──────────────────────── */
+
+/* Top right, opposite About's quiet line, clear of the axis labels below the plot. */
+.lx-more {
+  position: fixed;
+  top: 104px;
+  right: var(--gutter);
+  z-index: 21;
+}
+
+.lx-more[hidden],
+body.lx-page-open .lx-more {
+  display: none;
+}
+
+.lx-more__btn {
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s;
+}
+
+.lx-more__btn:hover,
+.lx-more__btn[aria-expanded='true'] {
+  border-color: var(--ink);
+}
+
+.lx-more__list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  gap: 2px;
+  width: 280px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.5);
+}
+
+.lx-more__list[hidden] {
+  display: none;
+}
+
+.lx-more__list button {
+  display: grid;
+  gap: 1px;
+  width: 100%;
+  padding: 7px 9px;
+  border-radius: 8px;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.lx-more__list button:hover {
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.lx-more__list span:first-child {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.lx-more__list span:last-child {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+@media (max-width: 1180px) {
+  .lx-quiet {
+    top: auto;
+    bottom: calc(var(--gutter) + 92px);
+  }
+}
+
+@media (max-width: 760px) {
+  .lx-quiet {
+    right: var(--gutter);
+    bottom: calc(var(--gutter) + 82px);
+    font-size: 9.5px;
+  }
+  .lx-quiet__dogs img {
+    height: 24px;
+  }
+  .lx-quiet__dogs img + img {
+    height: 26px;
+  }
+  .lx-more {
+    top: 60px;
+  }
+  /* "Placeholder images" → "Placeholder", clear of the section kicker. */
+  .lx-wide {
+    display: none;
+  }
+  .lx-more__btn {
+    min-height: 24px;
+    padding: 0 9px;
+    font-size: 9.5px;
+  }
+  .lx-more__list {
+    width: min(280px, calc(100vw - 2 * var(--gutter)));
   }
 }

@@ -105,7 +105,7 @@ export function createStacks({ albums, parent, onOpen }) {
     });
   }
 
-  /** Place every pile at its spot on the Art plot ({ stacks: [{ id, x, y }], card }). */
+  /** Place every pile at its spot on the Art plot ({ stacks: [{ id, x, y, capAlign }], card }). */
   function layout({ stacks: spots, card }) {
     for (const s of stacks) {
       const p = spots.find((q) => q.id === s.a.id);
@@ -115,7 +115,7 @@ export function createStacks({ albums, parent, onOpen }) {
       s.size = card;
       s.el.style.setProperty('--w', `${card.toFixed(1)}px`);
       s.el.style.transform = `translate(${(p.x - card / 2).toFixed(1)}px, ${(p.y - card * 0.65).toFixed(1)}px)`;
-      s.el.classList.toggle('cap-end', p.x > innerWidth * 0.8);
+      s.el.classList.toggle('cap-end', p.capAlign === 'end');
       if (resized) paintCards(s);
     }
   }

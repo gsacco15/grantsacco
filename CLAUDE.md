@@ -9,11 +9,14 @@ This is **not a resume on a website**. It should feel like:
 - **Show, don't tell.** The five themes (builder, field-oriented engineer, problem solver, internationally curious, active/adventurous) are proven by the projects, photography, travel, languages, sports, startup and apps. Don't add more personality words or adjectives to the site.
 - **Not a resume.** No PMP, no HOA board, no skill lists as content. Personal context (family, sports, travel) supports the work quietly and never crowds it.
 - **Uncluttered.** Each section shows a few hand-picked artifacts; everything else lives in a "+ more" list.
+- **One quiet line, at most.** About carries "Based in Austin · English, Italian, learning Portuguese" and nothing more like it. Jaylee and Helga (the family dogs) are named and sit beside that line as one small sprite each, not in the orbit.
+- **Keep personal tags off the work.** No languages on the Travel map; no sports on films or trips.
 
 ## Where things are
 
 - `planning/site-artifacts.xlsx`: the master list of artifacts and decisions (sections, crossovers, featured, open questions, places, films, profile). Grant edits it; keep it in sync when he answers questions.
-- `src/content.js`: the content the mocks read (still sample content).
+- `src/lens/artifacts.js`: Lens's real content (roles, engineering, projects, apps, films, places lived), taken from the workbook. Pictures are placeholders until real photos, CAD and the logo arrive; `tbd` marks placeholder dates.
+- `src/content.js`: sample content for mocks 1–6 (Lens only takes the section names from it).
 - Concept mocks: `/scale`, `/viewport`, `/coordinates`, `/layers`, `/translation`, `/morph`, `/lens`. Lens (Coordinates × Viewport Modes) is the direction being developed.
 
 ## Lens decisions so far
@@ -21,5 +24,6 @@ This is **not a resume on a website**. It should feel like:
 - Sections keep their coordinate systems; a render line re-renders everything when switching.
 - Sections show only their own work; tiles step out and back in at the render line.
 - Art: the 35mm films are photo stacks plotted on Art's axes; clicking one opens the infinite grid with that film selected ("All films" in the sidebar).
-- Travel: places lived, moves and trips, not every project.
+- Travel: places lived (Wilmette → Lawrence 2014–18 → Chicago 2018–19 → Milan 2019–21 → Dallas 2021–25 → Austin since April 2025), the moves between them, trips (one per film) and the Houston work sites. Not every project. Trips are labelled on hover; clicking one opens its photos. Each home's page lists what happened while living there.
+- Every country Grant has been to should go on the map once he sends the list (not received yet).
 - 3D models are welcome for physical builds (representations are fine; real photos on click).

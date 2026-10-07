@@ -1,10 +1,13 @@
 // The static drawing behind the tiles for each section: rings, grids, axes,
 // the map. Colours are baked in from the section's palette (not CSS variables)
 // so the outgoing and incoming drawings can sit side by side during a sweep.
-import { systems, graticule, STAGES, yearToRing, travelRoute } from '../coordinates/systems.js';
-import { items } from '../content.js';
+import { systems, graticule, STAGES } from '../coordinates/systems.js';
+import { artifacts, homes, films, homeIn } from './artifacts.js';
 import { landPath } from '../shared/geo.js';
-import { YEAR0, YEAR1, mapFrame, polarFrame, anchor } from './layout.js';
+import { YEAR0, YEAR1, mapFrame, polarFrame, anchor, ringRadius } from './layout.js';
+import { scaleTicks } from './meta.js';
+
+const byId = new Map(artifacts.map((a) => [a.id, a]));
 
 const NS = 'http://www.w3.org/2000/svg';
 const f = (v) => v.toFixed(1);
@@ -32,7 +35,7 @@ export function overlay(mode, R, W, H, land) {
   if (mode === 'reality') {
     const P = polarFrame(R);
     for (let y = YEAR0; y < YEAR1; y++) {
-      const r = 0.18 + 0.82 * yearToRing(y);
+      const r = ringRadius(y);
       parts.push(
         `<ellipse cx="${f(P.cx)}" cy="${f(P.cy)}" rx="${f(r * P.rx)}" ry="${f(r * P.ry)}" fill="none" stroke="${ink(y % 5 === 0 ? 0.2 : 0.09)}" stroke-width="1"/>`,
       );
@@ -57,7 +60,7 @@ export function overlay(mode, R, W, H, land) {
       ln(R.x, V(v), R.x + R.w, V(v), ink(0.06));
     }
     parts.push(`<rect x="${f(R.x)}" y="${f(R.y)}" width="${f(R.w)}" height="${f(R.h)}" fill="none" stroke="${ink(0.5)}" stroke-width="1"/>`);
-    for (const tk of s.x.ticks ?? []) {
+    for (const tk of mode === 'structure' ? scaleTicks() : s.x.ticks ?? []) {
       const x = U(pad(tk.at));
       ln(x, R.y + R.h, x, R.y + R.h + 5, ink(0.5));
       if (!mob) text(x, R.y + R.h + 15, tk.label, { anchor: 'middle', size: 9.5 });
@@ -120,18 +123,22 @@ export function overlay(mode, R, W, H, land) {
     const g = graticule(b);
     for (const lon of g.lons) ln(F.x + (lon - b.west) * sx, F.y, F.x + (lon - b.west) * sx, F.y + F.h, ink(0.08));
     for (const lat of g.lats) ln(F.x, F.y + (b.north - lat) * sy, F.x + F.w, F.y + (b.north - lat) * sy, ink(0.08));
-    // The trips in order, as one dashed route.
-    const pts = travelRoute.map((id) => anchor(items.find((i) => i.id === id), 'place', R));
-    if (pts.length > 1) {
-      let d = `M${f(pts[0][0])},${f(pts[0][1])}`;
-      for (let i = 1; i < pts.length; i++) {
-        const [x0, y0] = pts[i - 1];
-        const [x1, y1] = pts[i];
-        const mx = (x0 + x1) / 2;
-        const my = Math.min(y0, y1) - Math.abs(x1 - x0) * 0.18;
-        d += ` Q${f(mx)},${f(my)} ${f(x1)},${f(y1)}`;
-      }
-      parts.push(`<path d="${d}" fill="none" stroke="${hexA(pal.accent, 0.55)}" stroke-width="1.2" stroke-dasharray="3 5"/>`);
+    // The moves, in order, as one solid line between the places lived…
+    const home = homes.map((h) => anchor(byId.get(h.id), 'place', R));
+    let d = `M${f(home[0][0])},${f(home[0][1])}`;
+    for (let i = 1; i < home.length; i++) {
+      const [x0, y0] = home[i - 1];
+      const [x1, y1] = home[i];
+      const bow = Math.min(60, Math.hypot(x1 - x0, y1 - y0) * 0.22);
+      d += ` Q${f((x0 + x1) / 2)},${f(Math.min(y0, y1) - bow)} ${f(x1)},${f(y1)}`;
+    }
+    parts.push(`<path d="${d}" fill="none" stroke="${hexA(pal.ink, 0.55)}" stroke-width="1.4"/>`);
+    // …and each trip as a dashed arc from wherever home was at the time.
+    for (const film of films) {
+      const [x0, y0] = anchor(byId.get(homeIn(film.year).id), 'place', R);
+      const [x1, y1] = anchor(byId.get(film.id), 'place', R);
+      const bow = Math.min(90, Math.hypot(x1 - x0, y1 - y0) * 0.25);
+      parts.push(`<path d="M${f(x0)},${f(y0)} Q${f((x0 + x1) / 2)},${f(Math.min(y0, y1) - bow)} ${f(x1)},${f(y1)}" fill="none" stroke="${hexA(pal.accent, 0.5)}" stroke-width="1" stroke-dasharray="3 5"/>`);
     }
     parts.push('</g>');
     parts.push(`<rect x="${f(F.x)}" y="${f(F.y)}" width="${f(F.w)}" height="${f(F.h)}" fill="none" stroke="${ink(0.3)}"/>`);

@@ -2,7 +2,22 @@
 // renderer: a graded photograph, hidden-line linework, clay, a film still, a
 // map duotone, and ASCII on a phosphor screen. All of it is plain 2D canvas
 // pixel work, cached per (item, mode, width).
-import { drawPicture } from './pictures.js';
+import { drawArtifact } from './scenes.js';
+import { photo } from './photos.js';
+import { artifacts } from './artifacts.js';
+
+const byId = new Map(artifacts.map((a) => [a.id, a]));
+
+/** A 3:2 picture for artifact `id`: a film's cover frame, or a placeholder scene. */
+function picture(id, w, h) {
+  const a = byId.get(id) ?? { id, picture: { scene: id } };
+  if (!a.film) return drawArtifact(a, w, h);
+  const f = photo(a.film, a.film.cover, w);
+  const c = canvas(w, h);
+  const s = Math.max(w / f.width, h / f.height);
+  c.getContext('2d').drawImage(f, (w - f.width * s) / 2, (h - f.height * s) / 2, f.width * s, f.height * s);
+  return c;
+}
 import { mulberry32, hashString } from '../anim.js';
 
 /** Frame aspect (w / h) each mode presents its pictures at. */
@@ -23,7 +38,7 @@ function source(id, w, h) {
   // Pictures are 3:2. Draw one big enough to cover w × h, then centre-crop.
   const sw = Math.ceil(Math.max(w, h * 1.5));
   const key = `${id}@${sw}`;
-  if (!sources.has(key)) sources.set(key, drawPicture(id, sw, Math.round(sw / 1.5)));
+  if (!sources.has(key)) sources.set(key, picture(id, sw, Math.round(sw / 1.5)));
   const src = sources.get(key);
   const c = canvas(w, h);
   c.getContext('2d').drawImage(src, Math.round((src.width - w) / 2), Math.round((src.height - h) / 2), w, h, 0, 0, w, h);
