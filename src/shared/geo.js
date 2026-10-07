@@ -15,6 +15,7 @@ export function loadLand() {
 }
 
 let countriesPromise;
+let detailPromise;
 
 /** GeoJSON FeatureCollection of the world's countries (110m), named in `properties.name`. */
 export function loadCountries() {
@@ -23,6 +24,16 @@ export function loadCountries() {
     return feature(topo, topo.objects.countries);
   });
   return countriesPromise;
+}
+
+/** Finer (50m) land and countries, for a map zoomed in close. Loaded on first use. */
+export function loadDetail() {
+  detailPromise ??= Promise.all([import('world-atlas/land-50m.json'), import('world-atlas/countries-50m.json')]).then(([l, c]) => {
+    const land = l.default ?? l;
+    const ctry = c.default ?? c;
+    return { land: feature(land, land.objects.land), countries: feature(ctry, ctry.objects.countries) };
+  });
+  return detailPromise;
 }
 
 /** Iterate every ring of every polygon as arrays of [lon, lat]. */

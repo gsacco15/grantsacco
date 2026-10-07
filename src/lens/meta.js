@@ -48,7 +48,8 @@ export function metaFor(it, mode) {
       return `${yrs(it)} · ${it.kind}`;
     case 'place':
       if (it.film) return `${it.film.year} · ${it.film.count} photos`;
-      return it.kind === 'place' ? yrs(it) : it.place.name;
+      if (it.home) return `${it.home.born ? 'born · ' : ''}${yrs(it)}`;
+      return it.place.name;
     case 'digital':
       return `d ${f2(it.axes.digital)} · f ${f2(it.axes.finished)}`;
     default:

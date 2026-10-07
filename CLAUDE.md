@@ -26,5 +26,7 @@ This is **not a resume on a website**. It should feel like:
 - Sections show only their own work; tiles step out and back in at the render line.
 - Art: the 35mm films are photo stacks plotted on Art's axes; clicking one opens the infinite grid with that film selected ("All films" in the sidebar).
 - Travel is a clean map of small dots, not pictures: places lived (Wilmette → Lawrence 2014–18 → Chicago 2018–19 → Milan 2019–21 → Dallas 2021–25 → Austin since April 2025), trips (one per film, "photos") and the Houston work sites. Not every project. The only lines are the moves between places lived. Homes are labelled; trips and work sites are labelled on hover, and clicking a trip opens its photos. Each home's page lists what happened while living there.
+- Homes where Grant also worked (Chicago, Milan, Dallas, Austin) are framed by the "worked" square; Wilmette carries a "born" ring and label. On phones Wilmette reads "Chicago · born" and the later Chicago goes unlabelled.
+- The map zooms and pans (wheel, pinch, drag, double-click, + / − / fit buttons) and always opens on the whole fitted view; finer coastlines load once zoomed in.
 - The 34 countries visited (`countries` in `src/lens/artifacts.js`, Countries sheet in the workbook) are shaded on the map; the four islands too small for its outlines are dots.
 - 3D models are welcome for physical builds (representations are fine; real photos on click).

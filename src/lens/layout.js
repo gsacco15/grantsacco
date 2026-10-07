@@ -72,7 +72,19 @@ export function plotRect(W, H) {
   return { x: left, y: top, w: Math.max(120, W - left - right), h: Math.max(120, H - top - bottom) };
 }
 
-/** Map frame: letterboxed so the world never stretches too tall. */
+/*
+ * The Travel map can be zoomed and panned. `zoom` is the magnification over the
+ * fitted view (1 = everything in view, as the section opens) and the centre
+ * of the view in degrees; the view never leaves the fitted bounds.
+ */
+export const MAX_ZOOM = 16;
+let zoom = { k: 1, lon: 0, lat: 0 };
+export const mapZoom = () => zoom;
+export function setMapZoom(k, lon, lat) {
+  zoom = { k: Math.min(MAX_ZOOM, Math.max(1, k)), lon, lat };
+}
+
+/** Map frame: letterboxed so the world never stretches too tall. `b` is the view's bounds. */
 export function mapFrame(R) {
   const MIN = 1.2;
   let F = R;
@@ -80,7 +92,13 @@ export function mapFrame(R) {
     const h = R.w / MIN;
     F = { x: R.x, y: R.y + (R.h - h) * 0.35, w: R.w, h };
   }
-  return { ...F, b: mapBounds(F.w / F.h) };
+  const fit = mapBounds(F.w / F.h);
+  if (zoom.k <= 1) return { ...F, fit, b: fit };
+  const lonSpan = (fit.east - fit.west) / zoom.k;
+  const latSpan = (fit.north - fit.south) / zoom.k;
+  const lon = Math.min(fit.east - lonSpan / 2, Math.max(fit.west + lonSpan / 2, zoom.lon));
+  const lat = Math.min(fit.north - latSpan / 2, Math.max(fit.south + latSpan / 2, zoom.lat));
+  return { ...F, fit, b: { west: lon - lonSpan / 2, east: lon + lonSpan / 2, south: lat - latSpan / 2, north: lat + latSpan / 2 } };
 }
 
 export const polarFrame = (R) => {
@@ -163,7 +181,8 @@ function captionSize(it, mode, W) {
   const serif = mode === 'image';
   // On phones only the sans titles shrink (12px → 10.5px).
   const k = m && !mono && !serif ? 0.875 : 1;
-  const title = mono ? it.title.toUpperCase() : it.title;
+  const name = m && it.phone ? it.phone : it.title;
+  const title = mono ? name.toUpperCase() : name;
   const font = mono ? FONTS.mono : serif ? FONTS.serif : FONTS.sans;
   const tw = textWidth(title, font, mono ? 0.42 : 0) * k;
   const mw = m ? 0 : textWidth(metaFor(it, mode), FONTS.meta, 0.38);
@@ -402,11 +421,14 @@ function artLayout(W, H) {
 function mapLayout(W, H) {
   const R = plotRect(W, H);
   const F = mapFrame(R);
-  const L = artifacts.filter((a) => inSection(a, 'place')).map((it) => {
+  const all = artifacts.filter((a) => inSection(a, 'place')).map((it) => {
     const [ax, ay] = anchor(it, 'place', R);
     const [w, h] = tileSize(it, 'place', R, W);
-    return { id: it.id, it, ax, ay, x: ax, y: ay, w, h, cap: false, focus: isFocus(it, 'place') };
+    // Zoomed in, dots beyond the edge of the view step out.
+    const off = ax < F.x - 2 || ax > F.x + F.w + 2 || ay < F.y - 2 || ay > F.y + F.h + 2;
+    return { id: it.id, it, ax, ay, x: ax, y: ay, w, h, cap: false, focus: isFocus(it, 'place'), off };
   });
+  const L = all.filter((t) => !t.off);
   relax(L, R, 'place', W);
 
   // Hover labels hang on the side with more room.
@@ -418,7 +440,7 @@ function mapLayout(W, H) {
   const dots = L.map((t) => ({ x0: t.x - t.w / 2 - 3, y0: t.y - t.h / 2 - 1, x1: t.x + t.w / 2 + 3, y1: t.y + t.h / 2 + 1 }));
   const hit = (a, b) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
   const inside = (b) => b.x0 >= F.x + 2 && b.x1 <= F.x + F.w - 2 && b.y0 >= F.y + 2 && b.y1 <= F.y + F.h - 2;
-  const labelled = L.filter((t) => hasCaption(t.it, 'place', W)).map((t) => {
+  const labelled = L.filter((t) => hasCaption(t.it, 'place', W) && !(W < 760 && t.it.phone === '')).map((t) => {
     const { cw, capH } = captionSize(t.it, 'place', W);
     const h = capH - 7;
     const r = t.w / 2;
@@ -469,5 +491,5 @@ function mapLayout(W, H) {
   best.pick.forEach((o, i) => {
     if (o) Object.assign(labelled[i].t, { cap: true, capSide: o.side, capDx: o.dx, capDy: o.dy });
   });
-  return { R, tiles: withHidden(L) };
+  return { R, tiles: withHidden(all) };
 }

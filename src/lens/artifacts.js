@@ -24,11 +24,15 @@ export const quiet = { line: 'Based in Austin · English, Italian, learning Port
 /** Jaylee and Helga, sitting on About's 2021 ring (one frame from each sprite sheet). */
 export const dogs = { src: [dogBlackTan, dogTan], names: 'Jaylee & Helga', year: 2021 };
 
-/** Places lived, in order (the Travel map draws the moves between them). */
+/**
+ * Places lived, in order (the Travel map draws the moves between them).
+ * `phone` is the map label on phones, where Wilmette and Chicago share a dot's
+ * width: the birthplace reads "Chicago · born" and the later Chicago has none.
+ */
 export const homes = [
-  { id: 'home-wilmette', name: 'Wilmette, IL', years: [null, 2014], lat: 42.08, lon: -87.72, note: 'Born and grew up', town: true },
+  { id: 'home-wilmette', name: 'Wilmette, IL', years: [null, 2014], lat: 42.08, lon: -87.72, note: 'Born and grew up', town: true, born: true, phone: 'Chicago · born' },
   { id: 'home-lawrence', name: 'Lawrence, KS', years: [2014, 2018], lat: 38.97, lon: -95.24, note: 'University of Kansas', town: true },
-  { id: 'home-chicago', name: 'Chicago, IL', years: [2018, 2019], lat: 41.88, lon: -87.63, note: 'MAPEI Chicago' },
+  { id: 'home-chicago', name: 'Chicago, IL', years: [2018, 2019], lat: 41.88, lon: -87.63, note: 'MAPEI Chicago', phone: '' },
   { id: 'home-milan', name: 'Milan, Italy', years: [2019, 2021], lat: 45.46, lon: 9.19, note: 'MAPEI SpA' },
   { id: 'home-dallas', name: 'Dallas, TX', years: [2021, 2025], lat: 32.78, lon: -96.8, note: 'MAPEI Corp · OnlyChargeEV' },
   { id: 'home-austin', name: 'Austin, TX', years: [2025, 2026], lat: 30.27, lon: -97.74, note: 'Since April 2025' },
@@ -377,7 +381,7 @@ for (const h of homes) {
     id: h.id, title: h.name, kind: 'place', org: h.note, years: h.years,
     place: { name: h.name, lat: h.lat, lon: h.lon }, main: 'place', also: [], featured: 'yes', stage: 'shipped', axes: ax(0.9, 0.3),
     summary: h.note, lens: { place: `${h.years[0] ? `${h.years[0]} – ` : 'Until '}${h.years[1] === 2026 ? 'now' : h.years[1]} · ${h.note}.` },
-    picture: { scene: 'home', town: !!h.town }, related: [], home: h,
+    picture: { scene: 'home', town: !!h.town }, related: [], home: h, phone: h.phone,
   });
 }
 
@@ -389,6 +393,8 @@ const near = (p, h) => Math.abs(p.lat - h.lat) < 1.5 && Math.abs(p.lon - h.lon) 
 const during = (y, h) => y[0] < h.years[1] && y[1] >= (h.years[0] ?? 0);
 for (const a of artifacts) {
   if (!a.home) continue;
+  // Lived and worked there: the map frames the dot in the "worked" square.
+  a.worked = artifacts.some((b) => b.kind === 'role' && near(b.place, a.home) && during(b.years, a.home));
   a.related = artifacts
     .filter((b) => !b.home && (b.featured === 'yes' || b.kind === 'role'))
     .filter((b) => (b.film ? homeIn(b.film.year) === a.home : near(b.place, a.home) && during(b.years, a.home)))

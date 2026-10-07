@@ -1,10 +1,10 @@
 // The static drawing behind the tiles for each section: rings, grids, axes,
 // the map. Colours are baked in from the section's palette (not CSS variables)
 // so the outgoing and incoming drawings can sit side by side during a sweep.
-import { systems, graticule, STAGES } from '../coordinates/systems.js';
+import { systems, STAGES } from '../coordinates/systems.js';
 import { artifacts, homes, countries } from './artifacts.js';
-import { landPath } from '../shared/geo.js';
-import { YEAR0, YEAR1, mapFrame, polarFrame, anchor, ringRadius } from './layout.js';
+import { planarRings } from '../shared/geo.js';
+import { YEAR0, YEAR1, mapFrame, mapZoom, polarFrame, anchor, ringRadius } from './layout.js';
 import { scaleTicks } from './meta.js';
 
 const byId = new Map(artifacts.map((a) => [a.id, a]));
@@ -17,9 +17,8 @@ const hexA = (hex, a) => {
   return `rgb(${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255} / ${a})`;
 };
 
-/** `geo` is { land, countries } once the map data has loaded. */
+/** `geo` is { land, countries, detail? } once the map data has loaded. */
 export function overlay(mode, R, W, H, geo) {
-  const land = geo?.land;
   const pal = systems[mode].palette;
   const ink = (a) => hexA(pal.ink, a);
   const parts = [];
@@ -123,44 +122,27 @@ export function overlay(mode, R, W, H, geo) {
 
   if (mode === 'place') {
     const F = mapFrame(R);
-    const { b } = F;
-    const sx = F.w / (b.east - b.west);
-    const sy = F.h / (b.north - b.south);
+    const detail = useDetail(geo);
+    const land = detail ? geo.detail.land : geo?.land;
+    const all = detail ? geo.detail.countries : geo?.countries;
     parts.push(`<clipPath id="lx-mapclip"><rect x="${f(F.x)}" y="${f(F.y)}" width="${f(F.w)}" height="${f(F.h)}"/></clipPath>`);
     parts.push(`<g clip-path="url(#lx-mapclip)">`);
-    const pj = (lon, lat) => [F.x + (lon - b.west) * sx, F.y + (b.north - lat) * sy];
-    if (land) parts.push(`<path d="${landPath(land, pj)}" fill="${ink(0.1)}" stroke="${ink(0.32)}" stroke-width="0.8" stroke-linejoin="round"/>`);
-    // Every country visited, shaded; islands too small to draw get a dot.
-    if (geo?.countries) {
-      const names = new Set(countries.map((c) => c.name));
-      const visited = { type: 'FeatureCollection', features: geo.countries.features.filter((c) => names.has(c.properties.name)) };
-      parts.push(`<path d="${landPath(visited, pj)}" fill="${hexA(pal.accent, 0.17)}" fill-rule="evenodd" stroke="${hexA(pal.accent, 0.45)}" stroke-width="0.7" stroke-linejoin="round"/>`);
-    }
-    for (const c of countries) {
-      if (!c.at) continue;
-      const [x, y] = pj(c.at[1], c.at[0]);
-      parts.push(`<circle cx="${f(x)}" cy="${f(y)}" r="2.2" fill="${hexA(pal.accent, 0.55)}"/>`);
-    }
-    const g = graticule(b);
-    for (const lon of g.lons) ln(F.x + (lon - b.west) * sx, F.y, F.x + (lon - b.west) * sx, F.y + F.h, ink(0.08));
-    for (const lat of g.lats) ln(F.x, F.y + (b.north - lat) * sy, F.x + F.w, F.y + (b.north - lat) * sy, ink(0.08));
-    // The moves between the places lived, in order: the only lines on the map.
-    const home = homes.map((h) => anchor(byId.get(h.id), 'place', R));
-    let d = `M${f(home[0][0])},${f(home[0][1])}`;
-    for (let i = 1; i < home.length; i++) {
-      const [x0, y0] = home[i - 1];
-      const [x1, y1] = home[i];
-      const bow = Math.min(60, Math.hypot(x1 - x0, y1 - y0) * 0.22);
-      d += ` Q${f((x0 + x1) / 2)},${f(Math.min(y0, y1) - bow)} ${f(x1)},${f(y1)}`;
-    }
-    parts.push(`<path d="${d}" fill="none" stroke="${hexA(pal.ink, 0.6)}" stroke-width="1.3"/>`);
+    // Land, then every country visited shaded, drawn in degrees and placed by
+    // a transform: zooming and panning only change the matrix.
+    parts.push(`<g class="lx-geo" transform="${geoMatrix(F)}">`);
+    if (land) parts.push(`<path d="${degPath(land)}" fill="${ink(0.1)}" stroke="${ink(0.32)}" stroke-width="0.8" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`);
+    if (all) parts.push(`<path d="${degPath(visitedOf(all))}" fill="${hexA(pal.accent, 0.17)}" fill-rule="evenodd" stroke="${hexA(pal.accent, 0.45)}" stroke-width="0.7" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`);
+    parts.push('</g>');
+    parts.push(`<g class="lx-maplines">${mapLines(F, R, pal)}</g>`);
     parts.push('</g>');
     parts.push(`<rect x="${f(F.x)}" y="${f(F.y)}" width="${f(F.w)}" height="${f(F.h)}" fill="none" stroke="${ink(0.3)}"/>`);
+    parts.push(`<g class="lx-mapticks">${mapTicks(F, mob, pal)}</g>`);
     // Key, bottom left (the Pacific): the same marks the dots use.
     {
       const y = F.y + F.h - (mob ? 12 : 16);
       let x = F.x + (mob ? 10 : 14);
       const size = mob ? 8.5 : 9.5;
+      parts.push(`<rect x="${f(F.x + 1)}" y="${f(y - 10)}" width="${mob ? 318 : 350}" height="20" fill="${hexA(pal.bg, 0.55)}"/>`);
       const key = (shape, label, w) => {
         parts.push(shape(x, y));
         text(x + 9, y, label, { size, fill: ink(0.6) });
@@ -172,19 +154,6 @@ export function overlay(mode, R, W, H, geo) {
       key((x0, y0) => `<line x1="${f(x0 - 6)}" y1="${f(y0)}" x2="${f(x0 + 5)}" y2="${f(y0)}" stroke="${hexA(pal.ink, 0.6)}" stroke-width="1.3"/>`, 'moved', mob ? 52 : 58);
       key((x0, y0) => `<rect x="${f(x0 - 5)}" y="${f(y0 - 3.5)}" width="10" height="7" fill="${hexA(pal.accent, 0.17)}" stroke="${hexA(pal.accent, 0.45)}" stroke-width="0.7"/>`, `${countries.length} countries`, 0);
     }
-    const lonLabel = (lon) => `${Math.abs(lon)}°${lon < 0 ? 'W' : lon > 0 ? 'E' : ''}`;
-    const latLabel = (lat) => `${Math.abs(lat)}°${lat < 0 ? 'S' : lat > 0 ? 'N' : ''}`;
-    if (!mob) {
-      for (const lon of g.lons) text(F.x + (lon - b.west) * sx, F.y + F.h + 14, lonLabel(lon), { anchor: 'middle', size: 9 });
-      for (const lat of g.lats) text(F.x - 8, F.y + (b.north - lat) * sy, latLabel(lat), { anchor: 'end', size: 9 });
-    } else {
-      // Phones: every 30°, longitudes under the map and latitudes just inside it (clear of the key).
-      for (const lon of g.lons) if (lon % 30 === 0) text(F.x + (lon - b.west) * sx, F.y + F.h + 12, lonLabel(lon), { anchor: 'middle', size: 8 });
-      for (const lat of g.lats) {
-        const y = F.y + (b.north - lat) * sy;
-        if (lat % 30 === 0 && y < F.y + F.h - 26) text(F.x + 4, y - 6, latLabel(lat), { size: 8, halo: true });
-      }
-    }
   }
 
   const svg = document.createElementNS(NS, 'svg');
@@ -194,5 +163,122 @@ export function overlay(mode, R, W, H, geo) {
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.setAttribute('aria-hidden', 'true');
   svg.innerHTML = parts.join('');
+  if (mode === 'place') svg.dataset.detail = useDetail(geo) ? 'hi' : 'lo';
   return svg;
+}
+
+/* ── Travel map pieces ─────────────────────────────────────────────────────── */
+
+/** Zoomed in close, with the finer outlines loaded, the map draws them. */
+export const DETAIL_ZOOM = 2.5;
+const useDetail = (geo) => !!geo?.detail && mapZoom().k >= DETAIL_ZOOM;
+
+// Path data in degrees (x = lon, y = −lat), built once per dataset.
+const degPaths = new WeakMap();
+function degPath(fc) {
+  let d = degPaths.get(fc);
+  if (d == null) {
+    d = '';
+    planarRings(fc).forEach((ring) => {
+      ring.forEach(([lon, lat], i) => (d += `${i ? 'L' : 'M'}${lon.toFixed(2)},${(-lat).toFixed(2)}`));
+      d += 'Z';
+    });
+    degPaths.set(fc, d);
+  }
+  return d;
+}
+
+const visited = new WeakMap();
+function visitedOf(all) {
+  let v = visited.get(all);
+  if (!v) {
+    const names = new Set(countries.map((c) => c.name));
+    v = { type: 'FeatureCollection', features: all.features.filter((c) => names.has(c.properties.name)) };
+    visited.set(all, v);
+  }
+  return v;
+}
+
+/** Degrees → screen for the current view, as an SVG transform. */
+function geoMatrix(F) {
+  const { b } = F;
+  const sx = F.w / (b.east - b.west);
+  const sy = F.h / (b.north - b.south);
+  return `matrix(${sx} 0 0 ${sy} ${F.x - b.west * sx} ${F.y + b.north * sy})`;
+}
+
+/** Grid spacing: the widest step that still gives five lines across the view. */
+const gridStep = (span) => [30, 15, 10, 5, 2, 1, 0.5, 0.25].find((s) => span / s >= 5) ?? 0.25;
+const gridLines = (lo, hi, step) => {
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(4));
+  return out;
+};
+
+/** The graticule, island dots and the moves between homes, for the current view. */
+function mapLines(F, R, pal) {
+  const { b } = F;
+  const sx = F.w / (b.east - b.west);
+  const sy = F.h / (b.north - b.south);
+  const pj = (lon, lat) => [F.x + (lon - b.west) * sx, F.y + (b.north - lat) * sy];
+  const out = [];
+  const step = gridStep(b.east - b.west);
+  const grid = hexA(pal.ink, 0.08);
+  for (const lon of gridLines(b.west, b.east, step)) out.push(`<line x1="${f(pj(lon, 0)[0])}" y1="${f(F.y)}" x2="${f(pj(lon, 0)[0])}" y2="${f(F.y + F.h)}" stroke="${grid}"/>`);
+  for (const lat of gridLines(b.south, b.north, step)) out.push(`<line x1="${f(F.x)}" y1="${f(pj(0, lat)[1])}" x2="${f(F.x + F.w)}" y2="${f(pj(0, lat)[1])}" stroke="${grid}"/>`);
+  // Islands too small for the outlines: a dot each, growing a little with the zoom.
+  const r = Math.min(4, 2.2 * Math.sqrt(mapZoom().k));
+  for (const c of countries) {
+    if (!c.at) continue;
+    const [x, y] = pj(c.at[1], c.at[0]);
+    out.push(`<circle cx="${f(x)}" cy="${f(y)}" r="${f(r)}" fill="${hexA(pal.accent, 0.55)}"/>`);
+  }
+  // The moves between the places lived, in order: the only lines on the map.
+  const home = homes.map((h) => anchor(byId.get(h.id), 'place', R));
+  let d = `M${f(home[0][0])},${f(home[0][1])}`;
+  for (let i = 1; i < home.length; i++) {
+    const [x0, y0] = home[i - 1];
+    const [x1, y1] = home[i];
+    const bow = Math.min(60, Math.hypot(x1 - x0, y1 - y0) * 0.22);
+    d += ` Q${f((x0 + x1) / 2)},${f(Math.min(y0, y1) - bow)} ${f(x1)},${f(y1)}`;
+  }
+  out.push(`<path d="${d}" fill="none" stroke="${hexA(pal.ink, 0.6)}" stroke-width="1.3"/>`);
+  return out.join('');
+}
+
+/** Latitude and longitude labels around the view (fewer on phones). */
+function mapTicks(F, mob, pal) {
+  const { b } = F;
+  const step = gridStep(b.east - b.west);
+  const fmt = (v, pos, neg) => `${Math.abs(v)}°${v < 0 ? neg : v > 0 ? pos : ''}`;
+  const label = (x, y, s, anchor, size, halo) =>
+    `<text class="ov-mono" x="${f(x)}" y="${f(y)}" text-anchor="${anchor}" dominant-baseline="middle" font-size="${size}" fill="${hexA(pal.ink, 0.55)}"${halo ? ` paint-order="stroke" stroke="${pal.bg}" stroke-width="3" stroke-linejoin="round"` : ''}>${s}</text>`;
+  const out = [];
+  // Phones label every other line: longitudes under the map, latitudes just inside it, clear of the key.
+  const every = (v) => !mob || Math.round(v / step) % 2 === 0;
+  for (const lon of gridLines(b.west, b.east, step)) {
+    if (!every(lon)) continue;
+    const x = F.x + ((lon - b.west) / (b.east - b.west)) * F.w;
+    out.push(label(x, F.y + F.h + (mob ? 12 : 14), fmt(lon, 'E', 'W'), 'middle', mob ? 8 : 9));
+  }
+  for (const lat of gridLines(b.south, b.north, step)) {
+    if (!every(lat)) continue;
+    const y = F.y + ((b.north - lat) / (b.north - b.south)) * F.h;
+    if (mob) {
+      if (y < F.y + F.h - 26) out.push(label(F.x + 4, y - 6, fmt(lat, 'N', 'S'), 'start', 8, true));
+    } else out.push(label(F.x - 8, y, fmt(lat, 'N', 'S'), 'end', 9));
+  }
+  return out.join('');
+}
+
+/** Move the drawn map to the current zoom without rebuilding it. */
+export function updateMap(svg, R, W) {
+  if (!svg) return;
+  const pal = systems.place.palette;
+  const F = mapFrame(R);
+  svg.querySelector('.lx-geo')?.setAttribute('transform', geoMatrix(F));
+  const lines = svg.querySelector('.lx-maplines');
+  if (lines) lines.innerHTML = mapLines(F, R, pal);
+  const ticks = svg.querySelector('.lx-mapticks');
+  if (ticks) ticks.innerHTML = mapTicks(F, W < 760, pal);
 }

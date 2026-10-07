@@ -10,11 +10,11 @@ import { mountChrome, mountSwitcher, prefersReducedMotion } from '../shared/chro
 import { modes } from '../content.js';
 import { artifacts as items, films as albums, quiet, dogs, inMore } from './artifacts.js';
 import { systems } from '../coordinates/systems.js';
-import { loadLand, loadCountries } from '../shared/geo.js';
+import { loadLand, loadCountries, loadDetail } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
 import { render } from './render.js';
-import { layout } from './layout.js';
-import { overlay } from './overlay.js';
+import { layout, mapFrame, mapZoom, setMapZoom, MAX_ZOOM } from './layout.js';
+import { overlay, updateMap, DETAIL_ZOOM } from './overlay.js';
 import { createPage } from './page.js';
 import { RENDER, metaFor } from './meta.js';
 import { createStacks } from './stacks.js';
@@ -67,7 +67,7 @@ const lg = {
   render: legend.querySelector('.lx-legend__render'),
 };
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
-const HINT = { image: 'Hover a film to skim · click to open', place: 'Click a trip to see its photos' };
+const HINT = { image: 'Hover a film to skim · click to open', place: 'Click a trip for photos · scroll or pinch to zoom' };
 
 // About's one quiet line.
 const quietEl = div('lx-quiet', body, `<span>${quiet.line}</span>`);
@@ -118,6 +118,8 @@ const tiles = items.map((it) => {
   el.className = 'lx-tile';
   el.dataset.kind = it.kind;
   el.dataset.id = it.id;
+  if (it.worked) el.dataset.worked = '';
+  if (it.home?.born) el.dataset.born = '';
   el.setAttribute('role', 'listitem');
   el.setAttribute('aria-label', `${it.title} — open`);
   el.innerHTML = `
@@ -126,7 +128,7 @@ const tiles = items.map((it) => {
       <span class="lx-tile__ghost lx-tile__ghost--1"></span>
       <span class="lx-tile__pics"><canvas></canvas><canvas></canvas></span>
     </span>
-    <span class="lx-tile__cap"><span class="lx-tile__title">${it.title}</span><span class="lx-tile__meta"></span></span>`;
+    <span class="lx-tile__cap"><span class="lx-tile__title${it.phone != null ? ' has-phone' : ''}"><span class="lx-tile__long">${it.title}</span>${it.phone ? `<span class="lx-tile__phone">${it.phone}</span>` : ''}</span><span class="lx-tile__meta"></span></span>`;
   field.appendChild(el);
   const t = {
     it,
@@ -214,6 +216,12 @@ function setMode(id) {
   const prev = mode;
   mode = id;
   const dir = first || MODE_IDS.indexOf(id) >= MODE_IDS.indexOf(prev) ? 1 : -1;
+  // The map always opens on the whole picture.
+  if (id === 'place' && mapZoom().k > 1) {
+    setMapZoom(1, 0, 0);
+    layouts.place = layout('place', W, H);
+  }
+  mapUi.classList.remove('is-on');
   const L = layouts[id];
 
   // An interrupted sweep: each tile keeps whichever render it mostly showed.
@@ -357,6 +365,7 @@ function frame(ms) {
     ovOld.replaceChildren();
     // The map data may have arrived mid-sweep; draw the map with it now.
     if (mode === 'place' && geo && !ovNew.dataset.geo) drawOverlay(mode);
+    if (mode === 'place') showMapUi();
     bgOld.style.clipPath = 'inset(0 0 0 100%)';
     drawDyn();
     warm();
@@ -502,6 +511,177 @@ const darkroom = createDarkroom({
   onClose: (id, from) => (from ? from.focus({ preventScroll: true }) : stacks.focus(id)),
 });
 
+/* ── Travel map: zoom and pan ─────────────────────────────────────────────── */
+
+// A layer over the map's frame takes the wheel, drags and pinches (the dots
+// sit above it and stay clickable); buttons zoom in, out and back to the fit.
+const mapHit = div('lx-maphit', body);
+const mapUi = div(
+  'lx-mapui',
+  body,
+  `<button type="button" data-zoom="in" aria-label="Zoom in">+</button><button type="button" data-zoom="out" aria-label="Zoom out">−</button><button type="button" data-zoom="fit" aria-label="Show the whole map">fit</button>`,
+);
+const fitBtn = mapUi.querySelector('[data-zoom="fit"]');
+const darkroomClosed = () => document.querySelector('.dk')?.hidden !== false;
+
+function showMapUi() {
+  const F = mapFrame(layouts.place.R);
+  Object.assign(mapHit.style, { left: `${F.x}px`, top: `${F.y}px`, width: `${F.w}px`, height: `${F.h}px` });
+  mapUi.style.transform = `translate(${(F.x + F.w - 8).toFixed(1)}px, ${(F.y + 8).toFixed(1)}px)`;
+  mapUi.classList.add('is-on');
+  syncZoomUi();
+}
+
+function syncZoomUi() {
+  const z = mapZoom();
+  fitBtn.disabled = z.k <= 1.001;
+  mapUi.querySelector('[data-zoom="in"]').disabled = z.k >= MAX_ZOOM - 0.01;
+  mapUi.querySelector('[data-zoom="out"]').disabled = z.k <= 1.001;
+  mapHit.classList.toggle('is-zoomed', z.k > 1.001);
+}
+
+/** Re-lay the map for the current zoom: dots, labels and drawing, without a sweep. */
+let mapRaf = 0;
+function mapRefresh() {
+  mapRaf = 0;
+  if (mode !== 'place' || T) return;
+  layouts.place = layout('place', W, H);
+  const L = layouts.place;
+  for (const t of tiles) {
+    const target = L.tiles.get(t.it.id);
+    if (target.hidden) continue;
+    t.to = target;
+    t.from = target;
+    Object.assign(t, { x: target.x, y: target.y, w: target.w, h: target.h });
+    place(t);
+    t.el.classList.toggle('has-cap', target.cap);
+    t.el.dataset.cap = target.capSide ?? '';
+    t.el.style.setProperty('--cap-dx', `${(target.capDx ?? 0).toFixed(1)}px`);
+    t.el.style.setProperty('--cap-dy', `${(target.capDy ?? 0).toFixed(1)}px`);
+    if (!!t.hidden !== !!target.off) setOut(t, !!target.off);
+  }
+  const svg = ovNew.querySelector('.lx-ov');
+  const wantDetail = !!geo?.detail && mapZoom().k >= DETAIL_ZOOM;
+  if (!svg || (svg.dataset.detail === 'hi') !== wantDetail) drawOverlay('place');
+  else updateMap(svg, L.R, W);
+  syncZoomUi();
+  // Close in, fetch the finer coastlines once.
+  if (mapZoom().k >= 2 && !geo?.detail && geo) {
+    loadDetail().then((detail) => {
+      geo = { ...geo, detail };
+      kickMap();
+    });
+  }
+}
+const kickMap = () => {
+  if (!mapRaf) mapRaf = requestAnimationFrame(mapRefresh);
+};
+
+/** Zoom by `factor` around the screen point (px, py), keeping that spot under it. */
+function zoomAt(factor, px, py) {
+  const F = mapFrame(layouts.place.R);
+  const { b } = F;
+  const z = mapZoom();
+  const k = Math.min(MAX_ZOOM, Math.max(1, z.k * factor));
+  const lon = b.west + ((px - F.x) / F.w) * (b.east - b.west);
+  const lat = b.north - ((py - F.y) / F.h) * (b.north - b.south);
+  const lonSpan = (F.fit.east - F.fit.west) / k;
+  const latSpan = (F.fit.north - F.fit.south) / k;
+  setMapZoom(k, lon - ((px - F.x) / F.w - 0.5) * lonSpan, lat + ((py - F.y) / F.h - 0.5) * latSpan);
+  kickMap();
+}
+
+function panBy(dx, dy) {
+  const F = mapFrame(layouts.place.R);
+  const { b } = F;
+  const z = mapZoom();
+  const lonSpan = b.east - b.west;
+  const latSpan = b.north - b.south;
+  // Start from the clamped centre so panning back from an edge responds at once.
+  setMapZoom(z.k, (b.west + b.east) / 2 - (dx / F.w) * lonSpan, (b.south + b.north) / 2 + (dy / F.h) * latSpan);
+  kickMap();
+}
+
+// Buttons ease to their zoom over a few frames.
+let zoomAnim = 0;
+function animateZoom(to, px, py) {
+  cancelAnimationFrame(zoomAnim);
+  const from = mapZoom().k;
+  const t0 = performance.now();
+  let last = from;
+  const step = (now) => {
+    const k = clamp((now - t0) / 260);
+    const target = from * (to / from) ** ease.inOutCubic(k);
+    zoomAt(target / last, px, py);
+    last = target;
+    if (k < 1) zoomAnim = requestAnimationFrame(step);
+  };
+  zoomAnim = requestAnimationFrame(step);
+}
+
+mapUi.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-zoom]');
+  if (!b || mode !== 'place') return;
+  const F = mapFrame(layouts.place.R);
+  const [cx, cy] = [F.x + F.w / 2, F.y + F.h / 2];
+  const k = mapZoom().k;
+  if (b.dataset.zoom === 'in') animateZoom(Math.min(MAX_ZOOM, k * 2), cx, cy);
+  else if (b.dataset.zoom === 'out') animateZoom(Math.max(1, k / 2), cx, cy);
+  else animateZoom(1, cx, cy);
+});
+
+// The wheel works anywhere over the map, dots included.
+window.addEventListener(
+  'wheel',
+  (e) => {
+    if (mode !== 'place' || T || body.classList.contains('lx-page-open') || !darkroomClosed()) return;
+    const F = mapFrame(layouts.place.R);
+    if (e.clientX < F.x || e.clientX > F.x + F.w || e.clientY < F.y || e.clientY > F.y + F.h) return;
+    e.preventDefault();
+    // Trackpad pinches arrive as ctrl+wheel with small deltas.
+    const d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+    zoomAt(Math.exp(-d * (e.ctrlKey ? 0.01 : 0.0018)), e.clientX, e.clientY);
+  },
+  { passive: false },
+);
+
+// Drag to pan; two fingers pinch.
+const pointers = new Map();
+let pinch = null;
+mapHit.addEventListener('pointerdown', (e) => {
+  if (mode !== 'place' || T) return;
+  mapHit.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  mapHit.classList.add('is-dragging');
+  if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    pinch = { d: Math.hypot(a.x - b.x, a.y - b.y) };
+  }
+});
+mapHit.addEventListener('pointermove', (e) => {
+  const p = pointers.get(e.pointerId);
+  if (!p) return;
+  const prev = { ...p };
+  p.x = e.clientX;
+  p.y = e.clientY;
+  if (pointers.size === 2 && pinch) {
+    const [a, b] = [...pointers.values()];
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    zoomAt(d / pinch.d, (a.x + b.x) / 2, (a.y + b.y) / 2);
+    pinch.d = d;
+  } else if (pointers.size === 1 && mapZoom().k > 1) panBy(p.x - prev.x, p.y - prev.y);
+});
+const endPointer = (e) => {
+  pointers.delete(e.pointerId);
+  if (pointers.size < 2) pinch = null;
+  if (!pointers.size) mapHit.classList.remove('is-dragging');
+};
+mapHit.addEventListener('pointerup', endPointer);
+mapHit.addEventListener('pointercancel', endPointer);
+mapHit.addEventListener('dblclick', (e) => {
+  if (mode === 'place' && !T) animateZoom(Math.min(MAX_ZOOM, mapZoom().k * 2), e.clientX, e.clientY);
+});
+
 /* ── Boot ─────────────────────────────────────────────────────────────────── */
 
 const switcher = mountSwitcher({
@@ -520,7 +700,7 @@ if (rollQuery && (rollQuery === 'all' || albums.some((a) => a.id === rollQuery))
 stacks.warm();
 
 Promise.all([loadLand(), loadCountries()]).then(([land, countries]) => {
-  geo = { land, countries };
+  geo = { ...geo, land, countries };
   if (mode === 'place' && !T) drawOverlay('place');
 });
 
@@ -552,6 +732,7 @@ window.addEventListener('resize', () => {
       t.el.style.setProperty('--cap-dy', `${(t.to.capDy ?? 0).toFixed(1)}px`);
     }
     drawOverlay(mode);
+    if (mode === 'place' && !T) showMapUi();
     if (!T) drawDyn();
     warm();
   }, 160);

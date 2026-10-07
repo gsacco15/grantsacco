@@ -282,6 +282,30 @@ body.concept-lens {
   box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 3px var(--accent);
 }
 
+/* Lived and worked there: the "worked" square frames the home's dot. */
+.lx-tile[data-r='place'][data-worked] .lx-tile__frame {
+  box-shadow: 0 0 0 1.5px var(--bg);
+}
+
+.lx-tile[data-r='place'][data-worked] .lx-tile__frame::after {
+  content: '';
+  position: absolute;
+  inset: -4.5px;
+  border: 1.4px solid var(--ink);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Born there: a ring a step out from the dot. */
+.lx-tile[data-r='place'][data-born] .lx-tile__frame {
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 2.7px var(--accent), 0 0 0 4.2px var(--bg), 0 0 0 5.4px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* On phones some places carry a shorter label ("Chicago · born"). */
+.lx-tile__phone {
+  display: none;
+}
+
 /* A dot is small: give it a finger-sized target. */
 .lx-tile[data-r='place']::before {
   content: '';
@@ -1040,6 +1064,12 @@ body.lx-page-open .lx-hint {
   .lx-tile__cap {
     max-width: 150px;
   }
+  .lx-tile__title.has-phone .lx-tile__long {
+    display: none;
+  }
+  .lx-tile__phone {
+    display: inline;
+  }
   .lx-page__back {
     top: 92px;
   }
@@ -1767,6 +1797,84 @@ body.lx-page-open .lx-dogs {
 
 .lx-dogs:hover .lx-dogs__cap {
   opacity: 1;
+}
+
+/* ── Travel map: zoom and pan ──────────────────────────────────────────────── */
+
+.lx-maphit {
+  position: fixed;
+  z-index: 2;
+  display: none;
+  touch-action: none;
+}
+
+body[data-mode='place'] .lx-maphit {
+  display: block;
+}
+
+body.lx-page-open .lx-maphit {
+  display: none;
+}
+
+.lx-maphit.is-zoomed {
+  cursor: grab;
+}
+
+.lx-maphit.is-zoomed.is-dragging {
+  cursor: grabbing;
+}
+
+.lx-mapui {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 21;
+  display: grid;
+  gap: 4px;
+  translate: -100% 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.lx-mapui.is-on {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+body.lx-page-open .lx-mapui {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lx-mapui button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s, opacity 0.2s;
+}
+
+.lx-mapui button[data-zoom='fit'] {
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lx-mapui button:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.lx-mapui button:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 /* ── "+ more": the rest of a section, one click away ──────────────────────── */
