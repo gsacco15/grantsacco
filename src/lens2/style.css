@@ -1,0 +1,2442 @@
+body.concept-lens {
+  background: var(--bg);
+}
+
+/* ── Layers: outgoing background, drawings, leaders, tiles, the render line ─ */
+
+.lx-bgold {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  clip-path: inset(0 0 0 100%);
+}
+
+.lx-ovwrap {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lx-ov {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ov-mono {
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+}
+
+.ov-sans {
+  font-family: var(--sans);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ov-serif {
+  font-family: var(--serif);
+  font-style: italic;
+}
+
+.lx-dyn {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.lx-dyn.is-on {
+  opacity: 1;
+  transition: opacity 0.6s 0.05s;
+}
+
+.lx-leader {
+  stroke: var(--dyn-ink);
+  stroke-opacity: 0.26;
+  stroke-width: 1;
+}
+
+.lx-anchor {
+  fill: var(--dyn);
+}
+
+.lx-link {
+  stroke: var(--dyn);
+  stroke-opacity: 0.32;
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+}
+
+.lx-leader.is-hot,
+.lx-link.is-hot {
+  stroke-opacity: 0.95;
+}
+
+.lx-anchor.is-hot {
+  r: 4px;
+}
+
+/* ── Tiles ─────────────────────────────────────────────────────────────────── */
+
+.lx-field {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.lx-tile {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  text-align: left;
+  pointer-events: auto;
+  will-change: transform;
+  transition: opacity 0.3s;
+}
+
+.lx-tile:focus-visible {
+  outline: none;
+}
+
+.lx-tile__frame {
+  position: relative;
+  display: block;
+  border-radius: 6px;
+  transition: border-radius 0.35s var(--ease), box-shadow 0.35s, opacity 0.35s;
+}
+
+.lx-tile__pics {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.lx-tile__pics canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lx-tile__ghost {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid var(--muted);
+  opacity: 0;
+  transition: opacity 0.4s, transform 0.5s var(--ease);
+}
+
+.lx-tile__cap {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  display: grid;
+  gap: 1px;
+  width: max-content;
+  max-width: 200px;
+  margin-top: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.lx-tile.cap-end:not([data-r='place']) .lx-tile__cap {
+  left: auto;
+  right: 0;
+  text-align: right;
+  justify-items: end;
+}
+
+.lx-tile.has-cap .lx-tile__cap,
+.lx-tile.is-hot .lx-tile__cap {
+  opacity: 1;
+}
+
+.lx-tile.is-hot {
+  z-index: 5;
+}
+
+.lx-tile.is-hot .lx-tile__frame {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--accent);
+}
+
+.lx-tile.is-hot:not(.has-cap) .lx-tile__cap {
+  padding: 3px 6px 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+}
+
+.lx-field.has-hover .lx-tile:not(.is-hot) {
+  opacity: 0.6;
+}
+
+.lx-tile__title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.lx-tile__meta {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* Logos, small and only where a section asks for them. */
+.lx-tile__logo,
+.lx-tile__icon {
+  display: none;
+}
+
+.lx-tile.show-logo .lx-tile__logo {
+  display: block;
+  width: auto;
+  height: 12px;
+  margin-top: 5px;
+  opacity: 0.88;
+}
+
+.lx-tile.cap-end.show-logo .lx-tile__logo {
+  justify-self: end;
+}
+
+.lx-tile.show-logo .lx-tile__icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 6px;
+  border-radius: 3.5px;
+  vertical-align: -2px;
+}
+
+/* Out-of-focus work steps back in every section but About (and the map, which is dots). */
+.lx-tile[data-r]:not([data-r='reality']):not([data-r='place']):not(.is-focus) .lx-tile__frame {
+  opacity: 0.74;
+}
+
+/* Reality: photographs. */
+.lx-tile[data-r='reality'] .lx-tile__frame {
+  border-radius: 6px;
+  box-shadow: 0 12px 26px -16px rgb(0 0 0 / 0.55);
+}
+
+/* Structure: drawings on paper, hairline border and crop marks. */
+.lx-tile[data-r='structure'] .lx-tile__frame {
+  border-radius: 0;
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.lx-tile[data-r='structure'] .lx-tile__title,
+.lx-tile[data-r='digital'] .lx-tile__title {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Build: clay plates, shown exploded. */
+.lx-tile[data-r='build'] .lx-tile__frame {
+  border-radius: 3px;
+  box-shadow: 0 10px 22px -14px rgb(0 0 0 / 0.8);
+}
+
+.lx-tile[data-r='build'] .lx-tile__ghost--1 {
+  opacity: 0.55;
+  transform: translate(6px, -6px);
+}
+
+.lx-tile[data-r='build'] .lx-tile__ghost--2 {
+  opacity: 0.28;
+  transform: translate(12px, -12px);
+}
+
+/* Image: film stills. */
+.lx-tile[data-r='image'] .lx-tile__frame {
+  border-radius: 0;
+  box-shadow: 0 18px 30px -18px rgb(0 0 0 / 0.9);
+}
+
+.lx-tile[data-r='image'] .lx-tile__title {
+  font-family: var(--serif);
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Place: dots. Lived = amber with a halo, photos = a light dot, worked = an open square. */
+.lx-tile[data-r='place'] .lx-tile__pics {
+  opacity: 0;
+}
+
+.lx-tile[data-r='place'] .lx-tile__frame {
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 0 0 1.5px var(--bg);
+  opacity: 1;
+}
+
+.lx-tile[data-r='place'].is-focus .lx-tile__frame {
+  background: var(--accent);
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 5px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.lx-tile[data-r='place'][data-kind='engineering'] .lx-tile__frame {
+  border-radius: 1px;
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+.lx-tile[data-r='place'].is-hot .lx-tile__frame {
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 3px var(--accent);
+}
+
+/* Lived and worked there: the "worked" square frames the home's dot. */
+.lx-tile[data-r='place'][data-worked] .lx-tile__frame {
+  box-shadow: 0 0 0 1.5px var(--bg);
+}
+
+.lx-tile[data-r='place'][data-worked] .lx-tile__frame::after {
+  content: '';
+  position: absolute;
+  inset: -4.5px;
+  border: 1.4px solid var(--ink);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Born there: a ring a step out from the dot. */
+.lx-tile[data-r='place'][data-born] .lx-tile__frame {
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 2.7px var(--accent), 0 0 0 4.2px var(--bg), 0 0 0 5.4px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+/* On phones some places carry a shorter label ("Chicago · born"). */
+.lx-tile__phone {
+  display: none;
+}
+
+/* A dot is small: give it a finger-sized target. */
+.lx-tile[data-r='place']::before {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+}
+
+/* Labels sit beside the dot, on the side the layout found clear, with a halo
+   so the moves line never cuts through the text. */
+.lx-tile[data-r='place'] .lx-tile__cap {
+  top: 50%;
+  left: calc(100% + 6px);
+  margin: 0;
+  translate: var(--cap-dx, 0) calc(-50% + var(--cap-dy, 0px));
+  text-align: left;
+  text-shadow: 0 0 3px var(--bg), 0 0 6px var(--bg), 0 0 10px var(--bg);
+}
+
+.lx-tile[data-r='place'][data-cap='l'] .lx-tile__cap {
+  left: auto;
+  right: calc(100% + 6px);
+  text-align: right;
+  justify-items: end;
+}
+
+.lx-tile[data-r='place'][data-cap='t'] .lx-tile__cap,
+.lx-tile[data-r='place'][data-cap='b'] .lx-tile__cap {
+  left: 50%;
+  translate: calc(-50% + var(--cap-dx, 0px)) 0;
+  text-align: center;
+  justify-items: center;
+}
+
+.lx-tile[data-r='place'][data-cap='t'] .lx-tile__cap {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
+.lx-tile[data-r='place'][data-cap='b'] .lx-tile__cap {
+  top: calc(100% + 4px);
+}
+
+/* Digital: phosphor screens. */
+.lx-tile[data-r='digital'] .lx-tile__frame {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 70%, transparent), 0 0 18px -4px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.lx-tile[data-r='digital'] .lx-tile__title {
+  color: var(--accent);
+}
+
+/* ── Render line ───────────────────────────────────────────────────────────── */
+
+.lx-sweep {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 33;
+  width: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.lx-sweep.is-on {
+  opacity: 1;
+}
+
+.lx-sweep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -0.5px;
+  width: 1px;
+  background: var(--accent);
+  box-shadow: 0 0 14px 1px color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+.lx-sweep__tag {
+  position: absolute;
+  top: 46%;
+  left: 8px;
+  padding: 3px 7px 4px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--bg);
+  background: var(--accent);
+}
+
+.lx-sweep.is-back .lx-sweep__tag {
+  left: auto;
+  right: 8px;
+}
+
+/* ── Legend ────────────────────────────────────────────────────────────────── */
+
+.lx-legend {
+  position: fixed;
+  top: var(--gutter);
+  left: 50%;
+  z-index: 20;
+  width: min(560px, calc(100vw - 720px));
+  translate: -50% 0;
+  text-align: center;
+  pointer-events: none;
+}
+
+.lx-legend.is-in {
+  animation: lx-legend 0.7s var(--ease) both;
+}
+
+@keyframes lx-legend {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+    filter: blur(3px);
+  }
+}
+
+.lx-legend__kicker {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.lx-legend__title {
+  margin: 6px 0 5px;
+  font-size: clamp(22px, 2.2vw, 30px);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+}
+
+[data-mode='image'] .lx-legend__title,
+[data-mode='reality'] .lx-legend__title {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(28px, 2.7vw, 38px);
+  letter-spacing: 0;
+}
+
+[data-mode='image'] .lx-legend__title {
+  font-style: italic;
+}
+
+[data-mode='digital'] .lx-legend__title {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(18px, 1.8vw, 24px);
+  letter-spacing: 0;
+}
+
+.lx-legend__meta {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.lx-legend__render {
+  color: var(--ink);
+  opacity: 0.75;
+}
+
+.lx-hint {
+  position: fixed;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  z-index: 20;
+  max-width: 160px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-align: right;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* ── Project page ─────────────────────────────────────────────────────────── */
+
+.lx-page {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+.lx-page[hidden] {
+  display: none;
+}
+
+.lx-page__scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+}
+
+.lx-page.is-in .lx-page__scrim {
+  opacity: 1;
+}
+
+.lx-page__scrim--old {
+  display: none;
+}
+
+.lx-page__inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.9fr);
+  gap: clamp(24px, 4vw, 72px);
+  align-items: center;
+  padding: 104px clamp(24px, 5vw, 88px) 124px;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.lx-page__inner > * {
+  pointer-events: auto;
+}
+
+.lx-page__back {
+  position: fixed;
+  top: 104px;
+  left: var(--gutter);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s;
+}
+
+.lx-page__back:hover {
+  border-color: var(--ink);
+}
+
+.lx-page__hero {
+  margin: 0;
+}
+
+.lx-page__frame {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  transition: border-radius 0.4s, box-shadow 0.4s, background 0.4s;
+}
+
+.lx-page__frame canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lx-page__frame.is-flying {
+  background: transparent;
+  box-shadow: none;
+}
+
+.lx-page__frame.is-flying canvas,
+.lx-page__frame.is-flying .lx-notes {
+  visibility: hidden;
+}
+
+.lx-page__frame[data-mode='structure'] {
+  border-radius: 0;
+  box-shadow: 0 0 0 1px var(--ink);
+}
+
+.lx-page__frame[data-mode='image'] {
+  border-radius: 0;
+  background: #000;
+}
+
+.lx-page__frame[data-mode='place'] {
+  border-radius: 14px;
+}
+
+.lx-page__frame[data-mode='digital'] {
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 70%, transparent), 0 0 40px -14px var(--accent);
+}
+
+.lx-fly {
+  position: fixed;
+  z-index: 32;
+  transform-origin: 0 0;
+  pointer-events: none;
+  object-fit: contain;
+}
+
+/* Notes: a handwritten layer over the picture. */
+.lx-notes {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  transition: opacity 0.35s;
+}
+
+.lx-page__frame.notes-off .lx-notes {
+  opacity: 0;
+}
+
+.lx-notes__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.lx-notes__svg path {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.lx-notes__arrow {
+  stroke-dasharray: 3 3;
+}
+
+.lx-note {
+  position: absolute;
+  padding: 0 7px 1px;
+  border-radius: 4px;
+  font-family: var(--hand);
+  font-size: clamp(17px, 1.6vw, 23px);
+  line-height: 1.15;
+  white-space: nowrap;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+}
+
+.lx-note--dim {
+  left: 50%;
+  bottom: 9%;
+  translate: -50% 0;
+}
+
+.lx-note--a {
+  left: 3%;
+  top: 4%;
+  rotate: -3deg;
+}
+
+.lx-note--b {
+  right: 3%;
+  top: 70%;
+  rotate: 2deg;
+}
+
+.lx-page__cap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lx-page__notes {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font: inherit;
+  color: var(--ink);
+}
+
+.lx-page__notes::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--ink);
+}
+
+.lx-page__notes[aria-pressed='true']::before {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.lx-page__text {
+  max-width: 520px;
+}
+
+.lx-page.is-in .lx-page__text {
+  animation: lx-rise 0.6s 0.12s var(--ease) both;
+}
+
+.lx-page__text.is-swap {
+  animation: lx-swap 0.45s var(--ease) both;
+}
+
+@keyframes lx-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes lx-swap {
+  from {
+    opacity: 0.2;
+    filter: blur(2px);
+  }
+}
+
+.lx-page__kicker,
+.lx-page__label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.lx-page__label {
+  margin-bottom: 8px;
+  color: var(--muted);
+}
+
+.lx-page__title {
+  margin: 8px 0 10px;
+  font-size: clamp(28px, 2.7vw, 40px);
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+}
+
+[data-mode='image'] .lx-page__title {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+}
+
+[data-mode='digital'] .lx-page__title {
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: clamp(24px, 2.4vw, 34px);
+  letter-spacing: -0.01em;
+}
+
+.lx-page__line {
+  margin: 0 0 18px;
+  font-family: var(--serif);
+  font-size: clamp(19px, 1.65vw, 24px);
+  line-height: 1.25;
+}
+
+.lx-page__facts {
+  display: grid;
+  gap: 0;
+  margin: 0 0 18px;
+  border-top: 1px solid var(--line);
+}
+
+.lx-page__facts > div {
+  display: grid;
+  grid-template-columns: 112px 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.lx-page__facts dt {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lx-page__facts dd {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.lx-bar {
+  position: relative;
+  flex: 1;
+  max-width: 180px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
+}
+
+.lx-bar > span {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--accent);
+}
+
+.lx-num {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+.lx-stages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.lx-stages span {
+  padding: 2px 6px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.lx-stages .is-done {
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--ink) 35%, transparent);
+}
+
+.lx-stages .is-now {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.lx-mini {
+  width: 180px;
+  height: auto;
+}
+
+.lx-mini__land {
+  fill: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+
+.lx-mini__ring {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+}
+
+.lx-mini__dot {
+  fill: var(--accent);
+}
+
+.lx-page__seen {
+  margin-bottom: 16px;
+}
+
+.lx-page__lenses {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lx-page__lenses button {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 10px;
+  width: 100%;
+  padding: 3px 8px;
+  border-radius: 6px;
+  text-align: left;
+  color: var(--muted);
+  transition: background 0.2s, color 0.2s;
+}
+
+.lx-page__lenses button:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.lx-page__lenses .is-current button {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.lx-lens__who {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-top: 2px;
+}
+
+.lx-lens__line {
+  font-size: 12.5px;
+  line-height: 1.38;
+}
+
+.lx-page__related {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.lx-page__related .lx-page__label {
+  width: 100%;
+  margin-bottom: 2px;
+}
+
+.lx-chip {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12.5px;
+  transition: border-color 0.2s;
+}
+
+.lx-chip:hover {
+  border-color: var(--ink);
+}
+
+/* A film chip opens the photographs: marked with a small print. */
+.lx-chip--film::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 9px;
+  margin-right: 6px;
+  border: 1px solid currentColor;
+  border-bottom-width: 2.5px;
+  border-radius: 1px;
+  vertical-align: -1px;
+  opacity: 0.7;
+}
+
+.lx-page__pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lx-page__pager button {
+  max-width: 48%;
+  overflow: hidden;
+  color: var(--muted);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.lx-page__pager button:hover {
+  color: var(--ink);
+}
+
+body.lx-page-open .note,
+body.lx-page-open .lx-hint {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Narrower screens ─────────────────────────────────────────────────────── */
+
+@media (max-width: 1180px) {
+  .lx-legend {
+    top: 70px;
+    width: calc(100vw - 2 * var(--gutter));
+  }
+  .lx-legend__title {
+    margin: 3px 0 2px;
+  }
+  .lx-page__back {
+    top: 96px;
+  }
+}
+
+@media (max-width: 900px) {
+  .lx-page__inner {
+    grid-template-columns: 1fr;
+    align-items: start;
+    align-content: start;
+    padding: 124px var(--gutter) 120px;
+  }
+  .lx-page__text {
+    max-width: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .lx-hint {
+    display: none;
+  }
+  .lx-legend {
+    top: 64px;
+  }
+  .lx-legend__title {
+    font-size: 19px;
+  }
+  [data-mode='image'] .lx-legend__title,
+  [data-mode='reality'] .lx-legend__title {
+    font-size: 23px;
+  }
+  .lx-legend__meta {
+    font-size: 9.5px;
+  }
+  .lx-legend__render {
+    display: none;
+  }
+  .lx-tile__title {
+    font-size: 10.5px;
+  }
+  .lx-tile__meta {
+    display: none;
+  }
+  .lx-tile__cap {
+    max-width: 150px;
+  }
+  .lx-tile__title.has-phone .lx-tile__long {
+    display: none;
+  }
+  .lx-tile__phone {
+    display: inline;
+  }
+  .lx-page__back {
+    top: 92px;
+  }
+  .lx-page__inner {
+    padding-top: 140px;
+  }
+  .lx-note {
+    font-size: 15px;
+  }
+}
+
+/* ── Sections show their own work: tiles step out and back in ─────────────── */
+
+.lx-tile {
+  transition: opacity 0.35s, filter 0.35s;
+}
+
+.lx-tile.is-out {
+  opacity: 0 !important;
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+/* ── Art: photo rolls as piles of prints ──────────────────────────────────── */
+
+.pk-wall {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.pk {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: var(--w);
+  height: calc(var(--w) * 1.3);
+  pointer-events: none;
+}
+
+.pk-wall.is-live .pk.is-in {
+  pointer-events: auto;
+}
+
+.pk:focus-visible {
+  outline: none;
+}
+
+.pk__pile {
+  position: absolute;
+  inset: 0;
+}
+
+.pk__card {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(var(--w) * 0.05) calc(var(--w) * 0.05) 0;
+  border-radius: 3px;
+  background: #f3efe7;
+  box-shadow: 0 1px 1px rgb(0 0 0 / 0.3), 0 12px 24px -12px rgb(0 0 0 / 0.75);
+  /* One shared hinge, low on the left, like a pile held in one hand. */
+  transform-origin: 16% 96%;
+  transform: translate(var(--dx), calc(var(--dy) - 26px)) rotate(calc(var(--r) * 3)) scale(0.96);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.3, 1.35, 0.5, 1), opacity 0.25s;
+}
+
+.pk.is-in .pk__card {
+  transform: translate(var(--dx), var(--dy)) rotate(var(--r));
+  opacity: 1;
+  transition: transform 0.55s cubic-bezier(0.3, 1.3, 0.5, 1) calc(var(--d) + var(--k) * 45ms), opacity 0.3s calc(var(--d) + var(--k) * 45ms);
+}
+
+.pk.is-in.is-fanned .pk__card {
+  transform: rotate(var(--fan)) translateY(-6px);
+  transition: transform 0.26s cubic-bezier(0.3, 1.4, 0.5, 1), opacity 0.2s;
+}
+
+.pk.is-in.is-fanned .pk__card--top {
+  transform: translateY(-12px) scale(1.05);
+}
+
+.pk:focus-visible .pk__card--top {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.pk__photo {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  aspect-ratio: 1 / 1.04;
+  overflow: hidden;
+  background: #d9d4ca;
+}
+
+.pk__photo canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pk__foot {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 0 2px;
+}
+
+.pk__hand {
+  overflow: hidden;
+  font-family: var(--hand);
+  font-size: calc(var(--w) * 0.14);
+  line-height: 1;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #2a2622;
+}
+
+.pk__n {
+  font-family: var(--mono);
+  font-size: calc(var(--w) * 0.066);
+  letter-spacing: 0.04em;
+  color: #8a8378;
+  white-space: nowrap;
+}
+
+.pk__skim {
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -14px;
+  height: 1px;
+  background: color-mix(in srgb, var(--ink) 22%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.pk__skim span {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: 14px;
+  height: 5px;
+  border-radius: 3px;
+  translate: -50% 0;
+  background: var(--accent);
+  transition: left 0.08s linear;
+}
+
+.pk.is-fanned .pk__skim {
+  opacity: 1;
+}
+
+.pk__cap {
+  position: absolute;
+  top: calc(100% + 20px);
+  left: 50%;
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: 220px;
+  translate: -50% 0;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.pk.is-in .pk__cap {
+  opacity: 1;
+  transition-delay: calc(var(--d) + 180ms);
+}
+
+.pk.cap-end .pk__cap {
+  left: auto;
+  right: 0;
+  translate: none;
+  text-align: right;
+}
+
+.pk__title {
+  font-family: var(--serif);
+  font-size: clamp(13px, calc(var(--w) * 0.17), 17px);
+  font-style: italic;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.pk__short {
+  display: none;
+}
+
+.pk__meta {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Darkroom: a roll as an endless contact sheet ─────────────────────────── */
+
+.dk {
+  --bg: #0b0b0b;
+  --ink: #eee6d8;
+  --muted: #8b857b;
+  --accent: #d9b37a;
+  --line: rgb(238 230 216 / 0.14);
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  grid-template-columns: 236px minmax(0, 1fr);
+  grid-template-rows: 64px minmax(0, 1fr);
+  color: var(--ink);
+  background: var(--bg);
+  opacity: 0;
+  transition: opacity 0.26s var(--ease);
+}
+
+.dk[hidden] {
+  display: none;
+}
+
+.dk.is-in {
+  opacity: 1;
+}
+
+.dk__grain {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+}
+
+.dk::after {
+  content: '';
+  position: absolute;
+  inset: 64px 0 0 236px;
+  z-index: 4;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgb(0 0 0 / 0.6));
+}
+
+.dk__bar {
+  position: relative;
+  z-index: 6;
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 16px;
+  padding: 0 var(--gutter);
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.dk__back {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: border-color 0.2s;
+}
+
+.dk__back:hover {
+  border-color: var(--ink);
+}
+
+.dk__title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.dk__roll {
+  font-family: var(--serif);
+  font-size: 26px;
+  font-style: italic;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.dk__meta,
+.dk__hint,
+.dk__label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+.dk__rolls {
+  position: relative;
+  z-index: 6;
+  grid-row: 2;
+  padding: 18px 12px;
+  overflow-y: auto;
+  border-right: 1px solid var(--line);
+  background: var(--bg);
+}
+
+.dk__label {
+  padding-left: 6px;
+}
+
+.dk__rolls ol {
+  display: grid;
+  gap: 4px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dk__rolls button {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 10px;
+  width: 100%;
+  padding: 6px;
+  border-radius: 8px;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.dk__rolls button:hover {
+  background: rgb(238 230 216 / 0.06);
+}
+
+.dk__rolls button[aria-current='true'] {
+  background: rgb(217 179 122 / 0.14);
+}
+
+.dk__thumb {
+  grid-row: 1 / 3;
+  width: 56px;
+  height: 40px;
+  border-radius: 2px;
+}
+
+.dk__rname {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dk__rolls button[aria-current='true'] .dk__rname {
+  color: var(--accent);
+}
+
+.dk__rcount {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--muted);
+}
+
+.dk__rmeta {
+  grid-column: 2 / 4;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.dk__canvas {
+  position: relative;
+  grid-row: 2;
+  grid-column: 2;
+  overflow: hidden;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+}
+
+.dk__canvas.is-dragging {
+  cursor: grabbing;
+}
+
+.dk__matrix {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  width: max-content;
+  will-change: transform;
+  transition: opacity 0.18s;
+}
+
+.dk__matrix.is-swapping {
+  opacity: 0;
+}
+
+.dk__block {
+  position: relative;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+}
+
+.dk__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.dk__img {
+  display: block;
+  box-shadow: 0 16px 34px -20px rgb(0 0 0 / 0.95);
+  transition: transform 0.22s ease-out;
+}
+
+.dk__img canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.dk__card:hover .dk__img {
+  transform: scale(1.045);
+}
+
+.dk__card:focus-visible {
+  outline: none;
+}
+
+.dk__card:focus-visible .dk__img {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.dk__cap {
+  display: flex;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.dk__cap b {
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.dk__lb {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+}
+
+.dk__lb[hidden] {
+  display: none;
+}
+
+.dk__lb-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(5 5 5 / 0.92);
+  opacity: 0;
+  transition: opacity 0.22s;
+}
+
+.dk__lb.is-in .dk__lb-scrim {
+  opacity: 1;
+}
+
+.dk__lb-fig {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.dk__lb-fig canvas {
+  display: block;
+  width: 100%;
+  box-shadow: 0 40px 80px -40px #000;
+  transform-origin: 0 0;
+}
+
+.dk__lb-fig figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dk__lb-title {
+  color: var(--ink);
+}
+
+.dk__lb-btn {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-size: 17px;
+  background: rgb(11 11 11 / 0.6);
+  transition: border-color 0.2s;
+}
+
+.dk__lb-btn:hover {
+  border-color: var(--ink);
+}
+
+.dk__lb-prev {
+  top: 50%;
+  left: var(--gutter);
+}
+
+.dk__lb-next {
+  top: 50%;
+  right: var(--gutter);
+}
+
+.dk__lb-close {
+  top: var(--gutter);
+  right: var(--gutter);
+}
+
+@media (max-width: 760px) {
+  .pk__title {
+    font-size: 13px;
+  }
+  /* Phones: the short name (the print already says where and when). */
+  .pk__long {
+    display: none;
+  }
+  .pk__short {
+    display: inline;
+  }
+  .pk__meta {
+    display: none;
+  }
+  .pk__cap {
+    top: calc(100% + 10px);
+    max-width: 110px;
+  }
+  .dk {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 56px auto minmax(0, 1fr);
+  }
+  .dk::after {
+    inset: 0;
+  }
+  .dk__hint,
+  .dk__meta,
+  .dk__label {
+    display: none;
+  }
+  .dk__roll {
+    font-size: 20px;
+  }
+  .dk__rolls {
+    grid-row: 2;
+    padding: 8px 10px;
+    overflow-x: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .dk__rolls ol {
+    grid-auto-columns: max-content;
+    grid-auto-flow: column;
+    margin: 0;
+  }
+  .dk__rolls button {
+    grid-template-columns: 40px auto auto;
+  }
+  .dk__thumb {
+    width: 40px;
+    height: 29px;
+  }
+  .dk__canvas {
+    grid-row: 3;
+    grid-column: 1;
+  }
+  .dk__lb-prev,
+  .dk__lb-next {
+    top: auto;
+    bottom: 28px;
+  }
+}
+
+/* ── About: one quiet line, and the dogs ──────────────────────────────────── */
+
+.lx-quiet {
+  position: fixed;
+  top: 104px;
+  left: var(--gutter);
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.5s, transform 0.5s var(--ease);
+}
+
+.lx-quiet.is-on {
+  opacity: 1;
+  transform: none;
+  transition-delay: 0.35s;
+}
+
+body.lx-page-open .lx-quiet {
+  opacity: 0;
+}
+
+/* Jaylee and Helga sit on their year's ring (the layout finds a clear spot). */
+.lx-dogs {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.lx-dogs.is-on {
+  pointer-events: auto;
+  opacity: 1;
+  transition-delay: 0.5s;
+}
+
+body.lx-page-open .lx-dogs {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lx-dogs__pics {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 1px;
+  translate: -50% 1px;
+}
+
+.lx-dogs__pics img {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+
+.lx-dogs__pics img + img {
+  height: 32px;
+}
+
+.lx-dogs__cap {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  width: max-content;
+  padding: 3px 6px 4px;
+  border-radius: 4px;
+  translate: -50% 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.lx-dogs__cap span + span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.lx-dogs:hover .lx-dogs__cap {
+  opacity: 1;
+}
+
+/* The origin: a button over "Grant" at the centre of About, opening a small card. */
+.lx-origin {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  width: 92px;
+  height: 66px;
+  border-radius: 12px;
+  cursor: pointer;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.lx-origin.is-on {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+body.lx-page-open .lx-origin {
+  visibility: hidden;
+}
+
+.lx-origin::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  width: 24px;
+  height: 24px;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  translate: -50% -50%;
+  opacity: 0;
+  scale: 0.6;
+  transition: opacity 0.25s, scale 0.35s var(--ease);
+}
+
+.lx-origin:hover::after,
+.lx-origin:focus-visible::after,
+.lx-origin[aria-expanded='true']::after {
+  opacity: 1;
+  scale: 1.5;
+}
+
+.lx-origin:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.lx-intro {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 26;
+  display: grid;
+  gap: 8px;
+  padding: 16px 18px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  box-shadow: 0 22px 50px -26px rgb(0 0 0 / 0.5);
+}
+
+.lx-intro[hidden] {
+  display: none;
+}
+
+.lx-intro__close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.lx-intro__close:hover {
+  color: var(--ink);
+}
+
+.lx-intro__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.lx-intro__photo {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Where the headshot goes until it arrives. */
+.lx-intro__photo--todo {
+  display: grid;
+  place-items: center;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 35%, transparent);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lx-intro__name {
+  font-family: var(--serif);
+  font-size: 26px;
+  line-height: 1.05;
+}
+
+.lx-intro__line {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.lx-intro__links {
+  display: grid;
+  gap: 2px;
+  margin: 6px 0 0;
+  padding: 8px 0 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+
+.lx-intro__links a,
+.lx-intro__links .is-todo {
+  text-decoration: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 2px;
+  font-size: 12.5px;
+}
+
+.lx-intro__links span:first-child {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lx-intro__links a:hover span:last-child {
+  text-decoration: underline;
+}
+
+.lx-intro__links .is-todo span:last-child {
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Races: their logos, small, on the wheel; named on hover. */
+.lx-race {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.lx-race.is-on {
+  pointer-events: auto;
+  opacity: 1;
+  transition-delay: 0.55s;
+}
+
+body.lx-page-open .lx-race {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lx-race__pic {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  width: auto;
+  height: 20px;
+  max-width: none;
+  translate: -50% -50%;
+}
+
+.lx-race__cap {
+  position: absolute;
+  top: 14px;
+  left: 0;
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  width: max-content;
+  padding: 3px 6px 4px;
+  border-radius: 4px;
+  translate: -50% 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+
+.lx-race__cap span + span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.lx-race:hover .lx-race__cap {
+  opacity: 1;
+}
+
+/* ── Travel map: zoom and pan ──────────────────────────────────────────────── */
+
+.lx-maphit {
+  position: fixed;
+  z-index: 2;
+  display: none;
+  touch-action: none;
+}
+
+body[data-mode='place'] .lx-maphit {
+  display: block;
+}
+
+body.lx-page-open .lx-maphit {
+  display: none;
+}
+
+.lx-maphit.is-zoomed {
+  cursor: grab;
+}
+
+.lx-maphit.is-zoomed.is-dragging {
+  cursor: grabbing;
+}
+
+.lx-mapui {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 21;
+  display: grid;
+  gap: 4px;
+  translate: -100% 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.lx-mapui.is-on {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+body.lx-page-open .lx-mapui {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lx-mapui button {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s, opacity 0.2s;
+}
+
+.lx-mapui button[data-zoom='fit'] {
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.lx-mapui button:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.lx-mapui button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ── "+ more": the rest of a section, one click away ──────────────────────── */
+
+/* Top right, opposite About's quiet line, clear of the axis labels below the plot. */
+.lx-more {
+  position: fixed;
+  top: 104px;
+  right: var(--gutter);
+  z-index: 21;
+}
+
+.lx-more[hidden],
+body.lx-page-open .lx-more {
+  display: none;
+}
+
+.lx-more__btn {
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  backdrop-filter: blur(8px);
+  transition: border-color 0.2s;
+}
+
+.lx-more__btn:hover,
+.lx-more__btn[aria-expanded='true'] {
+  border-color: var(--ink);
+}
+
+.lx-more__list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  display: grid;
+  gap: 2px;
+  width: 280px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px -24px rgb(0 0 0 / 0.5);
+}
+
+.lx-more__list[hidden] {
+  display: none;
+}
+
+.lx-more__list button {
+  display: grid;
+  gap: 1px;
+  width: 100%;
+  padding: 7px 9px;
+  border-radius: 8px;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.lx-more__list button:hover {
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.lx-more__list span:first-child {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.lx-more__list span:last-child {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+@media (max-width: 1180px) {
+  .lx-quiet {
+    top: auto;
+    bottom: calc(var(--gutter) + 92px);
+  }
+}
+
+@media (max-width: 760px) {
+  .lx-quiet {
+    right: var(--gutter);
+    bottom: calc(var(--gutter) + 82px);
+    font-size: 9.5px;
+  }
+  .lx-dogs__pics img {
+    height: 23px;
+  }
+  .lx-race__pic {
+    height: 15px;
+  }
+  .lx-dogs__pics img + img {
+    height: 25px;
+  }
+  .lx-more {
+    top: 60px;
+  }
+  /* "Placeholder images" → "Placeholder", clear of the section kicker. */
+  .lx-wide {
+    display: none;
+  }
+  .lx-more__btn {
+    min-height: 24px;
+    padding: 0 9px;
+    font-size: 9.5px;
+  }
+  .lx-more__list {
+    width: min(280px, calc(100vw - 2 * var(--gutter)));
+  }
+}
+
+/* ══ Lens (v2) ═════════════════════════════════════════════════════════════
+   The same page in a quieter, more professional voice: one sans and one mono,
+   hairlines instead of shadows and glows, square-ish corners, plain prints
+   instead of polaroids, technical labels instead of handwriting. Colour stays
+   in the pictures; the interface is ink, paper and one calm blue. Everything
+   here is scoped to body.concept-lens2 so it outranks the rules above.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.concept-lens2 {
+  --serif: var(--sans);
+  --hand: var(--mono);
+}
+
+/* The top bar keeps its own type (the contact button's hand-drawn "you" stays). */
+body.concept-lens2 .chrome {
+  --serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+  --hand: 'Caveat', 'Segoe Print', 'Bradley Hand', cursive;
+}
+
+/* Legend: one title style for every section. */
+body.concept-lens2 .lx-legend__title {
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 600;
+  font-size: clamp(20px, 1.9vw, 26px);
+  letter-spacing: -0.012em;
+}
+
+body.concept-lens2 .ov-serif {
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+/* Tiles: hairlines, small radii, no glow, no ghost plates. */
+body.concept-lens2 .lx-tile[data-r='reality'] .lx-tile__frame,
+body.concept-lens2 .lx-tile[data-r='build'] .lx-tile__frame,
+body.concept-lens2 .lx-tile[data-r='image'] .lx-tile__frame {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+body.concept-lens2 .lx-tile[data-r='structure'] .lx-tile__frame {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 55%, transparent);
+}
+
+body.concept-lens2 .lx-tile[data-r='digital'] .lx-tile__frame {
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 28%, transparent);
+}
+
+body.concept-lens2 .lx-tile[data-r='build'] .lx-tile__ghost {
+  opacity: 0;
+}
+
+body.concept-lens2 .lx-tile[data-r='image'] .lx-tile__title,
+body.concept-lens2 .lx-tile[data-r='digital'] .lx-tile__title {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ink);
+}
+
+body.concept-lens2 .lx-tile[data-r='structure'] .lx-tile__title {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+body.concept-lens2 .lx-tile.is-hot .lx-tile__frame {
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+
+body.concept-lens2 .lx-tile[data-r='place'].is-hot .lx-tile__frame {
+  box-shadow: 0 0 0 1.5px var(--bg), 0 0 0 3px var(--accent);
+}
+
+/* Logos and icons sit quietly: slightly desaturated until hovered. */
+body.concept-lens2 .lx-tile__logo {
+  filter: saturate(0.6);
+  opacity: 0.8;
+}
+
+/* Render line: a plain rule and a small square tag. */
+body.concept-lens2 .lx-sweep::before {
+  background: var(--ink);
+  box-shadow: none;
+}
+
+body.concept-lens2 .lx-sweep__tag {
+  border-radius: 2px;
+  color: var(--bg);
+  background: var(--ink);
+}
+
+/* Project page: technical labels instead of handwriting. */
+body.concept-lens2 .lx-note {
+  padding: 3px 6px;
+  border: 1px solid color-mix(in srgb, var(--ink) 22%, transparent);
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 90%, transparent);
+  rotate: 0deg;
+}
+
+body.concept-lens2 .lx-notes__arrow {
+  stroke-dasharray: none;
+}
+
+body.concept-lens2 .lx-page__line {
+  font-family: var(--sans);
+  font-size: clamp(15px, 1.2vw, 17px);
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--ink) 82%, transparent);
+}
+
+body.concept-lens2[data-mode='image'] .lx-page__title {
+  font-family: var(--sans);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Art: plain prints, barely turned, no bounce; labels in mono. */
+body.concept-lens2 .pk__card {
+  inset: 0 0 auto 0;
+  padding: calc(var(--w) * 0.035) calc(var(--w) * 0.035) 0;
+  border-radius: 1px;
+  background: #f4f3f0;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.35), 0 10px 22px -14px rgb(0 0 0 / 0.75);
+  transform: translate(var(--dx), calc(var(--dy) - 18px)) rotate(var(--r)) scale(0.97);
+  transition: transform 0.3s var(--ease), opacity 0.25s;
+}
+
+body.concept-lens2 .pk.is-in .pk__card {
+  transform: translate(calc(var(--dx) * 0.5), calc(var(--dy) * 0.5)) rotate(calc(var(--r) * 0.3));
+  transition: transform 0.5s var(--ease) calc(var(--d) + var(--k) * 45ms), opacity 0.3s calc(var(--d) + var(--k) * 45ms);
+}
+
+body.concept-lens2 .pk.is-in.is-fanned .pk__card {
+  transform: rotate(calc(var(--fan) * 0.5)) translateY(-4px);
+  transition: transform 0.24s var(--ease), opacity 0.2s;
+}
+
+body.concept-lens2 .pk.is-in.is-fanned .pk__card--top {
+  transform: translateY(-8px) scale(1.03);
+}
+
+body.concept-lens2 .pk__foot {
+  flex: 0 0 auto;
+  height: calc(var(--w) * 0.14);
+}
+
+body.concept-lens2 .pk__hand {
+  font-family: var(--mono);
+  font-size: calc(var(--w) * 0.07);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #4a4844;
+}
+
+body.concept-lens2 .pk__title {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+body.concept-lens2 .dk__roll {
+  font-family: var(--sans);
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* About: the origin card's name in the page's sans. */
+body.concept-lens2 .lx-intro__name {
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 600;
+}

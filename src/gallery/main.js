@@ -10,8 +10,8 @@ root.innerHTML = `
     <p class="g-kicker">${site.name} — personal site concepts</p>
     <h1 class="g-title">Same person.<br /><em>Different lens.</em></h1>
     <p class="g-lede">
-      Seven working mocks, one idea: the sections of the site aren't separate pages. They're different ways of looking
-      at the same work. All seven use identical sample content, so the only thing that changes is the concept.
+      Eight working mocks, one idea: the sections of the site aren't separate pages. They're different ways of looking
+      at the same work. The first six share the same sample content; Lens and Lens (v2) carry the real work in two looks.
     </p>
     <p class="g-keys">Inside every mock: <kbd>1</kbd>–<kbd>6</kbd> or <kbd>←</kbd> <kbd>→</kbd> to switch sections.</p>
   </header>

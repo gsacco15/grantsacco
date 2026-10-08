@@ -55,6 +55,14 @@ export const concepts = [
     score: 'new',
     line: 'The work, re-plotted and re-rendered for every section.',
     detail:
-      'Coordinates decide where each piece of work sits; viewport modes decide how it looks. A render line sweeps across and redraws everything: linework for Engineering, clay for Projects, film stills for Art, a map for Travel, ASCII for Apps. Open any project and the same tabs translate it.',
+      'Coordinates decide where each piece of work sits; viewport modes decide how it looks. A render line sweeps across and redraws everything: linework for Engineering, clay for Projects, film stills for Art, a map for Travel, ASCII for Digital. Open any project and the same tabs translate it.',
+  },
+  {
+    id: 'lens2',
+    name: 'Lens (v2)',
+    score: 'new',
+    line: 'The work, re-plotted and re-rendered for every section.',
+    detail:
+      'The same content and behaviour as Lens, restyled to be cleaner and more functional: one palette of ink, paper and a single calm blue, one sans and one mono, hairlines instead of glows, plain prints instead of polaroids, and technical labels instead of handwriting. The pictures keep their colour.',
   },
 ];

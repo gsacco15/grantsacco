@@ -1,6 +1,6 @@
 # Grant Sacco — personal site concepts
 
-**Same person. Different lens.** Seven working, interactive concept mocks for a personal site. Each one is a different answer to the same question: what if the sections (About, Engineering, Projects, Art, Travel, Apps) weren't separate pages, but different ways of looking at the same work?
+**Same person. Different lens.** Eight working, interactive concept mocks for a personal site. Each one is a different answer to the same question: what if the sections (About, Engineering, Projects, Art, Travel, Digital) weren't separate pages, but different ways of looking at the same work?
 
 All seven mocks share one content file, so the only thing that changes between them is the concept.
 
@@ -13,6 +13,7 @@ All seven mocks share one content file, so the only thing that changes between t
 | 05 | **Translation** (`/translation/`) | Shows one project at a time, seen as a Person, Engineer, Maker, Artist, Traveller or System. Each lens is a completely different form: a story, a technical drawing, a build log, a print, a map, or live data. |
 | 06 | **Object Morphing** (`/morph/`) | Rearranges twenty triangular plates into everything: a closed icosahedron, an exploded assembly, an arch, robot arm or workbench, a bronze sculpture, an unfolded (Dymaxion-style) world map, or a tiled screen. |
 | 07 | **Lens** (`/lens/`) | Coordinates × Viewport Modes. Every project is a picture on one field. Switching section moves the pictures onto that section's axes while a render line sweeps across and redraws everything in its visual language: photographs, hidden-line drawings, clay, film stills, a map duotone, ASCII. Click a project to open it; the same tabs then translate that one project. In Art, the photo films are plotted on Art's own axes as piles of prints: hover skims through a film, click goes straight into an endless, draggable contact sheet with every film (and "All films") in a sidebar. |
+| 08 | **Lens (v2)** (`/lens2/`) | The same Lens, with the same content and behaviour, in a quieter and more professional look: one palette (ink, paper, one calm blue), one sans and one mono, hairlines instead of glows, plain prints instead of polaroids, technical labels instead of handwriting. |
 
 Inside every mock: `1`–`6` or `←` `→` switch sections, and the URL hash (`#structure`, `#place`, …) links straight to a state.
 

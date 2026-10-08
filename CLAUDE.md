@@ -17,7 +17,8 @@ This is **not a resume on a website**. It should feel like:
 - `planning/site-artifacts.xlsx`: the master list of artifacts and decisions (sections, crossovers, featured, open questions, places, films, profile). Grant edits it; keep it in sync when he answers questions.
 - `src/lens/artifacts.js`: Lens's real content (roles, engineering, projects, apps, films, places lived), taken from the workbook. Pictures are placeholders until real photos, CAD and the logo arrive; `tbd` marks placeholder dates. A real image goes in as `picture: { src, bg }` (cover-cropped to 3:2 and re-rendered in every lens); the KU tile is the first.
 - `src/content.js`: sample content for mocks 1–6 (Lens only takes the section names from it).
-- Concept mocks: `/scale`, `/viewport`, `/coordinates`, `/layers`, `/translation`, `/morph`, `/lens`. Lens (Coordinates × Viewport Modes) is the direction being developed.
+- Concept mocks: `/scale`, `/viewport`, `/coordinates`, `/layers`, `/translation`, `/morph`, `/lens`, `/lens2`. Lens (Coordinates × Viewport Modes) is the direction being developed.
+- `/lens2` (Lens v2, `src/lens2/`) is a copy of Lens with a quieter, more professional look: one palette (ink, paper, one calm blue; Art and Digital dark), one sans and one mono, hairlines instead of shadows and glows, plain prints instead of polaroids, technical labels instead of handwriting, restrained picture renders (colour kept). It shares Lens's content (`src/lens2/artifacts.js` re-exports `src/lens/artifacts.js`), so content changes go in one place; behaviour changes need making in both copies until one version is chosen.
 
 ## Lens decisions so far
 
