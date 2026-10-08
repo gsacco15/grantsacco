@@ -2440,3 +2440,135 @@ body.concept-lens2 .lx-intro__name {
   font-size: 19px;
   font-weight: 600;
 }
+
+/* ── Project page: a live 3D model over the hero ──────────────────────────── */
+
+.lx-model {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: var(--bg);
+  animation: lx-model-in 0.5s 0.35s var(--ease) both;
+}
+
+@keyframes lx-model-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.lx-model__gl {
+  cursor: grab;
+  touch-action: none;
+}
+
+.lx-model__gl:active {
+  cursor: grabbing;
+}
+
+.lx-page__frame.has-model .lx-notes,
+.lx-page__hero:has(.has-model) .lx-page__notes {
+  display: none;
+}
+
+.lx-model__views {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.lx-model__views button {
+  padding: 5px 9px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  transition: color 0.2s, background 0.2s;
+}
+
+.lx-model__views button + button {
+  border-left: 1px solid var(--line);
+}
+
+.lx-model__views button:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+}
+
+.lx-model__hint {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.lx-model__label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 3px 7px;
+  border-radius: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--bg);
+  background: var(--accent);
+  translate: -50% -100%;
+  pointer-events: none;
+}
+
+.lx-model__label[hidden] {
+  display: none;
+}
+
+/* Zone legend under the model: hover to highlight, click to keep it lit. */
+.lx-zones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lx-zones[hidden] {
+  display: none;
+}
+
+.lx-zones button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px 4px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11.5px;
+  color: var(--ink);
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.lx-zones button:hover,
+.lx-zones button.is-on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.lx-zones__sw {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--c);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.15);
+}

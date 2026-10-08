@@ -24,6 +24,8 @@ import mapeiLogo from './img/logos/mapei.png';
 import onlychargeLogo from './img/logos/onlychargeev.png';
 import kuLogo from './img/logos/ku.png';
 import kuEngineering from './img/ku-engineering.png';
+import mpocModel from './img/models/mpoc.jpg';
+import mpocLab from './img/models/mpoc-lab.jpg';
 import austinMarathonLogo from './img/logos/austin-marathon.png';
 import ironmanTexasLogo from './img/logos/ironman-703-texas.png';
 import contactflowIcon from './img/logos/contactflow.svg';
@@ -205,7 +207,8 @@ export const artifacts = [
       structure: '200K sq ft: office, automated distribution, clean pack, sterilization and additive manufacturing under one roof.',
       reality: 'The building he walks into every day, designed and built from the ground up.',
     },
-    picture: { scene: 'facility' }, logo: LOGO.enovis, related: ['enovis', 'enovis-am'],
+    // Picture: a still of the MPOC model (Lens v2 opens the model itself).
+    picture: { src: mpocModel, bg: '#f4f3f0' }, logo: LOGO.enovis, model: { id: 'mpoc' }, related: ['enovis', 'enovis-am'],
   },
   {
     id: 'enovis-am', title: 'Additive manufacturing center', kind: 'engineering', org: 'Enovis', years: [2025, 2026],
@@ -216,7 +219,7 @@ export const artifacts = [
       structure: 'EBM and SLS printers: utilities, siting, install sequencing, material flow and validation.',
       build: 'Empty room → utilities → printers sited and sequenced → validated for production.',
     },
-    picture: { scene: 'renders' }, related: ['enovis-facility'],
+    picture: { src: mpocLab, bg: '#f4f3f0' }, model: { id: 'mpoc', highlight: 'lab' }, related: ['enovis-facility'],
   },
   {
     id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true,

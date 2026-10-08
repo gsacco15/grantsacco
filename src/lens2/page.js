@@ -116,6 +116,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
             <span class="lx-note lx-note--b"></span>
           </div>
         </div>
+        <ul class="lx-zones" aria-label="Zones" hidden></ul>
         <figcaption class="lx-page__cap">
           <span class="lx-page__render"></span>
           <button class="lx-page__notes" type="button" aria-pressed="true">Notes</button>
@@ -147,6 +148,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
   const backEl = $('.lx-page__back');
   const scrim = $('.lx-page__scrim');
   const scrimOld = $('.lx-page__scrim--old');
+  const zonesEl = $('.lx-zones');
   const el = {
     kicker: $('.lx-page__kicker'),
     title: $('.lx-page__title'),
@@ -182,6 +184,48 @@ export function createPage({ getMode, onNavigate, onClose }) {
   });
 
   const heroPx = () => Math.min(1800, Math.round(frameEl.clientWidth * DPR));
+
+  /* ── A live 3D model, for projects that have one ───────────────────────── */
+  // It sits over the hero picture; the zone legend below highlights its parts.
+  let model = null;
+  let modelFor = null;
+  async function mountModel(it) {
+    if (modelFor === it.id) return;
+    unmountModel();
+    if (!it.model) return;
+    modelFor = it.id;
+    frameEl.classList.add('has-model');
+    const { createModel, ZONES } = await import('./model3d.js');
+    if (modelFor !== it.id || !open) return;
+    model = createModel(frameEl, {
+      palette: (m) => PALETTE[m],
+      highlight: it.model.highlight ?? null,
+      onHover: (zone) => zonesEl.querySelectorAll('[data-zone]').forEach((b) => b.classList.toggle('is-on', b.dataset.zone === zone)),
+    });
+    zonesEl.innerHTML = ZONES.map(
+      (z) => `<li><button type="button" data-zone="${z.id}"><span class="lx-zones__sw" style="--c:${z.tone}"></span>${z.name}</button></li>`,
+    ).join('');
+    zonesEl.hidden = false;
+    model.setMode(shownMode ?? getMode());
+    if (it.model.highlight) model.setHighlight(it.model.highlight);
+  }
+  function unmountModel() {
+    model?.dispose();
+    model = null;
+    modelFor = null;
+    frameEl.classList.remove('has-model');
+    zonesEl.hidden = true;
+    zonesEl.innerHTML = '';
+  }
+  zonesEl.addEventListener('pointerover', (e) => {
+    const b = e.target.closest('[data-zone]');
+    if (b && model) model.setHighlight(b.dataset.zone, false);
+  });
+  zonesEl.addEventListener('pointerleave', () => model?.setHighlight(null, false));
+  zonesEl.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-zone]');
+    if (b && model) model.setHighlight(model.highlighted === b.dataset.zone ? null : b.dataset.zone, true);
+  });
 
   function paint(idx, mode) {
     const src = render(id, mode, heroPx(), heroAspect(mode));
@@ -272,6 +316,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
     paint(0, mode);
     fillText(mode);
     fillPager();
+    mountModel(byId.get(pid));
     const url = new URL(location.href);
     url.searchParams.set('p', pid);
     history.replaceState(null, '', url);
@@ -303,6 +348,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
       if (!open) {
         root.hidden = true;
         document.body.classList.remove('lx-page-open');
+        unmountModel();
       }
     };
     setTimeout(done, reduced() ? 0 : 420);
@@ -416,6 +462,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
       regions.hero = true;
       setVars(heroEl, textTarget);
       frameEl.dataset.mode = textTarget;
+      model?.setMode(textTarget);
       el.render.textContent = `render · ${RENDER[textTarget]}`;
       const [a, b, c] = notes(byId.get(id), textTarget);
       el.noteDim.textContent = a;
