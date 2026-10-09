@@ -29,7 +29,9 @@ import mpocLab from './img/models/mpoc-lab.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
 import drymixStill from './img/models/mapei-drymix.jpg';
 import drymixTurn from './img/models/mapei-drymix-turn.jpg';
-import drymixModel from './img/models/mapei-drymix.glb?url';
+import admixStill from './img/models/mapei-admix.jpg';
+import siteStill from './img/models/mapei-site.jpg';
+import houstonModel from './img/models/mapei-drymix.glb?url';
 import austinMarathonLogo from './img/logos/austin-marathon.png';
 import ironmanTexasLogo from './img/logos/ironman-703-texas.png';
 import contactflowIcon from './img/logos/contactflow.svg';
@@ -236,8 +238,9 @@ export const artifacts = [
       place: 'Houston, travelled to from Dallas.',
       reality: 'Silo tower, plant and offices, built from the ground up in Houston.',
     },
-    // Picture: stills of Grant's exterior model of the plant (Lens v2 opens the model itself).
-    picture: { src: drymixStill, bg: '#f4f3f0', turn: { src: drymixTurn, frames: 72, cols: 12 } }, model: { id: 'drymix', src: drymixModel }, related: ['sitedev', 'mapei-dallas'],
+    // Picture: stills of Grant's model of MAPEI Houston, the facility that also holds the
+    // admixtures plant and was the site development (Lens v2 opens the model, tower lit).
+    picture: { src: drymixStill, bg: '#f4f3f0', turn: { src: drymixTurn, frames: 72, cols: 12 } }, model: { id: 'drymix', src: houstonModel, highlight: 'tower' }, related: ['liquid', 'sitedev', 'mapei-dallas'],
   },
   {
     id: 'palletizer', title: 'Robotic palletizer & bag applicator', kind: 'engineering', org: 'MAPEI', years: [2021, 2022], tbd: true,
@@ -259,7 +262,8 @@ export const artifacts = [
       structure: '315K sq ft of empty brownfield building turned into production and distribution.',
       place: 'Houston, travelled to from Dallas.',
     },
-    picture: { scene: 'building' }, related: ['drymix'],
+    // The same Houston facility as the dry mix and admixtures plants: its plan, from the model.
+    picture: { src: siteStill, bg: '#f4f3f0' }, model: { id: 'drymix', src: houstonModel }, related: ['drymix', 'liquid'],
   },
   {
     id: 'staticmix', title: 'In-line static mixing process', kind: 'engineering', org: 'MAPEI', years: [2020, 2021], tbd: true,
@@ -274,11 +278,12 @@ export const artifacts = [
   },
   {
     id: 'liquid', title: 'Liquid admixtures plant expansion', kind: 'engineering', org: 'MAPEI', years: [2023, 2024], tbd: true,
-    place: { name: 'Texas', lat: 32.78, lon: -96.8 }, main: 'structure', also: [], featured: 'yes', stage: 'shipped', axes: ax(m(25), 0.6),
+    place: { name: 'Houston, TX', lat: 29.76, lon: -95.37 }, main: 'structure', also: [], featured: 'yes', stage: 'shipped', axes: ax(m(25), 0.6),
     summary: 'A $5M expansion introducing automated blending and bulk transfer to the Southern U.S.',
     facts: ['$5M', 'Automated blending and bulk transfer', 'Design through commissioning and lifecycle'],
     lens: { structure: 'Automated blending and bulk transfer, new to the Southern U.S., $5M.' },
-    picture: { scene: 'tanks' }, related: [],
+    // Inside the MAPEI Houston facility, with the dry mix plant: the model opens with the plant building lit.
+    picture: { src: admixStill, bg: '#f4f3f0' }, model: { id: 'drymix', src: houstonModel, highlight: 'plant' }, related: ['drymix', 'sitedev'],
   },
   ...[
     ['ev-fedex', 'FedEx Office HQ charging', 'Dallas, TX', 32.9, -96.8, '8 Enel X JuiceBox Pro 40 chargers on dual stands; trenching, concrete, electrical, permits.'],

@@ -1,10 +1,11 @@
 // Small interactive 3D models for project pages, loaded only when a page
 // needs one. Two so far:
 //  - the Enovis multipurpose operations center (MPOC), built here in code:
-//    generic massing only (the shell, entrances, dock doors and six zones with
-//    simple stand-in contents), nothing from the real layout;
-//  - the MAPEI dry mix plant, Grant's exterior model (a GLB), split here into
-//    the silo tower, the plant, the offices and the site.
+//    generic massing at the building's real proportions (the shell, entrance,
+//    docks and six zones with simple stand-in contents), no rooms or walls;
+//  - MAPEI Houston, Grant's exterior model (a GLB) of the facility that holds
+//    the dry mix plant and the admixtures plant, split here into the silo
+//    tower, the plant building, the offices and the site.
 // Each section shows a model its own way, like the page's picture: a daylight
 // view, a hidden-line drawing, an exploded clay build, a low dusk shot, a plan,
 // and a digital twin with flows. Zones highlight from the legend or on hover.
@@ -27,25 +28,35 @@ const LOOKS = {
 
 /* ── The MPOC ───────────────────────────────────────────────────────────── */
 
-// Metres: about 268 × 70 m, roughly 200K sq ft, 11 m to the roof.
-const L = 268;
-const D = 70;
-const H = 11;
-const T = 0.6; // wall thickness
+// Generic massing at the building's real proportions: one long warehouse
+// building, about 852 × 180 ft (260 × 55 m) and 11 m to the roof, the MPOC
+// taking all of it east of the neighbouring space at the west end. Blocks
+// only: six zones with stand-in contents, a mezzanine deck, the entrance and
+// the docks. No rooms, walls or names from the drawings.
+const FT = 0.3048;
+const H = 11; // to the roof (m)
+const T = 0.6; // wall thickness (m)
+const TENANT = 156; // ft: the MPOC runs east from here
 
-// Fractions → world. The front (entrances, office glazing) faces the default camera.
-const wx = (f) => -L / 2 + f * L;
-const wz = (f) => D / 2 - f * D;
+// Feet → world. x runs west → east; z = 0 ft is the front (offices, entrance),
+// 180 ft the dock face. The front faces the default camera.
+const fx = (x) => (x - 416) * FT;
+const fz = (z) => (90 - z) * FT;
+const fpt = ([x, z]) => [fx(x), fz(z)];
+// The shell: 832 ft along the front, 10 ft wider at each end behind that.
+const SHELL = [[0, 0], [832, 0], [832, 60], [842, 60], [842, 180], [-10, 180], [-10, 60], [0, 60]];
+const t = T / FT;
+const INNER = [[t, t], [832 - t, t], [832 - t, 60 + t], [842 - t, 60 + t], [842 - t, 180 - t], [-10 + t, 180 - t], [-10 + t, 60 + t], [t, 60 + t]];
 
 const MPOC = {
-  /** The six zones, as fractions of the length (x) and depth (z, 0 = front, 1 = back). */
+  /** The six zones, as rectangles in feet: [west, east, front, back]. */
   zones: [
-    { id: 'warehouse', name: 'Warehouse & shipping', rects: [[0, 0.4, 0.04, 1]], tone: '#cdc9c0', fill: 'racks' },
-    { id: 'support', name: 'Support work centers', rects: [[0.4, 0.5, 0, 1]], tone: '#c3c9cc', fill: 'benches' },
-    { id: 'lab', name: 'Additive & subtractive manufacturing lab', rects: [[0.5, 0.68, 0, 1]], tone: '#b7c3da', fill: 'machines' },
-    { id: 'clean', name: 'Clean pack & sterilization', rects: [[0.68, 0.84, 0.3, 1]], tone: '#b9d2cc', fill: 'rooms' },
-    { id: 'utilities', name: 'Utilities', rects: [[0.84, 1, 0.55, 1]], tone: '#d8cbb1', fill: 'plant' },
-    { id: 'offices', name: 'Offices', rects: [[0.68, 0.84, 0, 0.3], [0.84, 1, 0, 0.55]], tone: '#d8d4cc', fill: 'desks' },
+    { id: 'warehouse', name: 'Warehouse & shipping', rects: [[160, 394, 4, 176], [394, 438, 4, 144]], tone: '#cdc9c0', fill: 'racks' },
+    { id: 'support', name: 'Support work centers', rects: [[592, 678, 78, 160]], tone: '#c3c9cc', fill: 'benches', deck: [592, 646, 106, 160] },
+    { id: 'lab', name: 'Additive & subtractive manufacturing lab', rects: [[684, 838, 66, 176]], tone: '#b7c3da', fill: 'machines' },
+    { id: 'clean', name: 'Clean pack & sterilization', rects: [[442, 582, 8, 146]], tone: '#b9d2cc', fill: 'rooms' },
+    { id: 'utilities', name: 'Utilities', rects: [[396, 466, 148, 177]], tone: '#d8cbb1', fill: 'plant' },
+    { id: 'offices', name: 'Offices', rects: [[590, 824, 2, 58]], tone: '#d8d4cc', fill: 'desks' },
   ],
   cams: {
     iso: { pos: [118, 168, 330], target: [4, -8, 0] },
@@ -66,17 +77,9 @@ const MPOC = {
 
   build({ add, building, shell, roof, zones }) {
     const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-
-    // Footprint, with a notch at the front-left corner.
-    const outer = [
-      [-L / 2, -D / 2], [L / 2, -D / 2], [L / 2, D / 2], [-L / 2 + 6, D / 2], [-L / 2 + 6, D / 2 - 7], [-L / 2, D / 2 - 7],
-    ];
-    const inner = [
-      [-L / 2 + T, -D / 2 + T], [L / 2 - T, -D / 2 + T], [L / 2 - T, D / 2 - T], [-L / 2 + 6 + T, D / 2 - T], [-L / 2 + 6 + T, D / 2 - 7 - T], [-L / 2 + T, D / 2 - 7 - T],
-    ];
     const toShape = (pts) => {
       const s = new THREE.Shape();
-      pts.forEach(([x, z], i) => (i ? s.lineTo(x, -z) : s.moveTo(x, -z)));
+      pts.map(fpt).forEach(([x, z], i) => (i ? s.lineTo(x, -z) : s.moveTo(x, -z)));
       s.closePath();
       return s;
     };
@@ -85,25 +88,28 @@ const MPOC = {
       g.rotateX(-Math.PI / 2);
       return g;
     };
-    const wallShape = toShape(outer);
-    wallShape.holes.push(new THREE.Path(inner.map(([x, z]) => new THREE.Vector2(x, -z))));
+    const wallShape = toShape(SHELL);
+    wallShape.holes.push(new THREE.Path(INNER.map(fpt).map(([x, z]) => new THREE.Vector2(x, -z))));
     add(extrude(wallShape, H + 1.2), 'wall', shell);
-    add(extrude(toShape(outer), 0.4), 'slab', building, { y: -0.4, shadow: false });
-    add(extrude(toShape(inner), 0.6), 'roof', roof, { y: H });
+    add(extrude(toShape(SHELL), 0.4), 'slab', building, { y: -0.4, shadow: false });
+    add(extrude(toShape(INNER), 0.6), 'roof', roof, { y: H });
 
-    // Rooftop units over the production and office end.
-    for (let i = 0; i < 8; i++) add(box(5, 2.4, 3), 'rtu', roof, { x: wx(0.52 + i * 0.058), y: H + 1.8, z: (i % 2 ? -1 : 1) * 14 });
+    // The neighbouring space at the west end: a plain floor behind a demising wall.
+    add(box(T, H, 180 * FT - 2 * T), 'wall', shell, { x: fx(TENANT), y: H / 2, z: 0 });
+    add(box((TENANT + 10) * FT - 2 * T, 0.2, 120 * FT - 2 * T), 'context', building, { x: fx((TENANT - 10) / 2), y: 0.1, z: fz(120), shadow: false });
+    add(box(TENANT * FT - T, 0.2, 60 * FT), 'context', building, { x: fx(TENANT / 2), y: 0.1, z: fz(30), shadow: false });
 
-    // Entrances: two glazed vestibules on the front.
-    for (const f of [0.27, 0.6]) {
-      add(box(16, 5.5, 6), 'wall', shell, { x: wx(f), y: 2.75, z: D / 2 + 3 });
-      add(box(13, 3.4, 0.3), 'glass', shell, { x: wx(f), y: 2.2, z: D / 2 + 6.1, shadow: false });
+    // Rooftop units over the clean, lab and office end.
+    for (let i = 0; i < 8; i++) add(box(5, 2.4, 3), 'rtu', roof, { x: fx(470 + i * 46), y: H + 1.8, z: (i % 2 ? -1 : 1) * 12 });
+
+    // The entrance: a glazed vestibule at the east end of the office front, and office glazing.
+    add(box(14, 5.5, 6), 'wall', shell, { x: fx(806), y: 2.75, z: fz(0) + 3 });
+    add(box(11, 3.4, 0.3), 'glass', shell, { x: fx(806), y: 2.2, z: fz(0) + 6.1, shadow: false });
+    for (const y of [3, 7.4]) add(box(222 * FT, 1.7, 0.3), 'glass', shell, { x: fx(700), y, z: fz(0) + 0.1, shadow: false });
+    // Dock doors along the back, in two runs.
+    for (const [from, n] of [[181, 9], [493, 13]]) {
+      for (let i = 0; i < n; i++) add(box(2.7, 3, 0.3), 'door', shell, { x: fx(from + i * 26), y: 1.5, z: fz(180) - 0.1, shadow: false });
     }
-    // Office glazing: two bands along the front of the office end.
-    for (const y of [3, 7.4]) add(box(L * 0.3, 1.7, 0.3), 'glass', shell, { x: wx(0.845), y, z: D / 2 + 0.1, shadow: false });
-    // Dock doors along the back of the warehouse, and two service doors.
-    for (let i = 0; i < 14; i++) add(box(3.4, 3.8, 0.3), 'door', shell, { x: wx(0.035 + i * 0.025), y: 1.9, z: -D / 2 - 0.1, shadow: false });
-    for (const f of [0.88, 0.93]) add(box(3.4, 3.8, 0.3), 'door', shell, { x: wx(f), y: 1.9, z: -D / 2 - 0.1, shadow: false });
 
     // Zones: a tinted floor and simple stand-in contents each.
     const centers = new Map();
@@ -114,43 +120,61 @@ const MPOC = {
       let cz = 0;
       let area = 0;
       for (const [x0, x1, z0, z1] of zn.rects) {
-        const w = (x1 - x0) * L - 2.4;
-        const d = (z1 - z0) * D - 2.4;
-        const x = wx((x0 + x1) / 2);
-        const z = wz((z0 + z1) / 2);
+        const w = (x1 - x0) * FT - 1.2;
+        const d = (z1 - z0) * FT - 1.2;
+        const x = fx((x0 + x1) / 2);
+        const z = fz((z0 + z1) / 2);
         add(box(w, 0.25, d), 'floor', g, { zone: zn.id, x, y: 0.13, z, shadow: false });
         fillZone(g, zn, x, z, w, d);
         cx += x * w * d;
         cz += z * w * d;
         area += w * d;
       }
+      if (zn.deck) {
+        // A mezzanine deck on columns, 4.2 m up.
+        const [x0, x1, z0, z1] = zn.deck;
+        const w = (x1 - x0) * FT - 1;
+        const d = (z1 - z0) * FT - 1;
+        const x = fx((x0 + x1) / 2);
+        const z = fz((z0 + z1) / 2);
+        add(box(w, 0.35, d), 'content', g, { zone: zn.id, x, y: 4.2, z });
+        for (const sx of [-1, 0, 1]) for (const sz of [-1, 1]) add(box(0.4, 4.1, 0.4), 'content', g, { zone: zn.id, x: x + sx * (w / 2 - 0.4), y: 2.05, z: z + sz * (d / 2 - 0.4) });
+      }
       centers.set(zn.id, new THREE.Vector3(cx / area, 0, cz / area));
     }
 
+    // Stand-ins sized to each zone (metres; w along the building, d across it).
     function fillZone(g, zn, x, z, w, d) {
       const put = (bw, bh, bd, px, pz) => add(box(bw, bh, bd), 'content', g, { zone: zn.id, x: px, y: bh / 2 + 0.25, z: pz });
+      const grid = (sx, sz, mx, mz, fn) => {
+        const cols = Math.max(1, Math.floor((w - mx) / sx));
+        const rows = Math.max(1, Math.floor((d - mz) / sz));
+        for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) fn(x + (i - (cols - 1) / 2) * sx, z + (j - (rows - 1) / 2) * sz, i, j);
+      };
       if (zn.fill === 'racks') {
-        const rows = Math.floor(w / 6.5);
-        for (let i = 0; i < rows; i++) put(1.4, 7.5, d - 16, x - w / 2 + 4 + i * 6.5, z + 3);
+        const rows = Math.floor((w - 4) / 6.5);
+        for (let i = 0; i < rows; i++) put(1.4, 7.5, d - 14, x + (i - (rows - 1) / 2) * 6.5, z);
       } else if (zn.fill === 'benches') {
-        for (let i = 0; i < 3; i++) for (let j = 0; j < 5; j++) put(4, 1.1, 1.6, x - w / 2 + 6 + i * 8, z - d / 2 + 8 + j * 11);
+        grid(7, 8, 4, 6, (px, pz) => put(4, 1.1, 1.6, px, pz));
       } else if (zn.fill === 'machines') {
-        for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) put(5.5, 3 + ((i + j) % 3), 5, x - w / 2 + 7 + i * 11, z - d / 2 + 10 + j * 22);
+        grid(10, 10, 6, 8, (px, pz, i, j) => put(4.5, 2.6 + ((i + j) % 3) * 0.7, 4, px, pz));
       } else if (zn.fill === 'rooms') {
-        for (let i = 0; i < 3; i++) put(11, 4.2, d - 12, x - w / 2 + 7.5 + i * 13.5, z);
+        // A clean suite: three bands of rooms to the deck, two across.
+        const bw = (w - 5) / 2;
+        const bd = (d - 8) / 3;
+        for (let i = 0; i < 2; i++) for (let j = 0; j < 3; j++) put(bw, 4.3, bd, x + (i - 0.5) * (bw + 2), z + (j - 1) * (bd + 2));
       } else if (zn.fill === 'plant') {
-        for (let i = 0; i < 2; i++) add(new THREE.CylinderGeometry(2.6, 2.6, 7, 24), 'content', g, { zone: zn.id, x: x - w / 2 + 6 + i * 7, y: 3.75, z: z - 4 });
-        for (let i = 0; i < 3; i++) put(6, 2.8, 4, x + 2 + i * 7.5 - w / 4, z + 9);
+        for (let i = 0; i < 2; i++) add(new THREE.CylinderGeometry(2.2, 2.2, 6, 24), 'content', g, { zone: zn.id, x: x - w / 2 + 3.5 + i * 5.5, y: 3.25, z });
+        for (let i = 0; i < 2; i++) put(4.5, 2.8, 4, x + 2 + i * 5.5, z);
       } else if (zn.fill === 'desks') {
-        const cols = Math.floor((w - 6) / 6);
-        const rows = Math.floor((d - 6) / 5);
-        for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) put(3.2, 0.9, 1.6, x - w / 2 + 6 + i * 6, z - d / 2 + 5 + j * 5);
+        grid(6, 5, 6, 6, (px, pz) => put(3.2, 0.9, 1.6, px, pz));
       }
     }
 
-    // Labels ride above each zone; the twin's flows run between zone centres.
+    // Labels ride above each zone. The twin's flows: printed in the lab,
+    // checked in the work centers, cleaned, packed and sterilized, then shipped.
     const labels = new Map([...centers].map(([id, c]) => [id, c.clone().setY(14)]));
-    const route = ['warehouse', 'support', 'lab', 'clean', 'warehouse'];
+    const route = ['warehouse', 'lab', 'support', 'clean', 'warehouse'];
     const flows = route.slice(1).map((id, i) => [centers.get(route[i]).clone().setY(9), centers.get(id).clone().setY(9)]);
     return { labels, flows };
   },
@@ -176,9 +200,9 @@ const inBox = (c, [x0, x1, z0, z1]) => c.x >= x0 && c.x <= x1 && c.z >= z0 && c.
 const DRYMIX = {
   zones: [
     { id: 'tower', name: 'Silo & mixing tower', tone: '#b7c3da' },
-    { id: 'plant', name: 'Packaging & warehouse', tone: '#cdc9c0' },
+    { id: 'plant', name: 'Production & warehouse', tone: '#cdc9c0' }, // packaging lines and the admixtures plant are inside
     { id: 'offices', name: 'Offices', tone: '#d8d4cc' },
-    { id: 'site', name: 'Truck court & site', tone: '#c3c9cc', pick: false },
+    { id: 'site', name: 'Site', tone: '#c3c9cc', pick: false },
   ],
   cams: {
     iso: { pos: [-178, 150, 236], target: [6, -6, 10] },
@@ -361,6 +385,7 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
     wall: '#dedcd6',
     roof: '#3d3d3c',
     slab: '#d9d7d2',
+    context: '#cfccc5',
     glass: '#5d6c80',
     door: '#8b96a5',
     rtu: '#b9b8b4',
@@ -662,7 +687,12 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
     if (tween.moving) {
       camera.position.lerp(tween.cam, k);
       controls.target.lerp(tween.target, k);
-      if (camera.position.distanceTo(tween.cam) < 0.5 && controls.target.distanceTo(tween.target) < 0.2) tween.moving = false;
+      if (camera.position.distanceTo(tween.cam) < 0.5 && controls.target.distanceTo(tween.target) < 0.2) {
+        // Land exactly: looking straight down, the last half metre would still turn the plan.
+        camera.position.copy(tween.cam);
+        controls.target.copy(tween.target);
+        tween.moving = false;
+      }
       busy = true;
     }
     const rs = roofState();
@@ -716,8 +746,14 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
     get highlighted() {
       return pinned;
     },
-    view: (name) => {
+    /** Go to camera `name`; `jump` lands there at once (for stills). */
+    view: (name, jump = false) => {
       goTo(name);
+      if (jump) {
+        camera.position.copy(tween.cam);
+        controls.target.copy(tween.target);
+        tween.moving = false;
+      }
       kick();
     },
     /**
