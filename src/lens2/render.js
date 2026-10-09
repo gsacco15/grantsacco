@@ -298,6 +298,11 @@ export function forget(id) {
   for (const k of [...cache.keys()]) if (k.startsWith(`${id}|`)) cache.delete(k);
 }
 
+/** Develop canvas `c` (a frame of item `id`) in `mode`'s look, in place. */
+export function develop(c, mode, id) {
+  MODES[mode](c, id);
+}
+
 /**
  * Item `id` rendered in `mode` at `w` px wide. Height comes from the mode's
  * frame aspect unless `aspect` is given.

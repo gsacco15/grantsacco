@@ -133,6 +133,11 @@ body.concept-lens {
   object-fit: cover;
 }
 
+/* A model's turntable, drawn over its still while hovered in About. */
+.lx-tile__turn[hidden] {
+  display: none;
+}
+
 .lx-tile__ghost {
   position: absolute;
   inset: 0;
@@ -1052,7 +1057,7 @@ body.lx-page-open .lx-hint {
 
 @media (max-width: 900px) {
   .lx-page__inner {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
     align-content: start;
     padding: 124px var(--gutter) 120px;

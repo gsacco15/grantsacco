@@ -26,6 +26,10 @@ import kuLogo from './img/logos/ku.png';
 import kuEngineering from './img/ku-engineering.png';
 import mpocModel from './img/models/mpoc.jpg';
 import mpocLab from './img/models/mpoc-lab.jpg';
+import mpocTurn from './img/models/mpoc-turn.jpg';
+import drymixStill from './img/models/mapei-drymix.jpg';
+import drymixTurn from './img/models/mapei-drymix-turn.jpg';
+import drymixModel from './img/models/mapei-drymix.glb?url';
 import austinMarathonLogo from './img/logos/austin-marathon.png';
 import ironmanTexasLogo from './img/logos/ironman-703-texas.png';
 import contactflowIcon from './img/logos/contactflow.svg';
@@ -207,8 +211,8 @@ export const artifacts = [
       structure: '200K sq ft: office, automated distribution, clean pack, sterilization and additive manufacturing under one roof.',
       reality: 'The building he walks into every day, designed and built from the ground up.',
     },
-    // Picture: a still of the MPOC model (Lens v2 opens the model itself).
-    picture: { src: mpocModel, bg: '#f4f3f0' }, logo: LOGO.enovis, model: { id: 'mpoc' }, related: ['enovis', 'enovis-am'],
+    // Picture: a still of the MPOC model, and 72 frames of it turning for About's hover (Lens v2 opens the model itself).
+    picture: { src: mpocModel, bg: '#f4f3f0', turn: { src: mpocTurn, frames: 72, cols: 12 } }, logo: LOGO.enovis, model: { id: 'mpoc' }, related: ['enovis', 'enovis-am'],
   },
   {
     id: 'enovis-am', title: 'Additive manufacturing center', kind: 'engineering', org: 'Enovis', years: [2025, 2026],
@@ -222,16 +226,18 @@ export const artifacts = [
     picture: { src: mpocLab, bg: '#f4f3f0' }, model: { id: 'mpoc', highlight: 'lab' }, related: ['enovis-facility'],
   },
   {
-    id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true,
-    place: { name: 'Houston, TX', lat: 29.76, lon: -95.37 }, main: 'structure', also: ['build', 'place'], featured: 'yes', stage: 'shipped', axes: ax(m(60), 0.9),
+    id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true, month: 3, monthTbd: true,
+    place: { name: 'Houston, TX', lat: 29.76, lon: -95.37 }, main: 'structure', also: ['build', 'place', 'reality'], featured: 'yes', stage: 'shipped', axes: ax(m(60), 0.9),
     summary: 'A ground-up automated dry mix production and packaging plant.',
     facts: ['European and North American vendors', 'Italian contractors for power and automation', 'Air permitting and FAA approval', 'On budget and on schedule'],
     lens: {
       structure: 'Silo tower, mixing, packaging: P&IDs, layouts and automation with European and Italian partners.',
       build: 'Schematics → equipment from two continents → installed → commissioned and started up.',
       place: 'Houston, travelled to from Dallas.',
+      reality: 'Silo tower, plant and offices, built from the ground up in Houston.',
     },
-    picture: { scene: 'silo' }, related: ['sitedev', 'mapei-dallas'],
+    // Picture: stills of Grant's exterior model of the plant (Lens v2 opens the model itself).
+    picture: { src: drymixStill, bg: '#f4f3f0', turn: { src: drymixTurn, frames: 72, cols: 12 } }, model: { id: 'drymix', src: drymixModel }, related: ['sitedev', 'mapei-dallas'],
   },
   {
     id: 'palletizer', title: 'Robotic palletizer & bag applicator', kind: 'engineering', org: 'MAPEI', years: [2021, 2022], tbd: true,

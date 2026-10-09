@@ -195,14 +195,16 @@ export function createPage({ getMode, onNavigate, onClose }) {
     if (!it.model) return;
     modelFor = it.id;
     frameEl.classList.add('has-model');
-    const { createModel, ZONES } = await import('./model3d.js');
+    const { createModel } = await import('./model3d.js');
     if (modelFor !== it.id || !open) return;
     model = createModel(frameEl, {
+      id: it.model.id,
+      src: it.model.src,
       palette: (m) => PALETTE[m],
       highlight: it.model.highlight ?? null,
       onHover: (zone) => zonesEl.querySelectorAll('[data-zone]').forEach((b) => b.classList.toggle('is-on', b.dataset.zone === zone)),
     });
-    zonesEl.innerHTML = ZONES.map(
+    zonesEl.innerHTML = model.zones.map(
       (z) => `<li><button type="button" data-zone="${z.id}"><span class="lx-zones__sw" style="--c:${z.tone}"></span>${z.name}</button></li>`,
     ).join('');
     zonesEl.hidden = false;

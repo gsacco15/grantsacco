@@ -18,6 +18,7 @@ import { loadLand, loadCountries, loadDetail } from '../shared/geo.js';
 import { Tween, ease, clamp, lerp, hexToRgb, rgbToCss } from '../anim.js';
 import { render, forget } from './render.js';
 import { preloadPictures } from './scenes.js';
+import { attachTurntable } from './turntable.js';
 import { layout, mapFrame, mapZoom, setMapZoom, MAX_ZOOM, polarFrame } from './layout.js';
 import { overlay, updateMap, DETAIL_ZOOM } from './overlay.js';
 import { createPage } from './page.js';
@@ -242,6 +243,9 @@ const tiles = items.map((it) => {
   return t;
 });
 const tileById = new Map(tiles.map((t) => [t.it.id, t]));
+
+// About's 3D models turn on hover (frames rendered from the model).
+for (const t of tiles) if (t.it.picture?.turn) attachTurntable(t, t.it.picture.turn, () => mode === 'reality' && !T);
 
 // Real pictures load once; as each arrives, its renders are redone and its tile repainted.
 for (const ready of preloadPictures(items)) {
