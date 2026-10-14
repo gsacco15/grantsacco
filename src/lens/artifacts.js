@@ -28,6 +28,10 @@ import fsaeCar from './img/fsae-car.jpg';
 import fsaeRain from './img/photos/fsae-rain.jpg';
 import palletizerRender from './img/palletizer.jpg';
 import palletizerRobot from './img/photos/palletizer-robot.jpg';
+import drymixTowerPhoto from './img/photos/drymix-tower.jpg';
+import drymixInteriorPhoto from './img/photos/drymix-interior.jpg';
+import staticmixSkid from './img/photos/staticmix-skid.jpg';
+import staticmixDrawing from './img/photos/staticmix-drawing.jpg';
 import mpocModel from './img/models/mpoc.jpg';
 import mpocLab from './img/models/mpoc-lab.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
@@ -252,7 +256,13 @@ export const artifacts = [
     },
     // Picture: stills of Grant's model of MAPEI Houston, the facility that also holds the
     // admixtures plant and was the site development (Lens v2 opens the model, tower lit).
-    picture: { src: drymixStill, bg: '#f4f3f0', turn: { src: drymixTurn, frames: 72, cols: 12 } }, model: { id: 'drymix', src: houstonModel, highlight: 'tower' }, related: ['liquid', 'sitedev', 'mapei-dallas'],
+    picture: { src: drymixStill, bg: '#f4f3f0', turn: { src: drymixTurn, frames: 72, cols: 12 } }, model: { id: 'drymix', src: houstonModel, highlight: 'tower' },
+    // Photos (from the portfolio): the real tower and the plant inside.
+    photos: [
+      { src: drymixTowerPhoto, alt: 'The silo and mixing tower rising above the plant building in Houston, against a blue sky', caption: 'The silo tower, Houston' },
+      { src: drymixInteriorPhoto, alt: 'Inside the plant: steel mezzanines with yellow rails and an inclined conveyor under the roof', caption: 'Inside the plant' },
+    ],
+    related: ['liquid', 'sitedev', 'mapei-dallas'],
   },
   {
     id: 'palletizer', title: 'Robotic palletizer & bag applicator', kind: 'engineering', org: 'MAPEI', years: [2021, 2022], tbd: true,
@@ -289,7 +299,13 @@ export const artifacts = [
       structure: 'A mixing skid procured from Europe and installed in Dallas: −35% production time.',
       build: 'Prototype and testing in Milan → first production version in Dallas.',
     },
-    picture: { scene: 'capstone' }, related: ['mapei-milan'],
+    picture: { scene: 'capstone' },
+    // Photos (from the portfolio): the skid as installed, and its piping drawing.
+    photos: [
+      { src: staticmixSkid, alt: 'The static mixing skid installed between tanks: frame, hopper, pump and piping', caption: 'The static mixer' },
+      { src: staticmixDrawing, alt: 'Piping drawing of the static mixing installation, with numbered parts and pipeline junctions', caption: 'Piping drawing' },
+    ],
+    related: ['mapei-milan'],
   },
   {
     id: 'liquid', title: 'Liquid admixtures plant expansion', kind: 'engineering', org: 'MAPEI', years: [2023, 2024], tbd: true,
