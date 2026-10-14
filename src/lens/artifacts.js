@@ -273,8 +273,8 @@ export const artifacts = [
       structure: 'A robot cell added to a running plant: pneumatics, electrical and mechanical, integrated live.',
       build: 'Doubled output and removed two manual steps.',
     },
-    // Picture: a render of the cell (from the portfolio); the photo viewer has the robot at work.
-    picture: { src: palletizerRender, bg: '#e4eefd' },
+    // Picture: Grant's render of the cell on white, framed 3:2 so nothing is cropped; the photo viewer has the robot at work.
+    picture: { src: palletizerRender, bg: '#ffffff' },
     photos: [{ src: palletizerRobot, alt: 'The palletizing robot lifting a layer of bags onto a pallet', caption: 'The robot at work' }],
     related: ['drymix'],
   },
