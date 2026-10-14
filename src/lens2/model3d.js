@@ -1,8 +1,8 @@
 // Small interactive 3D models for project pages, loaded only when a page
 // needs one. Two so far:
-//  - the Enovis multipurpose operations center (MPOC), built here in code:
-//    generic massing at the building's real proportions (the shell, entrance,
-//    docks and six zones with simple stand-in contents), no rooms or walls;
+//  - the Enovis multipurpose operations center (MPOC), from Grant's concept
+//    model of the facility (walls, doors, rooms, mezzanine, roof framing),
+//    sorted into six zones;
 //  - MAPEI Houston, Grant's exterior model (a GLB) of the facility that holds
 //    the dry mix plant and the admixtures plant, split here into the silo
 //    tower, the plant building, the offices and the site;
@@ -30,154 +30,178 @@ const LOOKS = {
 
 /* ── The MPOC ───────────────────────────────────────────────────────────── */
 
-// Generic massing at the building's real proportions: one long warehouse
-// building, about 852 × 180 ft (260 × 55 m) and 11 m to the roof, the MPOC
-// taking all of it east of the neighbouring space at the west end. Blocks
-// only: six zones with stand-in contents, a mezzanine deck, the entrance and
-// the docks. No rooms, walls or names from the drawings.
-const FT = 0.3048;
-const H = 11; // to the roof (m)
-const T = 0.6; // wall thickness (m)
-const TENANT = 156; // ft: the MPOC runs east from here
-
-// Feet → world. x runs west → east; z = 0 ft is the front (offices, entrance),
-// 180 ft the dock face. The front faces the default camera.
-const fx = (x) => (x - 416) * FT;
-const fz = (z) => (90 - z) * FT;
-const fpt = ([x, z]) => [fx(x), fz(z)];
-// The shell: 832 ft along the front, 10 ft wider at each end behind that.
-const SHELL = [[0, 0], [832, 0], [832, 60], [842, 60], [842, 180], [-10, 180], [-10, 60], [0, 60]];
-const t = T / FT;
-const INNER = [[t, t], [832 - t, t], [832 - t, 60 + t], [842 - t, 60 + t], [842 - t, 180 - t], [-10 + t, 180 - t], [-10 + t, 60 + t], [t, 60 + t]];
-
+// Grant's concept model of the facility (a trace of the drawings, approximate),
+// converted to plain geometry (`mpoc-plan.json`): walls with their door
+// openings, solids (roof deck and framing, stairs, guards, furniture), floor
+// slabs, columns and room floors, each tagged with one of the six zones. No
+// names or numbers. The warehouse floor and the lab are not rooms in the
+// drawings: the warehouse is everything west of the clean suite, and the lab's
+// place (the east end, with stand-in machines) is a guess.
 const MPOC = {
-  /** The six zones, as rectangles in feet: [west, east, front, back]. */
   zones: [
-    { id: 'warehouse', name: 'Warehouse & shipping', rects: [[160, 394, 4, 176], [394, 438, 4, 144]], tone: '#cdc9c0', fill: 'racks' },
-    { id: 'support', name: 'Support work centers', rects: [[592, 678, 78, 160]], tone: '#c3c9cc', fill: 'benches', deck: [592, 646, 106, 160] },
-    { id: 'lab', name: 'Additive & subtractive manufacturing lab', rects: [[684, 838, 66, 176]], tone: '#b7c3da', fill: 'machines' },
-    { id: 'clean', name: 'Clean pack & sterilization', rects: [[442, 582, 8, 146]], tone: '#b9d2cc', fill: 'rooms' },
-    { id: 'utilities', name: 'Utilities', rects: [[396, 466, 148, 177]], tone: '#d8cbb1', fill: 'plant' },
-    { id: 'offices', name: 'Offices', rects: [[590, 824, 2, 58]], tone: '#d8d4cc', fill: 'desks' },
+    { id: 'warehouse', name: 'Warehouse & shipping', tone: '#cdc9c0' },
+    { id: 'support', name: 'Support work centers', tone: '#c3c9cc' },
+    { id: 'lab', name: 'Additive & subtractive manufacturing lab', tone: '#b7c3da' },
+    { id: 'clean', name: 'Clean pack & sterilization', tone: '#b9d2cc' },
+    { id: 'utilities', name: 'Utilities', tone: '#d8cbb1' },
+    { id: 'offices', name: 'Offices', tone: '#d8d4cc' },
   ],
+  // Seen from the dock side, as Grant's model opens; the plan puts the offices at the top.
   cams: {
-    iso: { pos: [118, 168, 330], target: [4, -8, 0] },
-    far: { pos: [140, 210, 390], target: [4, 6, 0] },
+    iso: { pos: [48, 206, 316], target: [2, 4, 6] },
+    far: { pos: [60, 256, 392], target: [2, 12, 6] },
     top: { pos: [0, 400, 1], target: [0, 0, 0] },
-    side: { pos: [-50, 34, -350], target: [0, 4, 0] },
-    low: { pos: [150, 12, 120], target: [-40, 9, -6] },
+    side: { pos: [-40, 30, -340], target: [0, 4, 0] },
+    low: { pos: [150, 10, 118], target: [-30, 7, 14] },
   },
   looks: {},
   // The roof lifts away to show the zones inside (and fades when one is picked).
   roof: { lift: 22, explode: [30, 9], peek: 26 },
   dim: 'fade',
-  exposure: 1,
+  exposure: 0.92, // its finishes are pale
   pivot: [0, 4, 0], // what a turntable turns about
-  shadowBox: [-200, 200, 120, -120],
-  groundY: -0.41,
-  distance: [90, 900],
+  shadowBox: [-200, 200, 150, -150],
+  groundY: -1.4,
+  distance: [40, 900],
 
-  build({ add, building, shell, roof, zones }) {
-    const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-    const toShape = (pts) => {
+  async build({ add, building, shell, roof, zones }, src) {
+    const data = await (await fetch(src)).json();
+    const ROT = new THREE.Matrix4();
+    const M = new THREE.Matrix4();
+    const mats = data.mats.map(([color, roughness, metalness, opacity]) => {
+      const m = new THREE.MeshStandardMaterial({ color, roughness, metalness, side: THREE.DoubleSide });
+      if (opacity < 1) Object.assign(m, { transparent: true, opacity, depthWrite: false });
+      return m;
+    });
+
+    // Triangles gather by (material, zone, layer) and become one mesh each.
+    const buckets = new Map();
+    const push = (key, info, arr) => {
+      if (!buckets.has(key)) buckets.set(key, { ...info, pos: [] });
+      const into = buckets.get(key).pos;
+      for (let i = 0; i < arr.length; i++) into.push(arr[i]);
+    };
+    const boxTris = (sx, sy, sz, matrix) => new THREE.BoxGeometry(sx, sy, sz).applyMatrix4(matrix).toNonIndexed().attributes.position.array;
+    const target = (layer, zone) => (layer === 'roof' ? roof : zone ? zones : layer === 'site' ? building : shell);
+    const keyOf = (mat, zone, layer) => `${layer}|${zone}|${mat}`;
+    const addPiece = (mat, zone, layer, arr) => push(keyOf(mat, zone, layer), { mat, zone, layer }, arr);
+
+    // Walls: solid between the openings, a lintel above each; dock doors get a closed panel.
+    for (const [x1, z1, x2, z2, t, h, base, mat, zone, isShell, ops] of data.walls) {
+      const L = Math.hypot(x2 - x1, z2 - z1);
+      if (L < 0.01) continue;
+      const ux = (x2 - x1) / L;
+      const uz = (z2 - z1) / L;
+      ROT.makeRotationY(Math.atan2(-uz, ux));
+      const layer = isShell ? 'shell' : 'part';
+      const piece = (s0, s1, y0, y1, m = mat, thick = t) => {
+        if (s1 - s0 < 0.01 || y1 - y0 < 0.01) return;
+        const s = (s0 + s1) / 2;
+        M.makeTranslation(x1 + ux * s, base + (y0 + y1) / 2, z1 + uz * s).multiply(ROT);
+        addPiece(m, zone, layer, boxTris(s1 - s0, y1 - y0, thick, M));
+      };
+      let at = 0;
+      for (const [c, w, bottom, oh, garage, pm] of ops) {
+        const a = Math.max(0, c - w / 2);
+        const b = Math.min(L, c + w / 2);
+        piece(at, a, 0, h);
+        piece(a, b, bottom + oh, h); // lintel
+        piece(a, b, 0, bottom); // sill
+        if (garage) piece(a, b, bottom, bottom + oh, pm, Math.min(0.12, t));
+        at = Math.max(at, b);
+      }
+      piece(at, L, 0, h);
+    }
+
+    // Solids: their own vertices and triangles, turned and placed.
+    const v = new THREE.Vector3();
+    for (const [px, py, pz, rot, verts, faces, mat, zone, isRoof] of data.blocks) {
+      M.makeTranslation(px, py, pz).multiply(ROT.makeRotationY(rot));
+      const arr = new Float32Array(faces.length * 3);
+      faces.forEach((vi, i) => {
+        v.set(verts[vi * 3], verts[vi * 3 + 1], verts[vi * 3 + 2]).applyMatrix4(M);
+        arr.set([v.x, v.y, v.z], i * 3);
+      });
+      addPiece(mat, zone, isRoof ? 'roof' : zone ? 'part' : 'shell', arr);
+    }
+
+    // Slabs: top at their level, thickness below.
+    const shape = (pts) => {
       const s = new THREE.Shape();
-      pts.map(fpt).forEach(([x, z], i) => (i ? s.lineTo(x, -z) : s.moveTo(x, -z)));
-      s.closePath();
+      pts.forEach(([x, z], i) => (i ? s.lineTo(x, -z) : s.moveTo(x, -z)));
       return s;
     };
-    const extrude = (shape, depth) => {
-      const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false });
+    for (const [poly, holes, top, thick, mat, zone] of data.slabs) {
+      const s = shape(poly);
+      for (const hp of holes) s.holes.push(new THREE.Path(hp.map(([x, z]) => new THREE.Vector2(x, -z))));
+      const g = new THREE.ExtrudeGeometry(s, { depth: Math.max(0.01, thick), bevelEnabled: false });
       g.rotateX(-Math.PI / 2);
-      return g;
-    };
-    const wallShape = toShape(SHELL);
-    wallShape.holes.push(new THREE.Path(INNER.map(fpt).map(([x, z]) => new THREE.Vector2(x, -z))));
-    add(extrude(wallShape, H + 1.2), 'wall', shell);
-    add(extrude(toShape(SHELL), 0.4), 'slab', building, { y: -0.4, shadow: false });
-    add(extrude(toShape(INNER), 0.6), 'roof', roof, { y: H });
-
-    // The neighbouring space at the west end: a plain floor behind a demising wall.
-    add(box(T, H, 180 * FT - 2 * T), 'wall', shell, { x: fx(TENANT), y: H / 2, z: 0 });
-    add(box((TENANT + 10) * FT - 2 * T, 0.2, 120 * FT - 2 * T), 'context', building, { x: fx((TENANT - 10) / 2), y: 0.1, z: fz(120), shadow: false });
-    add(box(TENANT * FT - T, 0.2, 60 * FT), 'context', building, { x: fx(TENANT / 2), y: 0.1, z: fz(30), shadow: false });
-
-    // Rooftop units over the clean, lab and office end.
-    for (let i = 0; i < 8; i++) add(box(5, 2.4, 3), 'rtu', roof, { x: fx(470 + i * 46), y: H + 1.8, z: (i % 2 ? -1 : 1) * 12 });
-
-    // The entrance: a glazed vestibule at the east end of the office front, and office glazing.
-    add(box(14, 5.5, 6), 'wall', shell, { x: fx(806), y: 2.75, z: fz(0) + 3 });
-    add(box(11, 3.4, 0.3), 'glass', shell, { x: fx(806), y: 2.2, z: fz(0) + 6.1, shadow: false });
-    for (const y of [3, 7.4]) add(box(222 * FT, 1.7, 0.3), 'glass', shell, { x: fx(700), y, z: fz(0) + 0.1, shadow: false });
-    // Dock doors along the back, in two runs.
-    for (const [from, n] of [[181, 9], [493, 13]]) {
-      for (let i = 0; i < n; i++) add(box(2.7, 3, 0.3), 'door', shell, { x: fx(from + i * 26), y: 1.5, z: fz(180) - 0.1, shadow: false });
+      g.translate(0, top - thick, 0);
+      addPiece(mat, zone, zone ? 'part' : 'site', (g.index ? g.toNonIndexed() : g).attributes.position.array);
     }
 
-    // Zones: a tinted floor and simple stand-in contents each.
+    // Columns.
+    for (const [x, y, z, w, d, h, mat] of data.cols) {
+      M.makeTranslation(x, y + h / 2, z);
+      addPiece(mat, null, 'shell', boxTris(w, h, d, M));
+    }
+
+    // The lab's stand-in machines (its place is a guess).
+    const lab = data.rooms.find(([cat]) => cat === 'lab')[1];
+    const [lx0, lx1] = [Math.min(...lab.map((p) => p[0])), Math.max(...lab.map((p) => p[0]))];
+    const [lz0, lz1] = [Math.min(...lab.map((p) => p[1])), Math.max(...lab.map((p) => p[1]))];
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 3; j++) {
+        const hgt = 2.6 + ((i + j) % 3) * 0.7;
+        M.makeTranslation(lx0 + 8 + i * ((lx1 - lx0 - 16) / 3), hgt / 2, lz0 + 7 + j * ((lz1 - lz0 - 14) / 2));
+        push('machines', { mat: 'content', zone: 'lab', layer: 'part' }, boxTris(4.5, hgt, 4, M));
+      }
+    }
+
+    for (const b of buckets.values()) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(b.pos, 3));
+      g.computeVertexNormals();
+      const role = b.mat === 'content' ? 'content' : `${b.layer === 'roof' ? 'r' : 'm'}${b.mat}`;
+      add(g, role, target(b.layer, b.zone), { zone: b.zone, src: b.mat === 'content' ? undefined : mats[b.mat], shadow: b.layer !== 'site' });
+    }
+
+    // Room floors, tinted by zone: what the legend and hover light up.
     const centers = new Map();
-    for (const zn of MPOC.zones) {
-      const g = new THREE.Group();
-      zones.add(g);
+    for (const [cat, poly, y] of data.rooms) {
+      const g = new THREE.ExtrudeGeometry(shape(poly), { depth: 0.02, bevelEnabled: false });
+      g.rotateX(-Math.PI / 2);
+      g.translate(0, y + 0.1, 0);
+      add(g, 'floor', zones, { zone: cat, shadow: false });
+      let a = 0;
       let cx = 0;
       let cz = 0;
-      let area = 0;
-      for (const [x0, x1, z0, z1] of zn.rects) {
-        const w = (x1 - x0) * FT - 1.2;
-        const d = (z1 - z0) * FT - 1.2;
-        const x = fx((x0 + x1) / 2);
-        const z = fz((z0 + z1) / 2);
-        add(box(w, 0.25, d), 'floor', g, { zone: zn.id, x, y: 0.13, z, shadow: false });
-        fillZone(g, zn, x, z, w, d);
-        cx += x * w * d;
-        cz += z * w * d;
-        area += w * d;
+      for (let i = 0; i < poly.length; i++) {
+        const [xa, za] = poly[i];
+        const [xb, zb] = poly[(i + 1) % poly.length];
+        const cross = xa * zb - xb * za;
+        a += cross;
+        cx += (xa + xb) * cross;
+        cz += (za + zb) * cross;
       }
-      if (zn.deck) {
-        // A mezzanine deck on columns, 4.2 m up.
-        const [x0, x1, z0, z1] = zn.deck;
-        const w = (x1 - x0) * FT - 1;
-        const d = (z1 - z0) * FT - 1;
-        const x = fx((x0 + x1) / 2);
-        const z = fz((z0 + z1) / 2);
-        add(box(w, 0.35, d), 'content', g, { zone: zn.id, x, y: 4.2, z });
-        for (const sx of [-1, 0, 1]) for (const sz of [-1, 1]) add(box(0.4, 4.1, 0.4), 'content', g, { zone: zn.id, x: x + sx * (w / 2 - 0.4), y: 2.05, z: z + sz * (d / 2 - 0.4) });
+      const c = centers.get(cat) ?? { x: 0, z: 0, a: 0 };
+      if (Math.abs(a) > 1e-6) {
+        c.x += cx / 3;
+        c.z += cz / 3;
+        c.a += a;
       }
-      centers.set(zn.id, new THREE.Vector3(cx / area, 0, cz / area));
+      centers.set(cat, c);
     }
-
-    // Stand-ins sized to each zone (metres; w along the building, d across it).
-    function fillZone(g, zn, x, z, w, d) {
-      const put = (bw, bh, bd, px, pz) => add(box(bw, bh, bd), 'content', g, { zone: zn.id, x: px, y: bh / 2 + 0.25, z: pz });
-      const grid = (sx, sz, mx, mz, fn) => {
-        const cols = Math.max(1, Math.floor((w - mx) / sx));
-        const rows = Math.max(1, Math.floor((d - mz) / sz));
-        for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) fn(x + (i - (cols - 1) / 2) * sx, z + (j - (rows - 1) / 2) * sz, i, j);
-      };
-      if (zn.fill === 'racks') {
-        const rows = Math.floor((w - 4) / 6.5);
-        for (let i = 0; i < rows; i++) put(1.4, 7.5, d - 14, x + (i - (rows - 1) / 2) * 6.5, z);
-      } else if (zn.fill === 'benches') {
-        grid(7, 8, 4, 6, (px, pz) => put(4, 1.1, 1.6, px, pz));
-      } else if (zn.fill === 'machines') {
-        grid(10, 10, 6, 8, (px, pz, i, j) => put(4.5, 2.6 + ((i + j) % 3) * 0.7, 4, px, pz));
-      } else if (zn.fill === 'rooms') {
-        // A clean suite: three bands of rooms to the deck, two across.
-        const bw = (w - 5) / 2;
-        const bd = (d - 8) / 3;
-        for (let i = 0; i < 2; i++) for (let j = 0; j < 3; j++) put(bw, 4.3, bd, x + (i - 0.5) * (bw + 2), z + (j - 1) * (bd + 2));
-      } else if (zn.fill === 'plant') {
-        for (let i = 0; i < 2; i++) add(new THREE.CylinderGeometry(2.2, 2.2, 6, 24), 'content', g, { zone: zn.id, x: x - w / 2 + 3.5 + i * 5.5, y: 3.25, z });
-        for (let i = 0; i < 2; i++) put(4.5, 2.8, 4, x + 2 + i * 5.5, z);
-      } else if (zn.fill === 'desks') {
-        grid(6, 5, 6, 6, (px, pz) => put(3.2, 0.9, 1.6, px, pz));
-      }
-    }
+    const centre = (id) => {
+      const c = centers.get(id);
+      return new THREE.Vector3(c.x / c.a, 0, c.z / c.a);
+    };
 
     // Labels ride above each zone. The twin's flows: printed in the lab,
     // checked in the work centers, cleaned, packed and sterilized, then shipped.
-    const labels = new Map([...centers].map(([id, c]) => [id, c.clone().setY(14)]));
+    const labels = new Map(MPOC.zones.map((z) => [z.id, centre(z.id).setY(14)]));
     const route = ['warehouse', 'lab', 'support', 'clean', 'warehouse'];
-    const flows = route.slice(1).map((id, i) => [centers.get(route[i]).clone().setY(9), centers.get(id).clone().setY(9)]);
+    const flows = route.slice(1).map((id, i) => [centre(route[i]).setY(9), centre(id).setY(9)]);
     return { labels, flows };
   },
 };

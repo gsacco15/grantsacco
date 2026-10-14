@@ -38,6 +38,7 @@ import drymixStructureCad from './img/photos/drymix-structure-cad.jpg';
 import mpocModel from './img/models/mpoc.jpg';
 import mpocLab from './img/models/mpoc-lab.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
+import mpocPlan from './img/models/mpoc-plan.json?url';
 import drymixStill from './img/models/mapei-drymix.jpg';
 import drymixTurn from './img/models/mapei-drymix-turn.jpg';
 import admixStill from './img/models/mapei-admix.jpg';
@@ -232,8 +233,8 @@ export const artifacts = [
       structure: '200K sq ft: office, automated distribution, clean pack, sterilization and additive manufacturing under one roof.',
       reality: 'The building he walks into every day, designed and built from the ground up.',
     },
-    // Picture: a still of the MPOC model, and 72 frames of it turning for About's hover (Lens v2 opens the model itself).
-    picture: { src: mpocModel, bg: '#f4f3f0', turn: { src: mpocTurn, frames: 72, cols: 12 } }, logo: LOGO.enovis, model: { id: 'mpoc' }, related: ['enovis', 'enovis-am'],
+    // Picture: a still of the MPOC model (Grant's concept model), and 72 frames of it turning for About's hover (Lens v2 opens the model itself).
+    picture: { src: mpocModel, bg: '#f4f3f0', turn: { src: mpocTurn, frames: 72, cols: 12 } }, logo: LOGO.enovis, model: { id: 'mpoc', src: mpocPlan }, related: ['enovis', 'enovis-am'],
   },
   {
     id: 'enovis-am', title: 'Additive manufacturing center', kind: 'engineering', org: 'Enovis', years: [2025, 2026],
@@ -244,7 +245,7 @@ export const artifacts = [
       structure: 'EBM and SLS printers: utilities, siting, install sequencing, material flow and validation.',
       build: 'Empty room → utilities → printers sited and sequenced → validated for production.',
     },
-    picture: { src: mpocLab, bg: '#f4f3f0' }, model: { id: 'mpoc', highlight: 'lab' }, related: ['enovis-facility'],
+    picture: { src: mpocLab, bg: '#f4f3f0' }, model: { id: 'mpoc', src: mpocPlan, highlight: 'lab' }, related: ['enovis-facility'],
   },
   {
     id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true, month: 3, monthTbd: true,
