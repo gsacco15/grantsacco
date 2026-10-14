@@ -9,6 +9,7 @@ import { systems, STAGES } from '../coordinates/systems.js';
 import { loadLand, landPath } from '../shared/geo.js';
 import { clamp } from '../anim.js';
 import { render, ASPECT } from './render.js';
+import { createGallery } from './gallery.js';
 import { RENDER, physicalSize, yrs } from './meta.js';
 
 const byId = new Map(items.map((it) => [it.id, it]));
@@ -73,7 +74,11 @@ function facts(it, mode) {
       row('Live', it.link ? `<a href="${it.link}" target="_blank" rel="noopener">${it.link.replace(/^https?:\/\//, '')} ↗</a>` : 'Private / local');
       break;
   }
-  for (const l of it.links ?? []) row('Link', `<a href="${l.href}">${l.label}</a>`);
+  // Links (a video, press) on one row; outside links open in a new tab.
+  if (it.links?.length) {
+    const a = (l) => (/^https?:/.test(l.href) ? `<a href="${l.href}" target="_blank" rel="noopener">${l.label} ↗</a>` : `<a href="${l.href}">${l.label}</a>`);
+    row(it.links.length > 1 ? 'Links' : 'Link', it.links.map(a).join('<span class="lx-sep"> · </span>'));
+  }
   return rows.join('');
 }
 
@@ -117,6 +122,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
         </div>
         <figcaption class="lx-page__cap">
           <span class="lx-page__render"></span>
+          <button class="lx-page__photos" type="button" aria-pressed="false" hidden>Photos</button>
           <button class="lx-page__notes" type="button" aria-pressed="true">Notes</button>
         </figcaption>
         <nav class="lx-page__pager" aria-label="Projects">
@@ -140,6 +146,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
 
   const $ = (s) => root.querySelector(s);
   const frameEl = $('.lx-page__frame');
+  const gallery = createGallery(frameEl, $('.lx-page__photos'));
   const pics = [...frameEl.querySelectorAll('canvas')];
   const textEl = $('.lx-page__text');
   const heroEl = $('.lx-page__hero');
@@ -271,6 +278,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
     paint(0, mode);
     fillText(mode);
     fillPager();
+    gallery.set(byId.get(pid).photos);
     const url = new URL(location.href);
     url.searchParams.set('p', pid);
     history.replaceState(null, '', url);
@@ -293,6 +301,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
     if (!open) return;
     const pid = id;
     open = false;
+    gallery.close();
     const tile = document.querySelector(`.lx-tile[data-id="${pid}"] .lx-tile__frame`);
     root.classList.remove('is-in');
     root.classList.add('is-out');

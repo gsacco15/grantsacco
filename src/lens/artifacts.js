@@ -32,6 +32,14 @@ import drymixTurn from './img/models/mapei-drymix-turn.jpg';
 import admixStill from './img/models/mapei-admix.jpg';
 import siteStill from './img/models/mapei-site.jpg';
 import houstonModel from './img/models/mapei-drymix.glb?url';
+import pedalStill from './img/models/piano-pedal.jpg';
+import pedalTurn from './img/models/piano-pedal-turn.jpg';
+import pedalModel from './img/models/piano-pedal.glb?url';
+import pedalPhoto1 from './img/photos/pedal-1.jpg';
+import pedalPhoto2 from './img/photos/pedal-2.jpg';
+import pedalPhoto3 from './img/photos/pedal-3.jpg';
+import pedalPhoto4 from './img/photos/pedal-4.jpg';
+import pedalPhoto5 from './img/photos/pedal-5.jpg';
 import austinMarathonLogo from './img/logos/austin-marathon.png';
 import ironmanTexasLogo from './img/logos/ironman-703-texas.png';
 import contactflowIcon from './img/logos/contactflow.svg';
@@ -333,7 +341,22 @@ export const artifacts = [
       structure: 'A pedal mechanism designed around one person\'s constraints.',
       reality: 'A pianist played the pedals for the first time.',
     },
-    picture: { scene: 'piano' }, related: ['ku'], links: [{ label: 'News coverage (placeholder)', href: '#' }],
+    // Picture: stills of the device's model (a reconstruction from photos), turning in About; Lens v2 opens the model.
+    picture: { src: pedalStill, bg: '#f4f3f0', turn: { src: pedalTurn, frames: 72, cols: 12 } }, model: { id: 'pedal', src: pedalModel },
+    // Photos (from the portfolio) cycle over the hero; the news coverage links out.
+    photos: [
+      { src: pedalPhoto1, alt: 'The assistive pedal device, front view, its return spring behind a window in the housing', caption: 'The device' },
+      { src: pedalPhoto2, alt: 'Two KU students in a living room with the pianist and a reporter', caption: 'With the pianist' },
+      { src: pedalPhoto3, alt: 'Grant at a workstation with the device open in CAD', caption: 'In CAD' },
+      { src: pedalPhoto4, alt: 'CAD render of the whole device: base, inclined pedal, shaft and T-grip', caption: 'CAD model' },
+      { src: pedalPhoto5, alt: 'CAD render of the pedal mechanism from the front', caption: 'CAD model, close up' },
+    ],
+    related: ['ku'],
+    links: [
+      { label: 'Video', href: 'https://www.youtube.com/watch?v=KiA2okjlkbE' },
+      { label: 'The Kansas City Star', href: 'https://www.kansascity.com/news/local/article217177885.html' },
+      { label: 'KSHB 41 News', href: 'https://www.kshb.com/news/local-news/ku-engineering-students-create-device-to-help-change-the-tune-for-young-teen' },
+    ],
   },
   {
     id: 'resin1', title: 'Resin Light 1.0', kind: 'build', org: 'Personal', years: [2023, 2023], tbd: true,

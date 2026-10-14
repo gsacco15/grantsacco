@@ -5,7 +5,9 @@
 //    docks and six zones with simple stand-in contents), no rooms or walls;
 //  - MAPEI Houston, Grant's exterior model (a GLB) of the facility that holds
 //    the dry mix plant and the admixtures plant, split here into the silo
-//    tower, the plant building, the offices and the site.
+//    tower, the plant building, the offices and the site;
+//  - the KU assistive piano-pedal device, a GLB of its parts, which the
+//    Projects tab pulls apart into an exploded assembly.
 // Each section shows a model its own way, like the page's picture: a daylight
 // view, a hidden-line drawing, an exploded clay build, a low dusk shot, a plan,
 // and a digital twin with flows. Zones highlight from the legend or on hover.
@@ -289,6 +291,85 @@ const DRYMIX = {
   },
 };
 
+/* ── The assistive piano-pedal device ──────────────────────────────────── */
+
+// A visual reconstruction of the KU device (a GLB, one mesh per part, in
+// metres), shown 250× so it sits at the same scale as the buildings: a
+// hand-pushed shaft with a T-grip that presses an inclined pedal plate on a
+// base, with a spring to return it. The parts group into six zones by name;
+// the Projects tab pulls them apart into an exploded assembly.
+const PEDAL_SCALE = 250;
+const PEDAL_GROUPS = [
+  ['grip', /grip|tbar|shaft_top_handle/],
+  ['shaft', /actuating_shaft|stainless_collar/],
+  ['pivot', /hinge|pillow_block|rod_fork|pivot|mount_bracket|swivel|shoulder_ring/],
+  ['pedal', /pedal|foot_plate|tread/],
+  ['spring', /spring|washer|fastener/],
+  ['base', /floor_pad|base|lower_mechanism/],
+];
+
+const PEDAL = {
+  zones: [
+    { id: 'grip', name: 'T-grip handle', tone: '#b7c3da' },
+    { id: 'shaft', name: 'Actuating shaft', tone: '#c3c9cc' },
+    { id: 'pivot', name: 'Pivot & linkage', tone: '#d8cbb1' },
+    { id: 'pedal', name: 'Inclined pedal plate', tone: '#cdc9c0' },
+    { id: 'spring', name: 'Spring return', tone: '#b9d2cc' },
+    { id: 'base', name: 'Base plate', tone: '#d8d4cc' },
+  ],
+  cams: {
+    iso: { pos: [96, 80, 122], target: [0, 16, 2] },
+    far: { pos: [250, 210, 430], target: [0, 104, 0] },
+    top: { pos: [0, 400, 4], target: [0, 0, 2] },
+    side: { pos: [470, 110, 30], target: [0, 100, 0] },
+    low: { pos: [64, 12, 112], target: [0, 15, 8] },
+  },
+  // A device, not a building: no roof; the exploded build pulls the parts apart.
+  looks: { structure: { roof: 'on' }, place: { roof: 'on' }, digital: { roof: 'on' } },
+  roof: { lift: 0, explode: [0, 0], peek: 0 },
+  explode: { grip: [0, 34, 0], shaft: [0, 18, 0], pivot: [0, 9, -8], pedal: [0, 4, 0], spring: [0, 2, 16], base: [0, -3, 0] },
+  dim: 'tint',
+  exposure: 1,
+  pivot: [0, 14, 0],
+  shadowBox: [-160, 160, 160, -160],
+  groundY: -0.3,
+  distance: [40, 900],
+
+  async build({ add, shell }, src) {
+    const gltf = await new GLTFLoader().loadAsync(src);
+    gltf.scene.updateMatrixWorld(true);
+    const scale = new THREE.Matrix4().makeScale(PEDAL_SCALE, PEDAL_SCALE, PEDAL_SCALE);
+    const parts = new Map(PEDAL.zones.map((z) => [z.id, new THREE.Group()]));
+    for (const g of parts.values()) shell.add(g);
+    const meshes = [];
+    gltf.scene.traverse((o) => {
+      if (o.isMesh) meshes.push(o);
+    });
+    for (const o of meshes) {
+      const zone = PEDAL_GROUPS.find(([, re]) => re.test(o.name))?.[0] ?? 'base';
+      const indexed = o.geometry.clone().applyMatrix4(scale.clone().multiply(o.matrixWorld));
+      add(toCreasedNormals(indexed, Math.PI / 6), o.material.name || 'part', parts.get(zone), { zone, src: o.material, edgesFrom: indexed });
+      o.geometry.dispose();
+    }
+    // Labels over each part; the twin's flow is the push: down the shaft,
+    // through the pivot into the pedal plate, and the spring pushing back.
+    const box = (id) => new THREE.Box3().setFromObject(parts.get(id));
+    const top = (id) => {
+      const b = box(id);
+      return b.getCenter(new THREE.Vector3()).setY(b.max.y + 3);
+    };
+    const labels = new Map(PEDAL.zones.map((z) => [z.id, top(z.id)]));
+    const shaft = box('shaft');
+    const c = (id) => box(id).getCenter(new THREE.Vector3());
+    const flows = [
+      [shaft.getCenter(new THREE.Vector3()).setY(shaft.max.y), shaft.getCenter(new THREE.Vector3()).setY(shaft.min.y), 0],
+      [c('pivot'), c('pedal'), 0.12],
+      [c('spring'), c('pedal'), 0.12],
+    ];
+    return { labels, flows, parts };
+  },
+};
+
 /** Split an indexed geometry into connected pieces: each one's triangles, bounds and centre. */
 function components(geo) {
   const index = geo.index.array;
@@ -323,7 +404,7 @@ function components(geo) {
   return [...byRoot.values()].map((k) => ({ ...k, c: k.lo.clone().add(k.hi).multiplyScalar(0.5) }));
 }
 
-const MODELS = { mpoc: MPOC, drymix: DRYMIX };
+const MODELS = { mpoc: MPOC, drymix: DRYMIX, pedal: PEDAL };
 
 /**
  * Mount model `id` in `host` (`src` is its file, for a model that loads one).
@@ -447,6 +528,7 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
   building.add(shellGroup, roofGroup, zoneGroup);
   let labels = new Map();
   let roofMeshes = [];
+  let parts = new Map(); // zone → group, for a model that explodes by part
 
   // Ground: catches shadows only.
   const groundMat = new THREE.ShadowMaterial({ opacity: 0.16 });
@@ -463,8 +545,11 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
   const packetMat = new THREE.MeshBasicMaterial({ color: '#93adf5' });
   const flows = [];
   function addFlows(pairs) {
-    for (const [a, b] of pairs) {
-      const mid = a.clone().lerp(b, 0.5).setY(Math.max(a.y, b.y) + a.distanceTo(b) * 0.22);
+    // An arc over the model, unless the flow gives its own lift (0: straight).
+    for (const [a, b, lift] of pairs) {
+      const mid = a.clone().lerp(b, 0.5);
+      if (lift == null) mid.setY(Math.max(a.y, b.y) + a.distanceTo(b) * 0.22);
+      else mid.y += a.distanceTo(b) * lift;
       const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
       flowGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(48)), flowMat));
       const packets = [0, 0.33, 0.66].map((o) => {
@@ -605,6 +690,7 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
     .then((out) => {
       if (!alive) return;
       labels = out.labels;
+      parts = out.parts ?? new Map();
       addFlows(out.flows);
       roofMeshes = roofGroup.children.filter((o) => o.isMesh);
       for (const m of meshes) if (hide.includes(m.userData.zone)) m.visible = false;
@@ -715,6 +801,15 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
       m.userData.edges.visible = look.edges > 0 && tween.roofOpacity > 0.5;
     }
     if (Math.abs(tween.roofY - rs.y) > 0.05 || Math.abs(tween.shellY - rs.shell) > 0.05 || Math.abs(tween.roofOpacity - rs.opacity) > 0.01) busy = true;
+    // A model that explodes by part moves each part out along its own offset.
+    for (const [zone, g] of parts) {
+      const off = look.roof === 'explode' ? def.explode?.[zone] : null;
+      const to = new THREE.Vector3(...(off ?? [0, 0, 0]));
+      if (g.position.distanceTo(to) > 0.02) {
+        g.position.lerp(to, k);
+        busy = true;
+      }
+    }
     if (look.flows) {
       const t = now / 4000;
       for (const f of flows) for (const p of f.packets) p.mesh.position.copy(f.curve.getPoint((t + p.o) % 1));
@@ -724,7 +819,7 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
     // The highlighted zone's name rides above it.
     const on = pinned || hovered;
     if (on && labels.has(on)) {
-      const v = labels.get(on).clone().project(camera);
+      const v = labels.get(on).clone().add(parts.get(on)?.position ?? new THREE.Vector3()).project(camera);
       label.style.transform = `translate(${(((v.x + 1) / 2) * wrap.clientWidth).toFixed(1)}px, ${(((1 - v.y) / 2) * wrap.clientHeight).toFixed(1)}px)`;
     }
     renderer.render(scene, camera);
