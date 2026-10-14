@@ -32,6 +32,9 @@ import drymixTowerPhoto from './img/photos/drymix-tower.jpg';
 import drymixInteriorPhoto from './img/photos/drymix-interior.jpg';
 import staticmixSkid from './img/photos/staticmix-skid.jpg';
 import staticmixDrawing from './img/photos/staticmix-drawing.jpg';
+import staticmixRender from './img/staticmix.jpg';
+import drymixTowerCad from './img/photos/drymix-tower-cad.jpg';
+import drymixStructureCad from './img/photos/drymix-structure-cad.jpg';
 import mpocModel from './img/models/mpoc.jpg';
 import mpocLab from './img/models/mpoc-lab.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
@@ -261,6 +264,8 @@ export const artifacts = [
     photos: [
       { src: drymixTowerPhoto, alt: 'The silo and mixing tower rising above the plant building in Houston, against a blue sky', caption: 'The silo tower, Houston' },
       { src: drymixInteriorPhoto, alt: 'Inside the plant: steel mezzanines with yellow rails and an inclined conveyor under the roof', caption: 'Inside the plant' },
+      { src: drymixTowerCad, alt: 'CAD model of the silo tower: silos on a red and yellow steel structure under a roof deck', caption: 'The silo tower, in CAD' },
+      { src: drymixStructureCad, alt: 'CAD model of the plant structure: two mezzanine levels with yellow rails, stairs, bulk-bag stations and dust-collection piping, with figures for scale', caption: 'The plant structure, in CAD' },
     ],
     related: ['liquid', 'sitedev', 'mapei-dallas'],
   },
@@ -299,7 +304,8 @@ export const artifacts = [
       structure: 'A mixing skid procured from Europe and installed in Dallas: −35% production time.',
       build: 'Prototype and testing in Milan → first production version in Dallas.',
     },
-    picture: { scene: 'capstone' },
+    // Picture: the CAD render of the mixing skid (from the portfolio), framed 3:2 on its own background.
+    picture: { src: staticmixRender, bg: '#e4eefd' },
     // Photos (from the portfolio): the skid as installed, and its piping drawing.
     photos: [
       { src: staticmixSkid, alt: 'The static mixing skid installed between tanks: frame, hopper, pump and piping', caption: 'The static mixer' },
