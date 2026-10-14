@@ -24,6 +24,10 @@ import mapeiLogo from './img/logos/mapei.png';
 import onlychargeLogo from './img/logos/onlychargeev.png';
 import kuLogo from './img/logos/ku.png';
 import kuEngineering from './img/ku-engineering.png';
+import fsaeCar from './img/fsae-car.jpg';
+import fsaeRain from './img/photos/fsae-rain.jpg';
+import palletizerRender from './img/palletizer.jpg';
+import palletizerRobot from './img/photos/palletizer-robot.jpg';
 import mpocModel from './img/models/mpoc.jpg';
 import mpocLab from './img/models/mpoc-lab.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
@@ -259,7 +263,10 @@ export const artifacts = [
       structure: 'A robot cell added to a running plant: pneumatics, electrical and mechanical, integrated live.',
       build: 'Doubled output and removed two manual steps.',
     },
-    picture: { scene: 'cell' }, related: ['drymix'],
+    // Picture: a render of the cell (from the portfolio); the photo viewer has the robot at work.
+    picture: { src: palletizerRender, bg: '#e4eefd' },
+    photos: [{ src: palletizerRobot, alt: 'The palletizing robot lifting a layer of bags onto a pallet', caption: 'The robot at work' }],
+    related: ['drymix'],
   },
   {
     id: 'sitedev', title: '315K sq ft site development', kind: 'engineering', org: 'MAPEI', years: [2022, 2024], tbd: true,
@@ -329,7 +336,11 @@ export const artifacts = [
       structure: 'Powertrain integration across subsystems: SolidWorks, MATLAB, FEA.',
       reality: '2017 – 2018 · led a team of five on the car.',
     },
-    picture: { scene: 'racecar' }, related: ['ku'],
+    // Picture: Grant's render of the car; the photo viewer has the car's nose in the rain.
+    picture: { src: fsaeCar, bg: '#eef0f3' },
+    photos: [{ src: fsaeRain, alt: 'The nose of the car, number 12 with the KU Engineering and Jayhawk livery, wet with rain', caption: 'In the rain' }],
+    related: ['ku'],
+    links: [{ label: 'Video', href: 'https://www.youtube.com/watch?v=QBBdbAZleAo' }],
   },
   {
     id: 'pedal', title: 'Assistive piano-pedal device', kind: 'project', org: 'KU biomechanical research', years: [2016, 2017], month: 1, monthTbd: true,

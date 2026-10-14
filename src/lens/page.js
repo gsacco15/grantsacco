@@ -477,5 +477,9 @@ export function createPage({ getMode, onNavigate, onClose }) {
     sweep,
     bindSwitcher: (s) => (switcher = s),
     isOpen: () => open,
+    /** A real picture just arrived: repaint the hero if it is showing that project. */
+    refresh(pid) {
+      if (open && pid === id) paint(show, shownMode ?? getMode());
+    },
   };
 }

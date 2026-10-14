@@ -254,6 +254,7 @@ for (const ready of preloadPictures(items)) {
     forget(id);
     const t = tileById.get(id);
     if (t && t.show >= 0 && !T && mode) paint(t, t.show, mode);
+    page.refresh(id); // an open project page shows it too
   });
 }
 
