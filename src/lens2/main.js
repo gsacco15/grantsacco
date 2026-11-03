@@ -25,9 +25,14 @@ import { createPage } from './page.js';
 import { RENDER, metaFor } from './meta.js';
 import { createStacks } from './stacks.js';
 import { createDarkroom } from './darkroom.js';
+import { inject as injectAnalytics } from '@vercel/analytics';
 
 // Lens carries Grant's real work; only the pictures are stand-ins so far.
 mountChrome('lens2', { standalone: true });
+
+// Vercel Web Analytics: visitors and page views on the deployed site (opening a
+// project or a film changes the URL, so those count as views too). Not in dev.
+if (import.meta.env.PROD) injectAnalytics({ mode: 'production' });
 
 const MODE_IDS = modes.map((m) => m.id);
 const body = document.body;

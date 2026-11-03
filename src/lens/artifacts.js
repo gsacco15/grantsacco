@@ -43,6 +43,7 @@ import promadeEbm from './img/photos/promade-ebm.jpg';
 import promadeSls from './img/photos/promade-sls.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
 import mpocCps from './img/models/mpoc-cps.jpg';
+import mpocCpsTurn from './img/models/mpoc-cps-turn.jpg';
 import mpocPlan from './img/models/mpoc-plan.json?url';
 import drymixStill from './img/models/mapei-drymix.jpg';
 import drymixTurn from './img/models/mapei-drymix-turn.jpg';
@@ -89,8 +90,8 @@ export const intro = {
   headshot, // Grant in Rio, cropped to the face
   lines: [
     'Grant is an advanced manufacturing engineer in Austin who specializes in project engineering and construction management: 8+ years designing, building and scaling production systems, from concept through full-rate operations.',
-    "At Enovis he leads factory build-outs and stood up the company's first U.S. additive manufacturing work center; before that he built plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston.",
-    "He also founded OnlyChargeEV, an EV charging company, and brings that founder's bias for action to every line he builds: equipment, automation and processes that move throughput, quality and cost.",
+    "At Enovis he is building end-to-end manufacturing for orthopedic implants under one roof: additive and subtractive manufacturing, cleaning, packaging, sterilization and outbound, starting with the company's first U.S. additive manufacturing work center.",
+    'Before that he built plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and founded OnlyChargeEV, an EV charging company. He runs every project like a founder, owning it from the first sketch to the first part out the door.',
   ],
 };
 
@@ -244,7 +245,7 @@ export const artifacts = [
   },
   {
     id: 'enovis-am', title: 'ProMade additive manufacturing work center', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 4, ended: true, // through September 2026
-    place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build'], featured: 'yes', stage: 'built', axes: ax(m(40), 0.84),
+    place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'built', axes: ax(m(40), 0.84),
     summary: 'The pilot ProMade work center: the first additive manufacturing capability for Enovis in the U.S., printing EBM titanium and PA 2200 nylon for patient-specific implants and precision surgical guides.',
     facts: [
       'First Enovis additive manufacturing in the U.S.',
@@ -256,6 +257,7 @@ export const artifacts = [
     lens: {
       structure: 'EBM titanium and PA 2200 printers with their lab, packaging and post-processing work centers: engineered, procured, built and qualified.',
       build: 'Empty space → utilities → printers sited → blasting and finishing → machines qualified, April 2025 – September 2026.',
+      reality: 'April 2025 – September 2026 · Austin. The first Enovis additive manufacturing in the U.S., from empty room to qualified printers.',
     },
     // Picture: the EBM room; the photo viewer has it and the SLS room. In the same plant as the operations facility.
     picture: { src: promadeEbm, bg: '#e9ecef' },
@@ -266,8 +268,8 @@ export const artifacts = [
     related: ['enovis-facility', 'enovis-cps', 'enovis'],
   },
   {
-    id: 'enovis-cps', title: 'Clean pack & sterilization expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true,
-    place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build'], featured: 'yes', stage: 'sketch', axes: ax(m(50), 0.92),
+    id: 'enovis-cps', title: 'Clean pack & sterilization expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true, month: 5, monthTbd: true,
+    place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'sketch', axes: ax(m(50), 0.92),
     summary: 'End to end, a 25K sq ft clean pack and sterilization suite inside the operations facility: design intent, engineering, permits, procurement, construction and qualification, with the validated utilities it runs on.',
     facts: [
       '25K sq ft: cleaning, two ISO 7 cleanrooms, sterilization, packaging and inspection',
@@ -279,9 +281,11 @@ export const artifacts = [
     lens: {
       structure: 'Two ISO 7 cleanrooms, an automated clean line and VHP and gas plasma sterilization, on validated air, water and neutralization systems.',
       build: 'Design intent → permits → the clean line first, for early validation → sterile pack and sterilization → outer boxing and the corridor wall.',
+      reality: '2026 – now · Austin. A cleanroom suite inside the operations facility, from design intent to qualification.',
     },
-    // In the same plant as the operations facility: the MPOC model opens with the clean pack & sterilization zone lit.
-    picture: { src: mpocCps, bg: '#f4f3f0' }, logo: LOGO.enovis, model: { id: 'mpoc', src: mpocPlan, highlight: 'clean' },
+    // In the same plant as the operations facility: the MPOC model opens with the clean pack & sterilization zone lit;
+    // its still and 72 turning frames (About's hover) are rendered with that zone lit too.
+    picture: { src: mpocCps, bg: '#f4f3f0', turn: { src: mpocCpsTurn, frames: 72, cols: 12 } }, model: { id: 'mpoc', src: mpocPlan, highlight: 'clean' },
     related: ['enovis-facility', 'enovis-am', 'enovis'],
   },
   {
