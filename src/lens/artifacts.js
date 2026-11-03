@@ -43,6 +43,11 @@ import promadeEbm from './img/photos/promade-ebm.jpg';
 import promadeSls from './img/photos/promade-sls.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
 import mpocCps from './img/models/mpoc-cps.jpg';
+import filmItaly from './img/films/italy.jpg';
+import filmMexicoCity from './img/films/mexicocity.jpg';
+import filmPeru from './img/films/peru.jpg';
+import filmNewMexico from './img/films/newmexico.jpg';
+import horizonteMoon from './img/horizonte.jpg';
 import mpocCpsTurn from './img/models/mpoc-cps-turn.jpg';
 import mpocPlan from './img/models/mpoc-plan.json?url';
 import drymixStill from './img/models/mapei-drymix.jpg';
@@ -172,18 +177,21 @@ export const countries = [
  * the albums are linked. `axes` places the film on Art's plot; `short` is the
  * caption on phones.
  */
+// Each film links to its full album (Google Photos, opened in a new tab); `photo`
+// is its real cover, a scan from the roll. Films without one yet keep a drawn
+// stand-in until Grant sends the cover.
 export const films = [
-  { id: 'film-spain', title: 'Mallorca, Ibiza & Formentera', short: 'Spain', place: 'Spain', year: 2026, count: 65, look: 'tuscan', cover: 0, lat: 39.57, lon: 2.65, axes: { expressive: 0.82, experimental: 0.5 } },
-  { id: 'film-portugal', title: 'Lagos, Algarve & Lisbon', short: 'Portugal', place: 'Portugal', year: 2026, count: 64, look: 'lake', cover: 1, lat: 38.72, lon: -9.14, axes: { expressive: 0.74, experimental: 0.14 } },
-  { id: 'film-acp', title: 'Argentina–Chile–Peru', short: 'Arg · Chile · Peru', place: 'Argentina, Chile, Peru', year: 2025, count: 267, look: 'nordic', cover: 0, lat: -33.45, lon: -70.67, approx: true, axes: { expressive: 0.94, experimental: 0.72 } },
-  { id: 'film-mexico', title: 'Mexico', short: 'Mexico', place: 'Mexico', year: 2025, count: 84, look: 'lake', cover: 0, lat: 20.6, lon: -105.2, approx: true, axes: { expressive: 0.64, experimental: 0.52 } },
-  { id: 'film-newmexico', title: 'New Mexico (Father & Son)', short: 'New Mexico', place: 'New Mexico, USA', year: 2025, count: 39, look: 'tuscan', cover: 2, lat: 35.69, lon: -105.94, approx: true, axes: { expressive: 0.4, experimental: 0.88 } },
-  { id: 'film-brazil', title: 'Brazil', short: 'Brazil', place: 'Brazil', year: 2024, count: 177, look: 'lake', cover: 2, lat: -22.97, lon: -43.18, axes: { expressive: 0.76, experimental: 0.9 } },
-  { id: 'film-peru', title: 'Peru', short: 'Peru', place: 'Peru', year: 2023, count: 106, look: 'nordic', cover: 3, lat: -13.53, lon: -71.97, approx: true, axes: { expressive: 0.56, experimental: 0.12 } },
-  { id: 'film-palmbeach', title: 'Palm Beach', short: 'Palm Beach', place: 'Florida, USA', year: 2023, count: 39, look: 'lake', cover: 3, lat: 26.71, lon: -80.04, axes: { expressive: 0.46, experimental: 0.5 } },
-  { id: 'film-mexicocity', title: 'Mexico City', short: 'Mexico City', place: 'Mexico', year: 2022, count: 59, look: 'city', cover: 0, lat: 19.43, lon: -99.13, axes: { expressive: 0.58, experimental: 0.9 } },
-  { id: 'film-italy', title: 'Italy', short: 'Italy', place: 'Italy', year: 2021, count: 59, look: 'tuscan', cover: 1, lat: 41.89, lon: 12.49, axes: { expressive: 0.38, experimental: 0.12 } },
-  { id: 'film-colombia', title: 'Colombia', short: 'Colombia', place: 'Colombia', year: 2022, count: 53, look: 'city', cover: 2, lat: 4.71, lon: -74.07, approx: true, axes: { expressive: 0.94, experimental: 0.26 } },
+  { id: 'film-spain', title: 'Mallorca, Ibiza & Formentera', short: 'Spain', place: 'Spain', year: 2026, count: 65, look: 'tuscan', cover: 0, lat: 39.57, lon: 2.65, axes: { expressive: 0.82, experimental: 0.5 }, album: 'https://photos.app.goo.gl/CYyz1BMUUuEPhmi79' },
+  { id: 'film-portugal', title: 'Lagos, Algarve & Lisbon', short: 'Portugal', place: 'Portugal', year: 2026, count: 64, look: 'lake', cover: 1, lat: 38.72, lon: -9.14, axes: { expressive: 0.74, experimental: 0.14 }, album: 'https://photos.app.goo.gl/qr9AxLvdPv7SBWh28' },
+  { id: 'film-acp', title: 'Argentina–Chile–Peru', short: 'Arg · Chile · Peru', place: 'Argentina, Chile, Peru', year: 2025, count: 267, look: 'nordic', cover: 0, lat: -33.45, lon: -70.67, approx: true, axes: { expressive: 0.94, experimental: 0.72 }, album: 'https://photos.app.goo.gl/Cw1cCV83WEAfcy2y7' },
+  { id: 'film-mexico', title: 'Mexico', short: 'Mexico', place: 'Mexico', year: 2025, count: 84, look: 'lake', cover: 0, lat: 20.6, lon: -105.2, approx: true, axes: { expressive: 0.64, experimental: 0.52 }, album: 'https://photos.app.goo.gl/dgCYAq2Sj1PQQbRc8' },
+  { id: 'film-newmexico', title: 'New Mexico (Father & Son)', short: 'New Mexico', place: 'New Mexico, USA', year: 2025, count: 39, look: 'tuscan', cover: 2, lat: 35.69, lon: -105.94, approx: true, axes: { expressive: 0.4, experimental: 0.88 }, album: 'https://photos.app.goo.gl/VpjypChCnTcmUYUy6', photo: filmNewMexico },
+  { id: 'film-brazil', title: 'Brazil', short: 'Brazil', place: 'Brazil', year: 2024, count: 177, look: 'lake', cover: 2, lat: -22.97, lon: -43.18, axes: { expressive: 0.76, experimental: 0.9 }, album: 'https://photos.app.goo.gl/mq7tDAW39WJtXZKb9' },
+  { id: 'film-peru', title: 'Peru', short: 'Peru', place: 'Peru', year: 2023, count: 106, look: 'nordic', cover: 3, lat: -13.53, lon: -71.97, approx: true, axes: { expressive: 0.56, experimental: 0.12 }, album: 'https://photos.app.goo.gl/xFZpvQYc3g4bkJCq7', photo: filmPeru },
+  { id: 'film-palmbeach', title: 'Palm Beach', short: 'Palm Beach', place: 'Florida, USA', year: 2023, count: 39, look: 'lake', cover: 3, lat: 26.71, lon: -80.04, axes: { expressive: 0.46, experimental: 0.5 }, album: 'https://photos.app.goo.gl/cdRyQoifqzXnUXHc9' },
+  { id: 'film-mexicocity', title: 'Mexico City', short: 'Mexico City', place: 'Mexico', year: 2022, count: 59, look: 'city', cover: 0, lat: 19.43, lon: -99.13, axes: { expressive: 0.58, experimental: 0.9 }, album: 'https://photos.app.goo.gl/KbPq8u5mRTioG6mV7', photo: filmMexicoCity },
+  { id: 'film-italy', title: 'Italy', short: 'Italy', place: 'Italy', year: 2021, count: 59, look: 'tuscan', cover: 1, lat: 41.89, lon: 12.49, axes: { expressive: 0.38, experimental: 0.12 }, album: 'https://photos.app.goo.gl/UhHmGhVmQcTq9g9f6', photo: filmItaly },
+  { id: 'film-colombia', title: 'Colombia', short: 'Colombia', place: 'Colombia', year: 2022, count: 53, look: 'city', cover: 2, lat: 4.71, lon: -74.07, approx: true, axes: { expressive: 0.94, experimental: 0.26 }, album: 'https://photos.app.goo.gl/F6T77reDexNC5zo27' },
 ];
 
 /** Engineering's x axis: characteristic size on a log scale, 10 cm → 1 km. */
@@ -536,6 +544,17 @@ export const artifacts = [
     tech: '', link: '',
     lens: { digital: 'The factory floor as software: equipment, layout and flow in one model.' },
     picture: { scene: 'app', label: 'Factory twin', layout: 'twin', accent: '#3fd0ff' }, related: [],
+  },
+  {
+    // Astrophotography, shot digitally: its main photo (the moon) for now, and the album.
+    id: 'horizonte', title: 'Horizonte Astronómico', kind: 'project', org: 'Astrophotography', years: [2025, 2025], tbd: true,
+    place: { name: 'Night sky', lat: 30.27, lon: -97.74 }, main: 'image', also: [], featured: 'yes', stage: 'shipped',
+    axes: { scale: m(0.3), complexity: 0.5, expressive: 0.7, experimental: 0.62, digital: 0.4, finished: 0.9 },
+    summary: 'Astrophotography: the moon and the night sky, shot through a long lens.',
+    lens: { image: 'The moon and the night sky, through a long lens.' },
+    picture: { src: horizonteMoon, bg: '#05070b' },
+    links: [{ label: 'Album', href: 'https://photos.app.goo.gl/Q6AQ6bDjTzfFLSqP6' }],
+    related: [],
   },
 ];
 

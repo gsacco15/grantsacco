@@ -8,8 +8,36 @@ import { rgba, lin, rad, rect, rr, poly, line, circle, glow } from './pictures.j
 const TAU = Math.PI * 2;
 const pick = (rnd, list) => list[Math.floor(rnd() * list.length)];
 
+/* ── Real covers ──────────────────────────────────────────────────────────────
+ * A film with `photo` (its real cover, a scan from the roll) shows that photo:
+ * the top print is the whole frame, the prints under it are details of it, until
+ * the full roll is in. When a cover finishes loading, 'lx-film-photo' fires on
+ * window (detail: the film id) so whatever drew the stand-in can repaint. */
+const real = new Map();
+
+/** The film's loaded cover image, or null (and start loading it). */
+export function realPhoto(album) {
+  if (!album.photo) return null;
+  let r = real.get(album.id);
+  if (!r) {
+    const img = new Image();
+    img.decoding = 'async';
+    r = { img, ok: false };
+    real.set(album.id, r);
+    img.onload = () => {
+      r.ok = true;
+      for (const k of [...cache.keys()]) if (k.startsWith(`${album.id}|`)) cache.delete(k);
+      window.dispatchEvent(new CustomEvent('lx-film-photo', { detail: album.id }));
+    };
+    img.src = album.photo;
+  }
+  return r.ok ? r.img : null;
+}
+
 /** Frame aspect (w / h): mostly 3:2 landscape, some 2:3 portrait. */
 export function photoAspect(album, i) {
+  const img = realPhoto(album);
+  if (img) return img.naturalWidth / img.naturalHeight;
   const rnd = mulberry32(hashString(`${album.id}#${i}`) ^ 0x2f6b);
   return rnd() < 0.28 ? 2 / 3 : 3 / 2;
 }
@@ -358,6 +386,23 @@ export function photo(album, i, w) {
   c.width = W;
   c.height = H;
   const g = c.getContext('2d');
+  const img = realPhoto(album);
+  if (img) {
+    // The cover itself, or a detail of it for the prints underneath.
+    const rnd = mulberry32(hashString(`${album.id}/${i}`));
+    const z = i === album.cover ? 1 : 1.35 + rnd() * 0.45;
+    const sw = img.naturalWidth / z;
+    const sh = img.naturalHeight / z;
+    g.drawImage(img, (img.naturalWidth - sw) * rnd(), (img.naturalHeight - sh) * (0.2 + rnd() * 0.6), sw, sh, 0, 0, W, H);
+    cache.set(key, c);
+    return c;
+  }
+  if (album.photo) {
+    // Still loading: plain paper, not cached.
+    g.fillStyle = '#e9e7e1';
+    g.fillRect(0, 0, W, H);
+    return c;
+  }
   const UW = aspect > 1 ? 300 : 200;
   const UH = aspect > 1 ? 200 : 300;
   g.scale(W / UW, H / UH);

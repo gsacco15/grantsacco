@@ -26,7 +26,7 @@ export function createStacks({ albums, parent, onOpen }) {
     el.type = 'button';
     el.className = 'pk';
     el.setAttribute('role', 'listitem');
-    el.setAttribute('aria-label', `${a.title} — ${a.place}, ${a.year}. ${a.count} photos. Open film`);
+    el.setAttribute('aria-label', `${a.title} — ${a.place}, ${a.year}. ${a.count} photos. ${a.album ? 'Open the album (new tab)' : 'Open film'}`);
     el.style.setProperty('--d', `${ai * 70}ms`);
     // Bottom of the pile first; the last card is the one on top.
     const frames = [3, 2, 1, 4, a.cover].map((k) => k % a.count);
@@ -78,7 +78,8 @@ export function createStacks({ albums, parent, onOpen }) {
       if (e.pointerType !== 'touch') el.classList.add('is-fanned');
     });
     el.addEventListener('pointermove', (e) => {
-      if (e.pointerType === 'touch') return;
+      // A roll shown by its cover alone has nothing to skim through yet.
+      if (e.pointerType === 'touch' || a.photo) return;
       const r = el.getBoundingClientRect();
       skimTo(Math.min(a.count - 1, Math.floor(clamp((e.clientX - r.left) / r.width) * a.count)));
     });
@@ -156,6 +157,12 @@ export function createStacks({ albums, parent, onOpen }) {
     };
     setTimeout(step, 400);
   }
+
+  // A real cover arrived: repaint that pile.
+  window.addEventListener('lx-film-photo', (e) => {
+    const s = stacks.find((q) => q.a.id === e.detail);
+    if (s?.size) paintCards(s);
+  });
 
   stacks.forEach((s) => (s.el.tabIndex = -1));
   return {

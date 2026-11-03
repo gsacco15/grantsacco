@@ -62,7 +62,12 @@ body.appendChild(dyn);
 const field = div('lx-field', body);
 field.setAttribute('role', 'list');
 field.setAttribute('aria-label', 'Work');
-const stacks = createStacks({ albums, parent: body, onOpen: (a, frame, el) => darkroom.open(a.id, frame, el) });
+// A film with an album link opens the album (Google Photos, new tab); one without opens the darkroom.
+function openFilm(a, frame, el) {
+  if (a.album) window.open(a.album, '_blank', 'noopener');
+  else darkroom.open(a.id, frame, el);
+}
+const stacks = createStacks({ albums, parent: body, onOpen: (a, frame, el) => openFilm(a, frame, el) });
 const sweep = div('lx-sweep', body, '<span class="lx-sweep__tag"></span>');
 sweep.setAttribute('aria-hidden', 'true');
 const sweepTag = sweep.firstElementChild;
@@ -80,7 +85,7 @@ const lg = {
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
 // Lens reads some axes differently from the Coordinates mock.
 const READOUT = { reality: 'r = year · θ = time of year · origin = you' };
-const HINT = { reality: 'Click the centre or any piece to open it', image: 'Hover a film to skim · click to open', place: 'Click a trip for photos · scroll or pinch to zoom' };
+const HINT = { reality: 'Click the centre or any piece to open it', image: 'Click a film to open its album', place: 'Click a trip for photos · scroll or pinch to zoom' };
 
 // About's one quiet line.
 const quietEl = div('lx-quiet', body, quiet.line.split(' · ').map((t) => `<span>${t}</span>`).join('<span class="lx-quiet__sep" aria-hidden="true">·</span>'));
@@ -275,7 +280,7 @@ const tiles = items.map((it) => {
   };
   // The film series is the photographs themselves: it opens straight into the films.
   // A film opens straight into its photographs; everything else opens its page.
-  el.addEventListener('click', () => (it.film ? darkroom.open(it.film.id, it.film.cover, el) : openProject(it.id, el)));
+  el.addEventListener('click', () => (it.film ? openFilm(it.film, it.film.cover, el) : openProject(it.id, el)));
   el.addEventListener('pointerenter', () => setHover(it.id));
   el.addEventListener('pointerleave', () => setHover(null));
   el.addEventListener('focus', () => setHover(it.id));
@@ -297,6 +302,12 @@ for (const ready of preloadPictures(items)) {
     page.refresh(id); // an open project page shows it too
   });
 }
+// A film's real cover arrived: its renders are redone too (the Art piles repaint themselves).
+window.addEventListener('lx-film-photo', (e) => {
+  forget(e.detail);
+  const t = tileById.get(e.detail);
+  if (t && t.show >= 0 && !T && mode) paint(t, t.show, mode);
+});
 
 const pxW = (w) => Math.max(24, Math.ceil((w * DPR) / 24) * 24);
 
@@ -631,7 +642,7 @@ const page = createPage({
   onNavigate: (id) => {
     const t = tileById.get(id);
     // A film opens its photographs over the page; anything else replaces the page.
-    if (t?.it.film) darkroom.open(t.it.film.id, t.it.film.cover, null);
+    if (t?.it.film) openFilm(t.it.film, t.it.film.cover, null);
     else page.open(id, t?.el.querySelector('.lx-tile__frame'));
   },
   onClose: (id) => {
