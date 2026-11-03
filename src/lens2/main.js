@@ -116,7 +116,7 @@ const introEl = div(
   `<button class="lx-intro__close" type="button" aria-label="Close">×</button>
   <div class="lx-intro__head">
     ${intro.headshot ? `<img class="lx-intro__photo" src="${intro.headshot}" alt="${site.name}" />` : `<span class="lx-intro__photo lx-intro__photo--todo" aria-hidden="true">${site.name.split(' ').map((w) => w[0]).join('')}</span>`}
-    <span class="lx-intro__name">${site.name}</span>
+    <span class="lx-intro__who"><span class="lx-intro__name">${site.name}</span><span class="lx-intro__role">Mechanical engineer · Austin</span></span>
   </div>
   ${intro.lines.map((l) => `<p class="lx-intro__line">${l}</p>`).join('')}
   ${intro.personal ? `<p class="lx-intro__line lx-intro__line--personal">${intro.personal}</p>` : ''}

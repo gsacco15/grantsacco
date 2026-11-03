@@ -127,14 +127,19 @@ function reality(c, id) {
   const g = ctx(c);
   const img = g.getImageData(0, 0, w, h);
   const d = img.data;
-  // A natural, slightly muted photograph: no warm cast, a touch less saturation.
+  // One shared print grade, so photos, renders, model stills and badges read as
+  // one set: a little less saturation, blacks lifted to ink, whites eased to
+  // paper, and the faintest warm cast.
   for (let j = 0; j < d.length; j += 4) {
     const l = 0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2];
-    d[j] = l + (d[j] - l) * 0.9;
-    d[j + 1] = l + (d[j + 1] - l) * 0.9;
-    d[j + 2] = l + (d[j + 2] - l) * 0.9;
+    const r = l + (d[j] - l) * 0.8;
+    const gr = l + (d[j + 1] - l) * 0.8;
+    const b = l + (d[j + 2] - l) * 0.8;
+    d[j] = 14 + r * 0.93 + 1.5;
+    d[j + 1] = 14 + gr * 0.93;
+    d[j + 2] = 14 + b * 0.93 - 2;
   }
-  grainAndVignette(d, w, h, hashString(id), 6, 0.1);
+  grainAndVignette(d, w, h, hashString(id), 5, 0.05);
   g.putImageData(img, 0, 0);
 }
 

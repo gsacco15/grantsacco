@@ -1955,6 +1955,19 @@ body.lx-page-open .lx-origin {
   line-height: 1.05;
 }
 
+.lx-intro__who {
+  display: grid;
+  gap: 3px;
+}
+
+.lx-intro__role {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
 .lx-intro__line {
   margin: 0;
   font-size: 13px;
@@ -2308,6 +2321,23 @@ body.concept-lens2 .lx-tile[data-r='build'] .lx-tile__frame,
 body.concept-lens2 .lx-tile[data-r='image'] .lx-tile__frame {
   border-radius: 2px;
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+/* About: every picture is the same kind of print, on a thin white mat with a hairline. */
+body.concept-lens2 .lx-tile[data-r='reality'] .lx-tile__frame {
+  border-radius: 1px;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 4px color-mix(in srgb, var(--ink) 12%, transparent),
+    0 12px 22px -16px rgb(0 0 0 / 0.4);
+}
+
+@media (max-width: 759px) {
+  body.concept-lens2 .lx-tile[data-r='reality'] .lx-tile__frame {
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 3px color-mix(in srgb, var(--ink) 12%, transparent);
+  }
 }
 
 body.concept-lens2 .lx-tile[data-r='structure'] .lx-tile__frame {

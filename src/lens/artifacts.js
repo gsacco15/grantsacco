@@ -82,21 +82,20 @@ export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+
 
 /**
  * The card behind the origin ("Grant" at the centre of About): a headshot,
- * three sentences in Grant's voice (from his résumé summary), and how to reach him
- * (email and links come from `site` in src/content.js). Draft wording: facts
- * only, no adjectives.
+ * three short paragraphs in Grant's own voice (first person, mixed from his
+ * résumé summary and his notes), a personal one under them, and how to reach
+ * him (email and links come from `site` in src/content.js).
  */
 export const intro = {
   headshot, // Grant in Rio, cropped to the face
   lines: [
-    'Grant is a mechanical engineer and project manager in Austin who builds advanced manufacturing facilities: 8+ years taking large manufacturing and industrial projects from scope and early budgets through construction and closeout.',
-    'He works best in the field: managing contractors, sorting out design conflicts as they come up and getting permits and inspections done, so projects finish safely, on schedule and on budget.',
-    'At Enovis he is building end-to-end orthopedic implant manufacturing under one roof, from additive and subtractive manufacturing through cleaning, packaging and sterilization to shipping.',
-    'Before that he built plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and founded OnlyChargeEV, an EV charging company.',
+    "I'm a mechanical engineer and project manager in Austin with 8+ years delivering advanced manufacturing and industrial facilities. I own projects end to end, from scope and budget through design, contracting, construction and closeout, leading the contractors, vendors and engineering teams who build them.",
+    "Today I'm in medical technology at Enovis, leading the build-out of a facility for end-to-end orthopedic implant manufacturing under one roof: additive and subtractive manufacturing, cleaning, packaging, sterilization and shipping.",
+    'Before that I delivered chemical manufacturing plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and I founded OnlyChargeEV, an EV charging company.',
   ],
   // The personal side, set apart under the work.
   personal:
-    "Originally from Chicago, he lived and worked in Milan and speaks Italian fluently. He loves travelling, other cultures and languages, and outside work he's usually running, surfing or somewhere outdoors.",
+    "I grew up in Chicago, lived and worked in Milan and speak Italian fluently. I love travelling, other cultures and learning languages, and outside work I'm usually running, surfing or somewhere outdoors.",
 };
 
 /** Jaylee and Helga, sitting on About's 2021 ring (one frame from each sprite sheet). */

@@ -277,12 +277,15 @@ const extra = {
   },
 
   // A role or a school: a quiet badge. The org's real mark can replace it.
+  // In v2 every badge is the same: paper with a faint drawing grid, the name in
+  // ink, the place and years in mono, and one short blue rule (the site's accent).
   badge(g, rnd, spec) {
-    const a = spec.accent ?? '#2b5aa6';
-    rect(g, 0, 0, 300, 200, lin(g, 0, 0, 300, 200, [[0, a], [1, '#0f1114']]));
-    for (let i = 0; i < 12; i++) line(g, -40 + i * 32, 200, 60 + i * 32, 0, 'rgb(255 255 255 / 0.06)', 10);
-    label(g, spec.label, 26, 120, { size: spec.label.length > 6 ? 42 : 58, weight: 700, color: '#ffffff' });
-    label(g, spec.sub ?? '', 28, 152, { size: 15, weight: 500, color: 'rgb(255 255 255 / 0.75)', family: 'JetBrains Mono, monospace' });
+    rect(g, 0, 0, 300, 200, '#efeee9');
+    for (let x = 20; x < 300; x += 20) line(g, x, 0, x, 200, 'rgb(21 21 21 / 0.05)', 1);
+    for (let y = 20; y < 200; y += 20) line(g, 0, y, 300, y, 'rgb(21 21 21 / 0.05)', 1);
+    rect(g, 28, 62, 30, 4, '#2c55c9');
+    label(g, spec.label, 26, 122, { size: spec.label.length > 6 ? 42 : 54, weight: 650, color: '#151515' });
+    label(g, spec.sub ?? '', 28, 154, { size: 15, weight: 500, color: '#6c6a64', family: 'JetBrains Mono, monospace' });
   },
 
   // A place lived: a skyline and the city's name.
