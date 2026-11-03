@@ -126,41 +126,70 @@ const introEl = div(
 introEl.setAttribute('role', 'dialog');
 introEl.setAttribute('aria-label', `About ${site.name}`);
 introEl.hidden = true;
-function setIntro(open) {
+
+// A small round photo beside the name in the corner opens the same card, from any section.
+const avatarBtn = document.createElement('button');
+avatarBtn.type = 'button';
+avatarBtn.className = 'chrome__avatar';
+avatarBtn.setAttribute('aria-label', `About ${site.name}`);
+avatarBtn.setAttribute('aria-haspopup', 'dialog');
+avatarBtn.setAttribute('aria-expanded', 'false');
+avatarBtn.innerHTML = intro.headshot ? `<img src="${intro.headshot}" alt="" />` : `<span>${site.name.split(' ').map((w) => w[0]).join('')}</span>`;
+document.querySelector('.chrome__id')?.prepend(avatarBtn);
+
+// The origin says it can be clicked: a slow pulse from the dot and an "About me" chip.
+originBtn.insertAdjacentHTML('beforeend', '<span class="lx-origin__cta" aria-hidden="true">About me <span>↗</span></span>');
+
+let introFrom = originBtn;
+function setIntro(open, from = introFrom) {
+  introFrom = from;
   introEl.hidden = !open;
-  originBtn.setAttribute('aria-expanded', String(open));
+  originBtn.setAttribute('aria-expanded', String(open && from === originBtn));
+  avatarBtn.setAttribute('aria-expanded', String(open && from === avatarBtn));
   if (open) {
-    const p = originBtn.getBoundingClientRect();
+    const p = from.getBoundingClientRect();
     const w = Math.min(320, innerWidth - 32);
+    const phone = innerWidth < 760;
     introEl.style.width = `${w}px`;
-    // Beside the origin on wide screens, centred on phones.
-    const x = innerWidth < 760 ? (innerWidth - w) / 2 : Math.min(innerWidth - w - 16, p.right + 16);
     // On phones it stays clear of the section switcher at the bottom (and scrolls if it must).
-    const room = innerHeight - (innerWidth < 760 ? 72 + 112 : 96 + 120);
+    const room = innerHeight - (phone ? 72 + 112 : 96 + 120);
     introEl.style.maxHeight = `${room}px`;
-    const y = innerWidth < 760 ? Math.max(72, Math.min(p.top - 40, innerHeight - 112 - Math.min(room, introEl.offsetHeight))) : Math.max(96, Math.min(innerHeight - introEl.offsetHeight - 120, p.top - 40));
+    const h = Math.min(room, introEl.offsetHeight);
+    let x;
+    let y;
+    if (from === avatarBtn) {
+      // Under the photo in the corner; centred on phones.
+      x = phone ? (innerWidth - w) / 2 : Math.max(16, p.left - 4);
+      y = p.bottom + 12;
+    } else {
+      // Beside the origin on wide screens, centred on phones.
+      x = phone ? (innerWidth - w) / 2 : Math.min(innerWidth - w - 16, p.right + 16);
+      y = phone ? Math.max(72, Math.min(p.top - 40, innerHeight - 112 - h)) : Math.max(96, Math.min(innerHeight - introEl.offsetHeight - 120, p.top - 40));
+    }
     introEl.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px)`;
     introEl.querySelector('.lx-intro__close').focus({ preventScroll: true });
   }
 }
-originBtn.addEventListener('click', () => setIntro(introEl.hidden));
+const toggleIntro = (from) => setIntro(introEl.hidden || introFrom !== from, from);
+originBtn.addEventListener('click', () => toggleIntro(originBtn));
 originBtn.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
-    setIntro(introEl.hidden);
+    toggleIntro(originBtn);
   }
 });
+avatarBtn.addEventListener('click', () => toggleIntro(avatarBtn));
 introEl.querySelector('.lx-intro__close').addEventListener('click', () => {
   setIntro(false);
-  originBtn.focus({ preventScroll: true });
+  introFrom.focus({ preventScroll: true });
 });
 document.addEventListener('pointerdown', (e) => {
-  if (!introEl.hidden && !introEl.contains(e.target) && !originBtn.contains(e.target)) setIntro(false);
+  if (!introEl.hidden && !introEl.contains(e.target) && !originBtn.contains(e.target) && !avatarBtn.contains(e.target)) setIntro(false);
 });
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !introEl.hidden) {
     setIntro(false);
-    originBtn.focus({ preventScroll: true });
+    introFrom.focus({ preventScroll: true });
   }
 });
 

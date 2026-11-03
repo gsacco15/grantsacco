@@ -342,7 +342,7 @@ export function layout(mode, W, H) {
   const obstacles = [];
   let marks = [];
   if (mode === 'reality') {
-    obstacles.push({ x0: P.cx - 44, x1: P.cx + 44, y0: P.cy - 16, y1: P.cy + 46 });
+    obstacles.push({ x0: P.cx - 50, x1: P.cx + 50, y0: P.cy - 16, y1: P.cy + 72 });
     marks = raceMarks(R, W);
     for (const k of marks) obstacles.push({ x0: k.x - k.w / 2 - 4, x1: k.x + k.w / 2 + 4, y0: k.y - k.h / 2 - 4, y1: k.y + k.h / 2 + 4 });
     for (const b of yearCues(R, W)) obstacles.push(b);

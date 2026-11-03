@@ -2734,3 +2734,112 @@ body.concept-lens2 .lx-intro__name {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+
+/* The small round photo beside the name in the corner (opens the About card). */
+.chrome--site .chrome__id {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chrome__avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s var(--ease);
+}
+
+.chrome__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.chrome__avatar span {
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.chrome__avatar:hover,
+.chrome__avatar:focus-visible,
+.chrome__avatar[aria-expanded='true'] {
+  transform: scale(1.06);
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--accent);
+  outline: none;
+}
+
+/* The origin calls attention to itself: a slow pulse from the dot, and a chip. */
+.lx-origin {
+  height: 84px;
+}
+
+.lx-origin::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 18px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  translate: -50% -50%;
+  pointer-events: none;
+  animation: lx-beacon 2.6s var(--ease) infinite;
+}
+
+@keyframes lx-beacon {
+  0% {
+    scale: 1;
+    opacity: 0.75;
+  }
+  70%,
+  100% {
+    scale: 3.6;
+    opacity: 0;
+  }
+}
+
+.lx-origin__cta {
+  position: absolute;
+  left: 50%;
+  top: 64px;
+  translate: -50% 0;
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px 9px 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--accent);
+  box-shadow: 0 6px 16px -8px color-mix(in srgb, var(--accent) 80%, transparent);
+  transition: transform 0.2s var(--ease);
+}
+
+.lx-origin:hover .lx-origin__cta,
+.lx-origin:focus-visible .lx-origin__cta {
+  transform: translateY(-1px);
+}
+
+.lx-origin[aria-expanded='true'] .lx-origin__cta {
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lx-origin::before {
+    animation: none;
+    scale: 2;
+    opacity: 0.35;
+  }
+}
