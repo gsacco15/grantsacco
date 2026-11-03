@@ -1,4 +1,4 @@
-// Concept 08 — Lens (v2): Lens with a quieter, more professional look:
+// Grant Sacco's site (Lens v2): Lens with a quieter, more professional look:
 // cleaner and more functional. Same content, same behaviour; only the look changes.
 //
 // Concept 07 — Lens. Every piece of work is a picture on a field. Switching
@@ -27,7 +27,7 @@ import { createStacks } from './stacks.js';
 import { createDarkroom } from './darkroom.js';
 
 // Lens carries Grant's real work; only the pictures are stand-ins so far.
-mountChrome('lens2', { draft: 'Placeholder<span class="lx-wide"> images</span>' });
+mountChrome('lens2', { standalone: true });
 
 const MODE_IDS = modes.map((m) => m.id);
 const body = document.body;
@@ -78,7 +78,7 @@ const READOUT = { reality: 'r = year · θ = time of year · origin = you' };
 const HINT = { reality: 'Click the centre or any piece to open it', image: 'Hover a film to skim · click to open', place: 'Click a trip for photos · scroll or pinch to zoom' };
 
 // About's one quiet line.
-const quietEl = div('lx-quiet', body, `<span>${quiet.line}</span>`);
+const quietEl = div('lx-quiet', body, quiet.line.split(' · ').map((t) => `<span>${t}</span>`).join('<span class="lx-quiet__sep" aria-hidden="true">·</span>'));
 
 // Jaylee and Helga, sitting on their year's ring in About (named on hover).
 const dogsEl = div(
@@ -110,16 +110,17 @@ const introEl = div(
   body,
   `<button class="lx-intro__close" type="button" aria-label="Close">×</button>
   <div class="lx-intro__head">
-    ${intro.headshot ? `<img class="lx-intro__photo" src="${intro.headshot}" alt="${site.name}" />` : '<span class="lx-intro__photo lx-intro__photo--todo" aria-hidden="true">headshot</span>'}
+    ${intro.headshot ? `<img class="lx-intro__photo" src="${intro.headshot}" alt="${site.name}" />` : `<span class="lx-intro__photo lx-intro__photo--todo" aria-hidden="true">${site.name.split(' ').map((w) => w[0]).join('')}</span>`}
     <span class="lx-intro__name">${site.name}</span>
   </div>
   ${intro.lines.map((l) => `<p class="lx-intro__line">${l}</p>`).join('')}
   <ul class="lx-intro__links">
-    ${site.email ? `<li><a href="mailto:${site.email}"><span>Email</span><span>${site.email}</span></a></li>` : '<li class="is-todo"><span>Email</span><span>to add</span></li>'}
+    ${site.email ? `<li><a href="mailto:${site.email}"><span>Email</span><span>${site.email}</span></a></li>` : ''}
     ${site.links
       .filter((l) => l.label === 'LinkedIn')
       .map((l) => `<li><a href="${l.href}" target="_blank" rel="noopener"><span>${l.label}</span><span>${bare(l.href)} ↗</span></a></li>`)
       .join('')}
+    ${site.resume ? `<li><a href="${site.resume}" target="_blank" rel="noopener"><span>Résumé</span><span>PDF ↗</span></a></li>` : ''}
   </ul>`,
 );
 introEl.setAttribute('role', 'dialog');

@@ -12,23 +12,35 @@ const el = (tag, cls, html) => {
   return n;
 };
 
-export function mountChrome(conceptId, { draft } = {}) {
+export function mountChrome(conceptId, { draft, standalone = false } = {}) {
   const i = concepts.findIndex((c) => c.id === conceptId);
   const c = concepts[i];
   const prev = concepts[(i + concepts.length - 1) % concepts.length];
   const next = concepts[(i + 1) % concepts.length];
 
+  // The real site: just the name and the contact pill, no concept navigation or note.
+  if (standalone) {
+    const bar = el('header', 'chrome chrome--site');
+    bar.innerHTML = `
+      <div class="chrome__id"><a class="chrome__name" href="./">${site.name}</a></div>
+      <div class="chrome__end"></div>`;
+    document.body.appendChild(bar);
+    mountContact(bar.querySelector('.chrome__end'));
+    document.title = site.name;
+    return { bar, note: null, concept: c };
+  }
+
   const bar = el('header', 'chrome');
   bar.innerHTML = `
     <div class="chrome__id">
-      <a class="chrome__name" href="../">${site.name}</a>
+      <a class="chrome__name" href="../concepts/">${site.name}</a>
       <span class="chrome__concept"><span class="chrome__concept-word">Concept </span>${String(i + 1).padStart(2, '0')} — ${c.name}</span>
       ${draft || site.draft ? `<span class="chrome__draft">${draft ?? 'Sample content'}</span>` : ''}
     </div>
     <div class="chrome__end">
       <nav class="chrome__nav" aria-label="Concepts">
         <a href="../${prev.id}/" title="Previous concept: ${prev.name}" aria-label="Previous concept: ${prev.name}">←</a>
-        <a class="chrome__all" href="../" title="All concepts"><span class="chrome__all-label">All concepts</span><span aria-hidden="true">&nbsp;▦</span></a>
+        <a class="chrome__all" href="../concepts/" title="All concepts"><span class="chrome__all-label">All concepts</span><span aria-hidden="true">&nbsp;▦</span></a>
         <a href="../${next.id}/" title="Next concept: ${next.name}" aria-label="Next concept: ${next.name}">→</a>
       </nav>
     </div>`;

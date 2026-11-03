@@ -21,7 +21,7 @@ root.innerHTML = `
       .map(
         (c, i) => `
       <li class="g-item">
-        <a class="g-card" href="./${c.id}/">
+        <a class="g-card" href="../${c.id}/">
           <span class="g-num">${String(i + 1).padStart(2, '0')}</span>
           <span class="g-preview" aria-hidden="true">
             <img src="previews/${c.id}.jpg" alt="" loading="lazy" onerror="this.remove()" />
@@ -48,7 +48,7 @@ root.innerHTML = `
       <div><dt>Coordinates</dt><dd>decide <em>how the work is arranged</em>.</dd></div>
       <div><dt>Translation</dt><dd>is the idea that explains why all of it works.</dd></div>
     </dl>
-    <p class="g-small">Concept 07, <a href="./lens/">Lens</a>, is a first try at that: Coordinates decide where the work sits, Viewport Modes decide how it looks.</p>
+    <p class="g-small">Concept 07, <a href="../lens/">Lens</a>, is a first try at that: Coordinates decide where the work sits, Viewport Modes decide how it looks.</p>
   </section>
 
   <footer class="g-foot">

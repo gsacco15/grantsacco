@@ -1,8 +1,8 @@
-# Grant Sacco — personal site concepts
+# Grant Sacco — personal site
 
-**Same person. Different lens.** Eight working, interactive concept mocks for a personal site. Each one is a different answer to the same question: what if the sections (About, Engineering, Projects, Art, Travel, Digital) weren't separate pages, but different ways of looking at the same work?
+The site is **Lens (v2)**, served on its own at the root (`index.html` → `src/lens2/`). Every piece of work is a picture on one field; switching section (About, Engineering, Projects, Art, Travel, Digital) moves the pictures onto that section's axes while a render line redraws them in its look. `1`–`6` or `←` `→` switch sections, the URL hash (`#structure`, `#place`, …) links to a section and `?p=<id>` to a project.
 
-All seven mocks share one content file, so the only thing that changes between them is the concept.
+The build contains only the site. The earlier concept mocks below stay in the repo for reference: they still run in `npm run dev` at `/<name>/`, but they are not built or linked from the site.
 
 | # | Concept | What switching sections does |
 |---|---|---|
@@ -23,8 +23,8 @@ The section switcher is a liquid glass tray: the active tab is an ink drop that 
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173 — the gallery links to every mock
-npm run build    # static site in dist/
+npm run dev      # http://localhost:5173 — the site (mocks at /scale/, /lens/, …)
+npm run build    # the site, static, in dist/
 npm run preview  # serve the build locally
 ```
 
@@ -51,7 +51,7 @@ src/<concept>/               that mock's code and styles
 src/shared/                  chrome (top bar, contact card, liquid section switcher), geo helpers, concept list
 src/content.js               the content every mock reads
 src/anim.js                  small interruption-safe tween helpers
-public/previews/             gallery thumbnails
+concepts/                    the old concept gallery (dev only, /concepts/) and its thumbnails
 src/lens/pictures.js         placeholder project pictures (swap for real photos)
 ```
 

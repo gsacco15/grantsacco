@@ -234,7 +234,7 @@ body.concept-lens {
 
 /* Out-of-focus work steps back in every section but About (and the map, which is dots). */
 .lx-tile[data-r]:not([data-r='reality']):not([data-r='place']):not(.is-focus) .lx-tile__frame {
-  opacity: 0.74;
+  opacity: 0.92;
 }
 
 /* Reality: photographs. */
@@ -1733,12 +1733,15 @@ body.lx-page-open .lx-hint {
 
 .lx-quiet {
   position: fixed;
-  top: 104px;
+  top: 66px;
   left: var(--gutter);
   z-index: 20;
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 3px 8px;
+  max-width: min(340px, calc(50vw - 230px));
+  line-height: 1.55;
   font-family: var(--mono);
   font-size: 10.5px;
   letter-spacing: 0.06em;
@@ -1937,12 +1940,13 @@ body.lx-page-open .lx-origin {
 .lx-intro__photo--todo {
   display: grid;
   place-items: center;
-  border: 1.5px dashed color-mix(in srgb, var(--ink) 35%, transparent);
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--ink) 6%, transparent);
   font-family: var(--mono);
-  font-size: 8.5px;
+  font-size: 13px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: var(--ink);
 }
 
 .lx-intro__name {
@@ -2708,4 +2712,19 @@ body.concept-lens2 .lx-intro__name {
 .lx-page__hero:has(.has-photos-open) .lx-zones,
 .lx-page__frame.has-photos-open .lx-notes {
   visibility: hidden;
+}
+
+/* The About line: items stay whole and wrap between them. */
+.lx-quiet > span {
+  white-space: nowrap;
+}
+
+.lx-quiet__sep {
+  opacity: 0.6;
+}
+
+@media (max-width: 1180px) {
+  .lx-quiet {
+    max-width: calc(100vw - 2 * var(--gutter));
+  }
 }

@@ -147,19 +147,15 @@ function structure(c) {
   const E = sobel(L, w, h);
   const paper = hex('#f7f6f3');
   const ink = hex('#151515');
-  const lineW = Math.max(1, Math.round(w / 300));
-  const gap = 7 * lineW;
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const i = y * w + x;
-      const edge = sstep(0.12, 0.42, E[i]);
-      // Light section hatching in the darkest regions only.
-      const hatch = (x + y) % gap < lineW ? 0.32 * sstep(0.3, 0.12, L[i]) : 0;
-      const t = Math.min(1, Math.max(edge, hatch));
-      const j = i * 4;
-      d[j] = mix(paper[0], ink[0], t);
-      d[j + 1] = mix(paper[1], ink[1], t);
-      d[j + 2] = mix(paper[2], ink[2], t);
+  for (let i = 0; i < w * h; i++) {
+    const j = i * 4;
+    // The picture itself, half desaturated and washed toward paper, with its
+    // edges inked over: a drawing that still reads as the thing.
+    const l = L[i] * 255;
+    const t = 0.85 * sstep(0.14, 0.46, E[i]);
+    for (let k = 0; k < 3; k++) {
+      const v = mix(mix(d[j + k], l, 0.5), paper[k], 0.32);
+      d[j + k] = mix(v, ink[k], t);
     }
   }
   g.putImageData(img, 0, 0);
@@ -175,15 +171,13 @@ function build(c) {
   const dark = hex('#3b3b3a');
   const light = hex('#f0f0ee');
   for (let i = 0; i < w * h; i++) {
-    // Soft posterise: clay reads in a few broad values, not gradients.
-    const steps = 5;
-    const q = Math.round(L[i] * steps) / steps;
-    const v = mix(L[i], q, 0.7) * (1 - 0.45 * sstep(0.1, 0.4, E[i]));
-    const t = Math.min(1, Math.max(0, 0.16 + v * 1.2));
+    // Clay: the picture's own light and shade in a neutral grey, lightly
+    // posterised, with a trace of its colour left so it stays recognisable.
+    const q = Math.round(L[i] * 5) / 5;
+    const v = mix(L[i], q, 0.3) * (1 - 0.3 * sstep(0.1, 0.4, E[i]));
+    const t = Math.min(1, Math.max(0, 0.06 + v * 0.96));
     const j = i * 4;
-    d[j] = mix(dark[0], light[0], t);
-    d[j + 1] = mix(dark[1], light[1], t);
-    d[j + 2] = mix(dark[2], light[2], t);
+    for (let k = 0; k < 3; k++) d[j + k] = mix(mix(dark[k], light[k], t), d[j + k], 0.22);
   }
   g.putImageData(img, 0, 0);
 }
@@ -227,7 +221,7 @@ function image(c, id) {
     d[j + 1] = (gg + halo * 0.85) * 255;
     d[j + 2] = (b + halo * 0.7) * 255;
   }
-  grainAndVignette(d, w, h, hashString(id) ^ 0x9e3779b9, 16, 0.38);
+  grainAndVignette(d, w, h, hashString(id) ^ 0x9e3779b9, 12, 0.24);
   g.putImageData(img, 0, 0);
 }
 
@@ -240,9 +234,10 @@ function place(c, id) {
   for (let j = 0; j < d.length; j += 4) {
     const l = Math.min(1, (0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2]) / 255 * 1.1);
     const [a, b, t] = l < 0.55 ? [stops[0], stops[1], l / 0.55] : [stops[1], stops[2], (l - 0.55) / 0.45];
-    d[j] = mix(a[0], b[0], t);
-    d[j + 1] = mix(a[1], b[1], t);
-    d[j + 2] = mix(a[2], b[2], t);
+    // A map tone over the picture, not instead of it.
+    d[j] = mix(mix(a[0], b[0], t), d[j], 0.38);
+    d[j + 1] = mix(mix(a[1], b[1], t), d[j + 1], 0.38);
+    d[j + 2] = mix(mix(a[2], b[2], t), d[j + 2], 0.38);
   }
   grainAndVignette(d, w, h, hashString(id) ^ 0x51ed27, 10, 0.3);
   g.putImageData(img, 0, 0);
@@ -263,8 +258,16 @@ function digital(c) {
   // ~40 columns on a tile, finer on a large hero.
   const cw = Math.max(4, Math.round(w / Math.min(110, Math.max(40, w / 8))));
   const ch = Math.round(cw * 1.55);
-  g.fillStyle = '#101010';
-  g.fillRect(0, 0, w, h);
+  // The picture stays underneath, dimmed and cooled, so the characters read as a
+  // layer on it rather than replacing it.
+  const base = g.getImageData(0, 0, w, h);
+  const bd = base.data;
+  for (let j = 0; j < bd.length; j += 4) {
+    bd[j] = 16 + bd[j] * 0.36;
+    bd[j + 1] = 16 + bd[j + 1] * 0.38;
+    bd[j + 2] = 18 + bd[j + 2] * 0.42;
+  }
+  g.putImageData(base, 0, 0);
   g.font = `500 ${Math.round(ch * 0.95)}px "JetBrains Mono", ui-monospace, monospace`;
   g.textBaseline = 'top';
   for (let y = 0; y + ch <= h + ch / 2; y += ch) {
@@ -282,7 +285,7 @@ function digital(c) {
       const l = Math.min(1, 0.5 * (s / k) ** 1.4 + Math.min(0.6, (e / k) * 0.9));
       const ci = Math.round(l * (RAMP.length - 1));
       if (ci === 0) continue;
-      g.fillStyle = `rgb(236 235 231 / ${(0.2 + 0.8 * l).toFixed(2)})`;
+      g.fillStyle = `rgb(236 235 231 / ${(0.12 + 0.5 * l).toFixed(2)})`;
       g.fillText(RAMP[ci], x, y);
     }
   }

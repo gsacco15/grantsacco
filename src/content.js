@@ -23,13 +23,13 @@ export const site = {
     'I design and build physical systems — manufacturing lines, machines, fixtures — and spend the rest of my time making things with cameras, code, and whatever is on the workbench.',
   basedIn: 'United States',
   email: '', // e.g. 'hello@yourdomain.com' — leave empty to hide
-  resume: '', // e.g. 'resume.pdf' placed in /public — leave empty to hide
+  resume: 'grant-sacco-resume.pdf', // in /public — leave empty to hide
   links: [
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/grant-t-sacco' },
     { label: 'GitHub', href: 'https://github.com/gsacco15' },
     // { label: 'Instagram', href: 'https://instagram.com/…' },
   ],
-  draft: true,
+  draft: false,
 };
 
 /*

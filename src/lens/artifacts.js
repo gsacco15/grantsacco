@@ -36,7 +36,8 @@ import staticmixRender from './img/staticmix.jpg';
 import drymixTowerCad from './img/photos/drymix-tower-cad.jpg';
 import drymixStructureCad from './img/photos/drymix-structure-cad.jpg';
 import mpocModel from './img/models/mpoc.jpg';
-import mpocLab from './img/models/mpoc-lab.jpg';
+import promadeEbm from './img/photos/promade-ebm.jpg';
+import promadeSls from './img/photos/promade-sls.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
 import mpocPlan from './img/models/mpoc-plan.json?url';
 import drymixStill from './img/models/mapei-drymix.jpg';
@@ -72,7 +73,7 @@ const LOGO = {
 };
 
 /** One quiet line in About. */
-export const quiet = { line: 'Based in Austin · English, Italian, learning Portuguese' };
+export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+ years in manufacturing · English, Italian' };
 
 /**
  * The card behind the origin ("Grant" at the centre of About): a headshot,
@@ -216,7 +217,7 @@ export const artifacts = [
     picture: { scene: 'badge', label: 'MAPEI', sub: 'Chicago · 2018 – 19', accent: '#5a7fb8' }, logo: LOGO.mapei, related: [],
   },
   {
-    id: 'ku', title: 'University of Kansas', kind: 'education', org: 'B.S. Mechanical Engineering', years: [2014, 2018], month: 8, monthTbd: true,
+    id: 'ku', title: 'University of Kansas', kind: 'education', org: 'B.S. Mechanical Engineering', years: [2014, 2018], month: 8, monthTbd: true, aboutNote: 'BSME',
     place: { name: 'Lawrence, KS', lat: 38.97, lon: -95.24 }, main: 'reality', also: [], featured: 'yes', stage: 'shipped', axes: ax(0.4, 0.55),
     summary: 'BSME. Formula SAE electric powertrain and biomechanical research.',
     lens: { reality: '2014 – 2018 · Lawrence. A racecar and a piano-pedal device on the way to a BSME.' },
@@ -237,15 +238,27 @@ export const artifacts = [
     picture: { src: mpocModel, bg: '#f4f3f0', turn: { src: mpocTurn, frames: 72, cols: 12 } }, logo: LOGO.enovis, model: { id: 'mpoc', src: mpocPlan }, related: ['enovis', 'enovis-am'],
   },
   {
-    id: 'enovis-am', title: 'Additive manufacturing center', kind: 'engineering', org: 'Enovis', years: [2025, 2026],
+    id: 'enovis-am', title: 'ProMade additive manufacturing work center', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 4, ended: true, // through September 2026
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build'], featured: 'yes', stage: 'built', axes: ax(m(40), 0.84),
-    summary: 'An industrial additive manufacturing center with EBM and SLS systems for patient-specific implants.',
-    facts: ['EBM and SLS systems', 'Utilities, equipment siting, install sequencing', 'Material-flow layout', 'Production validation'],
+    summary: 'The pilot ProMade work center: the first additive manufacturing capability for Enovis in the U.S., printing EBM titanium and PA 2200 nylon for patient-specific implants and precision surgical guides.',
+    facts: [
+      'First Enovis additive manufacturing in the U.S.',
+      'EBM titanium and PA 2200 nylon (SLS) printing',
+      'Lab, packaging, manufacturing and post-processing (blasting, finishing) work centers',
+      'Engineering, procurement, construction and machine qualification',
+      'April 2025 – September 2026',
+    ],
     lens: {
-      structure: 'EBM and SLS printers: utilities, siting, install sequencing, material flow and validation.',
-      build: 'Empty room → utilities → printers sited and sequenced → validated for production.',
+      structure: 'EBM titanium and PA 2200 printers with their lab, packaging and post-processing work centers: engineered, procured, built and qualified.',
+      build: 'Empty space → utilities → printers sited → blasting and finishing → machines qualified, April 2025 – September 2026.',
     },
-    picture: { src: mpocLab, bg: '#f4f3f0' }, model: { id: 'mpoc', src: mpocPlan, highlight: 'lab' }, related: ['enovis-facility'],
+    // Picture: the EBM room; the photo viewer has it and the SLS room. In the same plant as the operations facility.
+    picture: { src: promadeEbm, bg: '#e9ecef' },
+    photos: [
+      { src: promadeEbm, alt: 'The EBM room: two Arcam EBM titanium printers under their gas lines, with powder-handling carts', caption: 'EBM titanium printers' },
+      { src: promadeSls, alt: 'The SLS room: three FORMIGA P 110 printers for PA 2200 nylon parts', caption: 'SLS printers, PA 2200 nylon' },
+    ],
+    related: ['enovis-facility', 'enovis'],
   },
   {
     id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true, month: 3, monthTbd: true,

@@ -19,7 +19,7 @@ const yrs = (it) => {
   const [a, b] = it.years;
   const t = it.tbd ? '~' : '';
   if (a == null) return `until ${b}`;
-  if (b >= NOW && it.kind !== 'app' && it.kind !== 'film') return `${t}${a} – now`;
+  if (b >= NOW && !it.ended && it.kind !== 'app' && it.kind !== 'film') return `${t}${a} – now`;
   return a === b ? `${t}${a}` : `${t}${a}–${String(b).slice(2)}`;
 };
 const f2 = (v) => v.toFixed(2).replace(/^0/, '');
@@ -41,7 +41,7 @@ export const scaleTicks = () =>
 export function metaFor(it, mode) {
   switch (mode) {
     case 'reality':
-      return yrs(it);
+      return it.aboutNote ? `${it.aboutNote} · ${yrs(it)}` : yrs(it);
     case 'structure':
       return `≈ ${physicalSize(it.axes.scale)} · c ${f2(it.axes.complexity)}`;
     case 'build':
