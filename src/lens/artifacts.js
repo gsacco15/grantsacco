@@ -42,6 +42,7 @@ import onlychargeWall from './img/photos/onlycharge-wall.jpg';
 import promadeEbm from './img/photos/promade-ebm.jpg';
 import promadeSls from './img/photos/promade-sls.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
+import mpocCps from './img/models/mpoc-cps.jpg';
 import mpocPlan from './img/models/mpoc-plan.json?url';
 import drymixStill from './img/models/mapei-drymix.jpg';
 import drymixTurn from './img/models/mapei-drymix-turn.jpg';
@@ -192,9 +193,9 @@ export const artifacts = [
   {
     id: 'enovis', title: 'Enovis', kind: 'role', org: 'Sr. Project Engineer, Advanced Manufacturing', years: [2025, 2026], month: 4,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.9),
-    summary: 'Owner rep and engineering lead for a new operations facility and an additive manufacturing center.',
+    summary: 'Owner rep and engineering lead for a new operations facility, its clean pack & sterilization suite and an additive manufacturing center.',
     lens: { reality: '2025 – now · Austin. A 200K sq ft facility and an additive manufacturing center.' },
-    picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-am'],
+    picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-cps', 'enovis-am'],
   },
   {
     id: 'mapei-dallas', title: 'MAPEI Corp', kind: 'role', org: 'Project Engineering Manager', years: [2021, 2024], month: 7, monthTbd: true,
@@ -239,7 +240,7 @@ export const artifacts = [
       reality: 'The building he walks into every day, designed and built from the ground up.',
     },
     // Picture: a still of the MPOC model (Grant's concept model), and 72 frames of it turning for About's hover (Lens v2 opens the model itself).
-    picture: { src: mpocModel, bg: '#f4f3f0', turn: { src: mpocTurn, frames: 72, cols: 12 } }, logo: LOGO.enovis, model: { id: 'mpoc', src: mpocPlan }, related: ['enovis', 'enovis-am'],
+    picture: { src: mpocModel, bg: '#f4f3f0', turn: { src: mpocTurn, frames: 72, cols: 12 } }, logo: LOGO.enovis, model: { id: 'mpoc', src: mpocPlan }, related: ['enovis', 'enovis-cps', 'enovis-am'],
   },
   {
     id: 'enovis-am', title: 'ProMade additive manufacturing work center', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 4, ended: true, // through September 2026
@@ -262,7 +263,26 @@ export const artifacts = [
       { src: promadeEbm, alt: 'The EBM room: two Arcam EBM titanium printers under their gas lines, with powder-handling carts', caption: 'EBM titanium printers' },
       { src: promadeSls, alt: 'The SLS room: three FORMIGA P 110 printers for PA 2200 nylon parts', caption: 'SLS printers, PA 2200 nylon' },
     ],
-    related: ['enovis-facility', 'enovis'],
+    related: ['enovis-facility', 'enovis-cps', 'enovis'],
+  },
+  {
+    id: 'enovis-cps', title: 'Clean pack & sterilization expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true,
+    place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build'], featured: 'yes', stage: 'sketch', axes: ax(m(50), 0.92),
+    summary: 'End to end, a 25K sq ft clean pack and sterilization suite inside the operations facility: design intent, engineering, permits, procurement, construction and qualification, with the validated utilities it runs on.',
+    facts: [
+      '25K sq ft: cleaning, two ISO 7 cleanrooms, sterilization, packaging and inspection',
+      'Automated clean line, sterile pack, VHP and gas plasma sterilization',
+      'Validated utilities: clean dry air, DI/RO process water, neutralization',
+      'Design intent through permits, procurement, construction and IQ/OQ',
+      'Three phases, the clean line first so validation can start early',
+    ],
+    lens: {
+      structure: 'Two ISO 7 cleanrooms, an automated clean line and VHP and gas plasma sterilization, on validated air, water and neutralization systems.',
+      build: 'Design intent → permits → the clean line first, for early validation → sterile pack and sterilization → outer boxing and the corridor wall.',
+    },
+    // In the same plant as the operations facility: the MPOC model opens with the clean pack & sterilization zone lit.
+    picture: { src: mpocCps, bg: '#f4f3f0' }, logo: LOGO.enovis, model: { id: 'mpoc', src: mpocPlan, highlight: 'clean' },
+    related: ['enovis-facility', 'enovis-am', 'enovis'],
   },
   {
     id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true, month: 3, monthTbd: true,
