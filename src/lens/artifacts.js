@@ -36,6 +36,9 @@ import staticmixRender from './img/staticmix.jpg';
 import drymixTowerCad from './img/photos/drymix-tower-cad.jpg';
 import drymixStructureCad from './img/photos/drymix-structure-cad.jpg';
 import mpocModel from './img/models/mpoc.jpg';
+import headshot from './img/headshot.jpg';
+import onlychargeChargers from './img/onlycharge-chargers.jpg';
+import onlychargeWall from './img/photos/onlycharge-wall.jpg';
 import promadeEbm from './img/photos/promade-ebm.jpg';
 import promadeSls from './img/photos/promade-sls.jpg';
 import mpocTurn from './img/models/mpoc-turn.jpg';
@@ -79,10 +82,10 @@ export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+
  * The card behind the origin ("Grant" at the centre of About): a headshot,
  * two plain sentences on who he is and what he does now, and how to reach him
  * (email and links come from `site` in src/content.js). Draft wording: facts
- * only, no adjectives. `headshot` is empty until the photo arrives.
+ * only, no adjectives.
  */
 export const intro = {
-  headshot: '',
+  headshot, // Grant in Rio, cropped to the face
   lines: [
     'Grant is a mechanical engineer in Austin, working on advanced manufacturing at Enovis.',
     'Before that he built plants and production lines for MAPEI in Chicago, Milan and Dallas, and started an EV charging company.',
@@ -360,7 +363,13 @@ export const artifacts = [
       structure: 'Charging sites from site plan to trenching, power sharing and permits.',
       digital: 'Ran on automation: CRM, payments, accounting, estimating and proposals.',
     },
-    picture: { scene: 'charger', logo: true }, logo: LOGO.onlycharge, related: ['ev-fedex', 'ev-stallion', 'ev-fortworth', 'ev-gateway'],
+    // Picture: an OnlyChargeEV install (plates blurred); the photo viewer adds a fleet wall charger.
+    picture: { src: onlychargeChargers, bg: '#dfe6ee' }, logo: LOGO.onlycharge,
+    photos: [
+      { src: onlychargeChargers, alt: 'JuiceBox chargers on single and dual pedestals in an office parking lot, cars charging', caption: 'Pedestal chargers' },
+      { src: onlychargeWall, alt: 'A Ford Pro wall charger beside its disconnect switch on a building wall', caption: 'Fleet wall charger' },
+    ],
+    related: ['ev-fedex', 'ev-stallion', 'ev-fortworth', 'ev-gateway'],
   },
   {
     id: 'fsae', title: 'Formula SAE electric racecar', kind: 'project', org: 'University of Kansas', years: [2017, 2018], month: 9, monthTbd: true,
