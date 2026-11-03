@@ -119,6 +119,7 @@ const introEl = div(
     <span class="lx-intro__name">${site.name}</span>
   </div>
   ${intro.lines.map((l) => `<p class="lx-intro__line">${l}</p>`).join('')}
+  ${intro.personal ? `<p class="lx-intro__line lx-intro__line--personal">${intro.personal}</p>` : ''}
   <ul class="lx-intro__links">
     ${site.email ? `<li><a href="mailto:${site.email}"><span>Email</span><span>${site.email}</span></a></li>` : ''}
     ${site.links
@@ -153,11 +154,12 @@ function setIntro(open, from = introFrom) {
   avatarBtn.setAttribute('aria-expanded', String(open && from === avatarBtn));
   if (open) {
     const p = from.getBoundingClientRect();
-    const w = Math.min(320, innerWidth - 32);
     const phone = innerWidth < 760;
+    // Wider on desktop, so the paragraphs and the links fit without scrolling.
+    const w = Math.min(innerWidth >= 1200 ? 420 : innerWidth >= 1000 ? 380 : 320, innerWidth - 32);
     introEl.style.width = `${w}px`;
     // On phones it stays clear of the section switcher at the bottom (and scrolls if it must).
-    const room = innerHeight - (phone ? 72 + 112 : 96 + 120);
+    const room = innerHeight - (phone ? 72 + 112 : 76 + 120);
     introEl.style.maxHeight = `${room}px`;
     const h = Math.min(room, introEl.offsetHeight);
     let x;
@@ -169,7 +171,7 @@ function setIntro(open, from = introFrom) {
     } else {
       // Beside the origin on wide screens, centred on phones.
       x = phone ? (innerWidth - w) / 2 : Math.min(innerWidth - w - 16, p.right + 16);
-      y = phone ? Math.max(72, Math.min(p.top - 40, innerHeight - 112 - h)) : Math.max(96, Math.min(innerHeight - introEl.offsetHeight - 120, p.top - 40));
+      y = phone ? Math.max(72, Math.min(p.top - 40, innerHeight - 112 - h)) : Math.max(76, Math.min(innerHeight - introEl.offsetHeight - 120, p.top - 40));
     }
     introEl.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px)`;
     introEl.querySelector('.lx-intro__close').focus({ preventScroll: true });

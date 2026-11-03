@@ -22,7 +22,7 @@ export const site = {
   summary:
     'I design and build physical systems — manufacturing lines, machines, fixtures — and spend the rest of my time making things with cameras, code, and whatever is on the workbench.',
   basedIn: 'United States',
-  email: '', // e.g. 'hello@yourdomain.com' — leave empty to hide
+  email: 'gsacco15@gmail.com', // shown in the About card and Get in touch (Grant asked for it); empty hides it
   resume: 'grant-sacco-resume.pdf', // in /public — leave empty to hide
   links: [
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/grant-t-sacco' },

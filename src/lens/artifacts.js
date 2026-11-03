@@ -89,10 +89,14 @@ export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+
 export const intro = {
   headshot, // Grant in Rio, cropped to the face
   lines: [
-    'Grant is an advanced manufacturing engineer in Austin who specializes in project engineering and construction management: 8+ years designing, building and scaling production systems, from concept through full-rate operations.',
-    "At Enovis he is building end-to-end manufacturing for orthopedic implants under one roof: additive and subtractive manufacturing, cleaning, packaging, sterilization and outbound, starting with the company's first U.S. additive manufacturing work center.",
-    'Before that he built plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and founded OnlyChargeEV, an EV charging company. He runs every project like a founder, owning it from the first sketch to the first part out the door.',
+    'Grant is a mechanical engineer and project manager in Austin who builds advanced manufacturing facilities: 8+ years taking large manufacturing and industrial projects from scope and early budgets through construction and closeout.',
+    'He works best in the field: managing contractors, sorting out design conflicts as they come up and getting permits and inspections done, so projects finish safely, on schedule and on budget.',
+    'At Enovis he is building end-to-end orthopedic implant manufacturing under one roof, from additive and subtractive manufacturing through cleaning, packaging and sterilization to shipping.',
+    'Before that he built plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and founded OnlyChargeEV, an EV charging company.',
   ],
+  // The personal side, set apart under the work.
+  personal:
+    "Originally from Chicago, he lived and worked in Milan and speaks Italian fluently. He loves travelling, other cultures and languages, and outside work he's usually running, surfing or somewhere outdoors.",
 };
 
 /** Jaylee and Helga, sitting on About's 2021 ring (one frame from each sprite sheet). */
@@ -199,7 +203,7 @@ export const artifacts = [
     picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-cps', 'enovis-am'],
   },
   {
-    id: 'mapei-dallas', title: 'MAPEI Corp', kind: 'role', org: 'Project Engineering Manager', years: [2021, 2024], month: 7, monthTbd: true,
+    id: 'mapei-dallas', title: 'MAPEI Corp', kind: 'role', org: 'Project Engineering Manager', years: [2021, 2024], month: 8, monthTbd: true,
     place: { name: 'Dallas, TX', lat: 32.78, lon: -96.8 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.85),
     summary: 'Industrial construction and manufacturing capital projects, over $30M in total.',
     // MAPEI Corp in two stints: Chicago out of school, then Dallas after Milan.
@@ -268,7 +272,7 @@ export const artifacts = [
     related: ['enovis-facility', 'enovis-cps', 'enovis'],
   },
   {
-    id: 'enovis-cps', title: 'Clean pack & sterilization expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true, month: 5, monthTbd: true,
+    id: 'enovis-cps', title: 'Clean pack & sterilization expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true, month: 4, monthTbd: true,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'sketch', axes: ax(m(50), 0.92),
     summary: 'End to end, a 25K sq ft clean pack and sterilization suite inside the operations facility: design intent, engineering, permits, procurement, construction and qualification, with the validated utilities it runs on.',
     facts: [

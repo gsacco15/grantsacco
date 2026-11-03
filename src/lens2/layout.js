@@ -110,7 +110,10 @@ export const polarFrame = (R) => {
   const cx = R.x + R.w / 2;
   const cy = R.y + R.h / 2;
   const ry = R.h / 2;
-  return { cx, cy, ry, rx: Math.min(R.w / 2, ry * 1.75) };
+  // On short, wide screens (a 1366 × 768 laptop) the wheel flattens into the
+  // spare width, so its pieces keep room around them.
+  const k = R.h >= 500 ? 1.75 : Math.min(3.2, 1.75 + (500 - R.h) * 0.012);
+  return { cx, cy, ry, rx: Math.min(R.w / 2, ry * k) };
 };
 
 const toPx = (R, u, v) => [R.x + u * R.w, R.y + (1 - v) * R.h];
