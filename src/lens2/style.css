@@ -2728,3 +2728,9 @@ body.concept-lens2 .lx-intro__name {
     max-width: calc(100vw - 2 * var(--gutter));
   }
 }
+
+/* The About card scrolls inside itself if a short screen can't fit it. */
+.lx-intro {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

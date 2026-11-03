@@ -80,15 +80,16 @@ export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+
 
 /**
  * The card behind the origin ("Grant" at the centre of About): a headshot,
- * two plain sentences on who he is and what he does now, and how to reach him
+ * three sentences in Grant's voice (from his résumé summary), and how to reach him
  * (email and links come from `site` in src/content.js). Draft wording: facts
  * only, no adjectives.
  */
 export const intro = {
   headshot, // Grant in Rio, cropped to the face
   lines: [
-    'Grant is a mechanical engineer in Austin, working on advanced manufacturing at Enovis.',
-    'Before that he built plants and production lines for MAPEI in Chicago, Milan and Dallas, and started an EV charging company.',
+    'Grant is an advanced manufacturing engineer in Austin who specializes in project engineering and construction management: 8+ years designing, building and scaling production systems, from concept through full-rate operations.',
+    "At Enovis he leads factory build-outs and stood up the company's first U.S. additive manufacturing work center; before that he built plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston.",
+    "He also founded OnlyChargeEV, an EV charging company, and brings that founder's bias for action to every line he builds: equipment, automation and processes that move throughput, quality and cost.",
   ],
 };
 

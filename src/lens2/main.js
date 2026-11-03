@@ -135,7 +135,10 @@ function setIntro(open) {
     introEl.style.width = `${w}px`;
     // Beside the origin on wide screens, centred on phones.
     const x = innerWidth < 760 ? (innerWidth - w) / 2 : Math.min(innerWidth - w - 16, p.right + 16);
-    const y = innerWidth < 760 ? Math.max(96, p.top - 40) : Math.max(96, Math.min(innerHeight - introEl.offsetHeight - 120, p.top - 40));
+    // On phones it stays clear of the section switcher at the bottom (and scrolls if it must).
+    const room = innerHeight - (innerWidth < 760 ? 72 + 112 : 96 + 120);
+    introEl.style.maxHeight = `${room}px`;
+    const y = innerWidth < 760 ? Math.max(72, Math.min(p.top - 40, innerHeight - 112 - Math.min(room, introEl.offsetHeight))) : Math.max(96, Math.min(innerHeight - introEl.offsetHeight - 120, p.top - 40));
     introEl.style.transform = `translate(${x.toFixed(0)}px, ${y.toFixed(0)}px)`;
     introEl.querySelector('.lx-intro__close').focus({ preventScroll: true });
   }
