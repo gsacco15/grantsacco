@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://grantsacco-4v69.vercel.app/sitemap.xml

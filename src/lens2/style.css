@@ -2921,3 +2921,59 @@ body.concept-lens2 .lx-intro__name {
     touch-action: pan-y;
   }
 }
+
+/* "List view": every project as a plain list at /work/, beside Get in touch. */
+.chrome__end:has(.chrome__list) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chrome__list {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  color: inherit;
+  pointer-events: auto;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  transition: border-color 0.2s, color 0.2s;
+}
+.chrome__list:hover {
+  border-color: currentColor;
+}
+.chrome--site .chrome__name {
+  white-space: nowrap;
+}
+.chrome__list-icon {
+  display: none;
+}
+/* Phones: a small round list button, so the name stays on one line; the
+   narrowest phones reach the list from the About card instead. */
+@media (max-width: 430px) {
+  .chrome__list {
+    justify-content: center;
+    width: 32px;
+    padding: 0;
+    font-size: 17px;
+    letter-spacing: 0;
+  }
+  .chrome__list-icon {
+    display: inline;
+  }
+  .chrome__list-text {
+    display: none;
+  }
+}
+@media (max-width: 339px) {
+  .chrome__list {
+    display: none;
+  }
+}

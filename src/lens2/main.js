@@ -132,6 +132,7 @@ const introEl = div(
       .map((l) => `<li><a href="${l.href}" target="_blank" rel="noopener"><span>${l.label}</span><span>${bare(l.href)} ↗</span></a></li>`)
       .join('')}
     ${site.resume ? `<li><a href="${site.resume}" target="_blank" rel="noopener"><span>Résumé</span><span>PDF ↗</span></a></li>` : ''}
+    <li><a href="work/"><span>All work</span><span>List view →</span></a></li>
   </ul>`,
 );
 introEl.setAttribute('role', 'dialog');
