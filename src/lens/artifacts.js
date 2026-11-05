@@ -101,7 +101,7 @@ export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+
 export const intro = {
   headshot, // Grant in Rio, cropped to the face
   lines: [
-    "I'm a mechanical engineer and project manager in Austin with 8+ years of experience delivering advanced manufacturing and industrial facilities. I own projects end to end, from scope and budget through design, contracting, construction and closeout, leading the contractors, vendors and engineering teams who build them.",
+    "I'm a mechanical engineer and project engineering manager in Austin with 8+ years of experience delivering advanced manufacturing and industrial facilities. I own projects end to end, from scope and budget through design, contracting, construction and closeout, leading the contractors, vendors and engineering teams who build them.",
     "Today I'm in medical technology at Enovis, leading the build-out of a facility for end-to-end orthopedic implant manufacturing under one roof: additive and subtractive manufacturing, cleaning, packaging, sterilization and shipping.",
     'Before that I delivered chemical manufacturing plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and founded OnlyChargeEV, an EV charging company.',
   ],

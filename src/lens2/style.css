@@ -2897,8 +2897,10 @@ body.concept-lens2 .lx-intro__name {
     opacity: 0;
     pointer-events: none;
   }
-  /* A paper band behind the header and "← All work", so scrolled text passes under it cleanly. */
-  .lx-page::before {
+  /* A paper band behind the header and "← All work", so scrolled text passes under it
+     cleanly. It lives inside the scrolling column, next to the button, so the button
+     (z-index 2) always sits above it (z-index 1), whichever box the browser stacks them in. */
+  .lx-page__inner::before {
     content: '';
     position: fixed;
     inset: 0 0 auto;
@@ -2911,8 +2913,11 @@ body.concept-lens2 .lx-intro__name {
     pointer-events: auto;
     touch-action: pan-y;
     overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
     padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+  .lx-page__back {
+    z-index: 2;
+    background: var(--bg);
   }
 }
 

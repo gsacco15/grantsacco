@@ -65,7 +65,7 @@ export function renderWorkList({ artifacts, films, homes, countries, intro }, { 
   <header class="w-head">
     <p class="w-back"><a href="../">← Interactive site</a></p>
     <h1>${esc(site.name)}</h1>
-    <p class="w-role">Mechanical engineer · Project manager · Austin, TX</p>
+    <p class="w-role">Mechanical engineer · Project engineering manager · Austin, TX</p>
     ${intro.lines.map((l) => `<p>${esc(l)}</p>`).join('')}
     ${intro.personal ? `<p class="w-personal">${esc(intro.personal)}</p>` : ''}
     <p class="w-contact">
