@@ -251,7 +251,8 @@ function relax(L, R, mode, W, obstacles = []) {
   const P = polarFrame(R);
   // Art's "controlled" label sits on the bottom edge, so captions stay above it.
   // On phones the x axis title sits just above the plot, so marks stay below it.
-  const bounds = { x0: R.x - 12, x1: R.x + R.w + 12, y0: R.y + (W < 760 ? 4 : -10), y1: R.y + R.h + (mode === 'image' ? -18 : 16) };
+  // On phones About's quiet line sits just under the wheel, so marks stay above it there.
+  const bounds = { x0: R.x - 12, x1: R.x + R.w + 12, y0: R.y + (W < 760 ? 4 : -10), y1: R.y + R.h + (mode === 'image' ? -18 : mode === 'reality' && W < 760 ? -16 : 16) };
   const boxes = L.map(box);
 
   for (let iter = 0; iter < 260; iter++) {
@@ -421,7 +422,7 @@ export function yearCues(R, W) {
   const top = P.cy - r1 * P.ry - (m ? 19 : 14);
   const mid = ((YEAR_CUE.from + YEAR_CUE.to) / 2) * (Math.PI / 180);
   const off = m ? 18 : 24;
-  const tx = P.cx + Math.cos(mid) * (r1 * P.rx + off);
+  const tx = Math.min(P.cx + Math.cos(mid) * (r1 * P.rx + off), W - (m ? 92 : 112));
   const ty = P.cy + Math.sin(mid) * (r1 * P.ry + off);
   return [
     { x0: P.cx - 14, x1: P.cx + 14, y0: top - 7, y1: top + 7 },

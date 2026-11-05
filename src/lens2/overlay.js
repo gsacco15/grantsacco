@@ -73,7 +73,8 @@ export function overlay(mode, R, W, H, geo) {
       parts.push(`<path d="M-6,-3.5 L0,0 L-6,3.5" transform="translate(${f(x1)} ${f(y1)}) rotate(${f(ang)})" fill="none" stroke="${ink(0.55)}" stroke-width="1.2"/>`);
       const mid = ((YEAR_CUE.from + YEAR_CUE.to) / 2) * (Math.PI / 180);
       const lo = mob ? 18 : 24;
-      text(P.cx + Math.cos(mid) * (r1 * P.rx + lo), P.cy + Math.sin(mid) * (r1 * P.ry + lo), 'through the year', { size: mob ? 8.5 : 9.5, fill: ink(0.55), halo: true });
+      // Kept on screen on the narrowest phones (the label's box in yearCues matches).
+      text(Math.min(P.cx + Math.cos(mid) * (r1 * P.rx + lo), W - (mob ? 92 : 112)), P.cy + Math.sin(mid) * (r1 * P.ry + lo), 'through the year', { size: mob ? 8.5 : 9.5, fill: ink(0.55), halo: true });
     }
     parts.push(`<circle cx="${f(P.cx)}" cy="${f(P.cy)}" r="5" fill="${pal.accent}"/>`);
     parts.push(`<circle cx="${f(P.cx)}" cy="${f(P.cy)}" r="12" fill="none" stroke="${hexA(pal.accent, 0.4)}"/>`);
