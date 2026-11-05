@@ -211,7 +211,13 @@ export const artifacts = [
   {
     id: 'enovis', title: 'Enovis', kind: 'role', org: 'Sr. Project Engineer, Advanced Manufacturing', years: [2025, 2026], month: 4,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.9),
-    summary: "Owner's rep and engineering lead in medical technology, building out a 200K sq ft facility for end-to-end orthopedic implant manufacturing: the operations facility, its clean pack & sterilization suite and the company's first U.S. additive manufacturing work center.",
+    summary: "Owner's rep and engineering lead for a new 200K sq ft advanced manufacturing facility for orthopedic implants, from pre-construction engineering and a 10-year master plan through EPC delivery. It brings cleanrooms, sterilization and packaging, and the company's first U.S. additive manufacturing work center under one roof.",
+    facts: [
+      'Pre-construction engineering and project development',
+      'Planning and execution through EPC (engineering, procurement, construction)',
+      '10-year master plan, future-proofed for growth',
+      'Infrastructure, utilities and MEP lead',
+    ],
     lens: { reality: '2025 – now · Austin. A 200K sq ft facility for orthopedic implants: cleanrooms, sterilization and the first U.S. additive manufacturing work center.' },
     picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-cps', 'enovis-am'],
   },
@@ -251,8 +257,8 @@ export const artifacts = [
   {
     id: 'enovis-facility', title: 'Operations facility build-out', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 6, monthTbd: true,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['reality'], featured: 'yes', stage: 'built', axes: ax(m(140), 0.95),
-    summary: 'A 200K sq ft facility combining office, automated distribution, clean pack, sterilization and additive manufacturing, delivered as owner rep.',
-    facts: ['200K sq ft', 'Budget over $10M', 'Utilities, equipment integration, controls, life safety', 'Next-phase expansion planning'],
+    summary: "A new 200K sq ft advanced manufacturing facility for orthopedic implants, delivered as owner's rep: offices, automated distribution, cleanrooms, sterilization and packaging, and additive manufacturing under one roof.",
+    facts: ['200K sq ft, budget over $10M', 'Pre-construction engineering through EPC delivery', 'Infrastructure, utilities and MEP: controls, life safety, equipment integration', '10-year master plan, future-proofed for growth'],
     lens: {
       structure: '200K sq ft: office, automated distribution, clean pack, sterilization and additive manufacturing under one roof.',
       reality: 'The building he walks into every day, designed and built from the ground up.',
