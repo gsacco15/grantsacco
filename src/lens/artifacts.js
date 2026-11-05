@@ -101,13 +101,13 @@ export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+
 export const intro = {
   headshot, // Grant in Rio, cropped to the face
   lines: [
-    "I'm a mechanical engineer and project manager in Austin with 8+ years delivering advanced manufacturing and industrial facilities. I own projects end to end, from scope and budget through design, contracting, construction and closeout, leading the contractors, vendors and engineering teams who build them.",
+    "I'm a mechanical engineer and project manager in Austin with 8+ years of experience delivering advanced manufacturing and industrial facilities. I own projects end to end, from scope and budget through design, contracting, construction and closeout, leading the contractors, vendors and engineering teams who build them.",
     "Today I'm in medical technology at Enovis, leading the build-out of a facility for end-to-end orthopedic implant manufacturing under one roof: additive and subtractive manufacturing, cleaning, packaging, sterilization and shipping.",
-    'Before that I delivered chemical manufacturing plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and I founded OnlyChargeEV, an EV charging company.',
+    'Before that I delivered chemical manufacturing plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and founded OnlyChargeEV, an EV charging company.',
   ],
-  // The personal side, set apart under the work.
+  // The personal side, set apart under the work (Grant's own words).
   personal:
-    "I grew up in Chicago, lived and worked in Milan and speak Italian fluently. I love travelling, other cultures and learning languages, and outside work I'm usually running, surfing or somewhere outdoors.",
+    "I grew up in Chicago, lived and worked in Milan, and speak Italian fluently. I'm naturally curious and love the challenge of turning ideas into something real, whether that's building a facility, starting a business or learning something new. Outside of work, I'm usually traveling, exploring new cultures, learning languages, running, surfing or finding my next adventure.",
 };
 
 /** Jaylee and Helga, sitting on About's 2021 ring (one frame from each sprite sheet). */

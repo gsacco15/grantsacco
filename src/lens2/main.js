@@ -162,7 +162,7 @@ function setIntro(open, from = introFrom) {
     const p = from.getBoundingClientRect();
     const phone = innerWidth < 760;
     // Wider on desktop, so the paragraphs and the links fit without scrolling.
-    const w = Math.min(innerWidth >= 1200 ? 420 : innerWidth >= 1000 ? 380 : 320, innerWidth - 32);
+    const w = Math.min(innerWidth >= 1200 ? 500 : innerWidth >= 1000 ? 420 : 320, innerWidth - 32);
     introEl.style.width = `${w}px`;
     // On phones it stays clear of the section switcher at the bottom (and scrolls if it must).
     const room = innerHeight - (phone ? 72 + 112 : 76 + 120);
