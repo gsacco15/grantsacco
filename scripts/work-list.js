@@ -40,7 +40,8 @@ function item(a, mode) {
 
 export function renderWorkList({ artifacts, films, homes, countries, intro }, { site }) {
   const shown = artifacts.filter((a) => a.featured === 'yes' || a.featured === 'maybe');
-  const byStart = (x, y) => (y.years[1] ?? 0) - (x.years[1] ?? 0) || (y.years[0] ?? 0) - (x.years[0] ?? 0);
+  // Newest first; pieces marked `listLast` (the lights) go to the end of their section.
+  const byStart = (x, y) => !!x.listLast - !!y.listLast || (y.years[1] ?? 0) - (x.years[1] ?? 0) || (y.years[0] ?? 0) - (x.years[0] ?? 0);
   const sections = SECTIONS.map((s) => {
     const list = shown.filter((a) => !a.home && s.pick(a)).filter((a) => s.id !== 'experience' || a.featured === 'yes');
     const main = list.filter((a) => a.featured === 'yes').sort(byStart);

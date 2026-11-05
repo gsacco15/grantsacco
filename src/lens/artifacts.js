@@ -463,29 +463,27 @@ export const artifacts = [
     ],
   },
   {
-    id: 'resin1', title: 'Resin Light 1.0', kind: 'build', org: 'Personal', years: [2023, 2023], tbd: true,
-    place: { name: 'Home workshop', lat: 32.78, lon: -96.8 }, main: 'build', also: ['image'], featured: 'yes', stage: 'prototype', axes: ax(m(0.3), 0.38, 0.14, 0.62),
-    summary: 'First functional prototype of a cast-resin light: the resin is both the material and the diffuser, so the object glows.',
-    facts: ['Mold design and resin casting', 'LED placement, diffusion, brightness', 'Heat management', 'Surface finish and assembly'],
+    // Resin Light 1.0 and 2.0 as one product: first prototype → production-intent design. Last in the list view's Projects, with the other lights.
+    id: 'resin', title: 'Resin Light', kind: 'build', org: 'Product design & development', years: [2024, 2024], listLast: true,
+    place: { name: 'Home workshop', lat: 32.78, lon: -96.8 }, main: 'build', also: ['image'], featured: 'yes', stage: 'built', axes: ax(m(0.3), 0.55, 0.12, 0.4),
+    summary:
+      'Designed and built a custom LED resin lighting product from concept through multiple working prototypes, combining mechanical engineering, industrial design and hands-on fabrication. Developed 3D printed components, custom molds and resin casting processes while integrating LED electronics into a functional, finished product. Iterated on geometry, materials, light diffusion and assembly to improve aesthetics, durability and manufacturability, with the goal of a product suitable for small-scale production.',
+    facts: [
+      'Mechanical & industrial design: 3D CAD modeling, component design, fit and assembly',
+      'Rapid prototyping: FDM 3D printing, design iterations and functional testing',
+      'Mold making & resin casting: custom molds, material selection, casting and finishing',
+      'LED integration: lighting components, electrical integration, thermal considerations and light diffusion',
+      'Design for manufacturing: repeatability, assembly methods, surface finish and production scalability',
+      'Project evolution: Resin Light 1.0 → Resin Light 2.0',
+    ],
     lens: {
-      build: 'Built to learn how resin, light and the casting process behave in practice.',
-      image: 'A glowing sculptural object instead of an exposed fixture.',
+      build: 'Resin Light 1.0 → 2.0: from a first working prototype to a production-intent design.',
+      image: 'A glowing cast-resin object: the resin is both the material and the diffuser.',
     },
-    picture: { scene: 'resin', refined: false }, related: ['resin2'],
+    picture: { scene: 'resin', refined: true }, related: ['ledwall'],
   },
   {
-    id: 'resin2', title: 'Resin Light 2.0', kind: 'build', org: 'Personal', years: [2024, 2024], tbd: true,
-    place: { name: 'Home workshop', lat: 32.78, lon: -96.8 }, main: 'build', also: ['image'], featured: 'yes', stage: 'built', axes: ax(m(0.3), 0.52, 0.1, 0.24),
-    summary: 'A refined, production-intent version built on everything 1.0 taught.',
-    facts: ['Form and lighting quality', 'Material consistency and repeatability', 'Durability, fit and finish', 'Designed to be manufactured and sold'],
-    lens: {
-      build: 'From a one-off prototype to a design that could realistically be manufactured and sold.',
-      image: 'Cleaner form, more even glow.',
-    },
-    picture: { scene: 'resin', refined: true }, related: ['resin1'],
-  },
-  {
-    id: 'ledwall', title: 'LED wall art', kind: 'build', org: 'Personal', years: [2022, 2022], tbd: true,
+    id: 'ledwall', title: 'LED wall art', kind: 'build', org: 'Personal', years: [2022, 2022], tbd: true, listLast: true,
     place: { name: 'Home workshop', lat: 32.78, lon: -96.8 }, main: 'build', also: ['image', 'digital', 'structure'], featured: 'yes', stage: 'built',
     axes: { scale: m(1.2), complexity: 0.38, expressive: 0.24, experimental: 0.88, digital: 0.3, finished: 0.7 },
     summary: 'A series of wall pieces with concealed LEDs, layered structure and diffusers for a soft glow or gradient.',
