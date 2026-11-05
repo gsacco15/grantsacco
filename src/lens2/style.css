@@ -2881,3 +2881,43 @@ body.concept-lens2 .lx-intro__name {
     opacity: 0.35;
   }
 }
+
+/* Phones: an open project page gets the whole screen. The section switcher steps
+   away (the page's "← All work" goes back, and its lens list switches sections),
+   the page scrolls on its own, and a 3D model turns on sideways swipes only, so an
+   up/down swipe over it still scrolls the page. */
+@media (max-width: 760px) {
+  .switcher {
+    transition:
+      translate 0.35s var(--ease),
+      opacity 0.25s;
+  }
+  body.lx-page-open .switcher {
+    translate: 0 140%;
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* A paper band behind the header and "← All work", so scrolled text passes under it cleanly. */
+  .lx-page::before {
+    content: '';
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 1;
+    height: 144px;
+    background: linear-gradient(var(--bg) 84%, color-mix(in srgb, var(--bg) 0%, transparent));
+    pointer-events: none;
+  }
+  .lx-page__inner {
+    pointer-events: auto;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (pointer: coarse) {
+  .lx-model__gl {
+    touch-action: pan-y;
+  }
+}

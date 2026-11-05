@@ -446,7 +446,7 @@ export function createModel(host, { id = 'mpoc', src, palette, highlight = null,
     <div class="lx-model__views" role="group" aria-label="Camera">
       <button type="button" data-view="iso">Iso</button><button type="button" data-view="top">Top</button><button type="button" data-view="side">Side</button>
     </div>
-    <span class="lx-model__hint">Drag to turn · scroll to zoom</span>`;
+    <span class="lx-model__hint">${matchMedia('(pointer: coarse)').matches ? 'Swipe sideways to turn · pinch to zoom' : 'Drag to turn · scroll to zoom'}</span>`;
   host.appendChild(wrap);
   const canvas = wrap.querySelector('canvas');
   const label = wrap.querySelector('.lx-model__label');
