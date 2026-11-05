@@ -211,8 +211,8 @@ export const artifacts = [
   {
     id: 'enovis', title: 'Enovis', kind: 'role', org: 'Sr. Project Engineer, Advanced Manufacturing', years: [2025, 2026], month: 4,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.9),
-    summary: 'Owner rep and engineering lead for a new operations facility, its clean pack & sterilization suite and an additive manufacturing center.',
-    lens: { reality: '2025 – now · Austin. A 200K sq ft facility and an additive manufacturing center.' },
+    summary: "Owner's rep and engineering lead in medical technology, building out a 200K sq ft facility for end-to-end orthopedic implant manufacturing: the operations facility, its clean pack & sterilization suite and the company's first U.S. additive manufacturing work center.",
+    lens: { reality: '2025 – now · Austin. A 200K sq ft facility for orthopedic implants: cleanrooms, sterilization and the first U.S. additive manufacturing work center.' },
     picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-cps', 'enovis-am'],
   },
   {
