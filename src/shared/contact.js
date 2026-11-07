@@ -28,7 +28,7 @@ export function mountContact(parent) {
   }
   for (const l of site.links) {
     rows.push(
-      `<li class="contact__row"><a href="${l.href}" target="_blank" rel="noopener"><span class="contact__k">${l.label}</span><span class="contact__v">${bare(l.href)}</span><span class="contact__arrow" aria-hidden="true">↗</span></a></li>`,
+      `<li class="contact__row"><a href="${l.href}" target="_blank" rel="noopener"><span class="contact__k">${l.label}</span><span class="contact__v">${l.text ?? bare(l.href)}</span><span class="contact__arrow" aria-hidden="true">↗</span></a></li>`,
     );
   }
   if (site.resume) {

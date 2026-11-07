@@ -1890,7 +1890,7 @@ body.lx-page-open .lx-origin {
   top: 0;
   z-index: 26;
   display: grid;
-  gap: 8px;
+  gap: 6px;
   padding: 15px 18px 10px;
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -1971,7 +1971,7 @@ body.lx-page-open .lx-origin {
 .lx-intro__line {
   margin: 0;
   font-size: 13px;
-  line-height: 1.42;
+  line-height: 1.4;
 }
 
 /* The personal paragraph: set apart from the work by a hairline, a shade quieter. */
@@ -1997,7 +1997,7 @@ body.lx-page-open .lx-origin {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 5px 2px;
+  padding: 3px 2px;
   font-size: 12.5px;
 }
 

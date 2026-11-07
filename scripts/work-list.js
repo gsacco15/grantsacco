@@ -60,6 +60,7 @@ export function renderWorkList({ artifacts, films, homes, countries, intro }, { 
     .join('');
   const places = homes.map((h) => `${esc(h.name)}${h.years[0] ? ` ${h.years[0]}` : ''}`).join(' → ');
   const linkedin = site.links.find((l) => l.label === 'LinkedIn');
+  const x = site.links.find((l) => l.label === 'X');
 
   return `
   <header class="w-head">
@@ -71,6 +72,7 @@ export function renderWorkList({ artifacts, films, homes, countries, intro }, { 
     <p class="w-contact">
       ${site.email ? `<a href="mailto:${esc(site.email)}">${esc(site.email)}</a>` : ''}
       ${linkedin ? `<a href="${esc(linkedin.href)}" target="_blank" rel="noopener">LinkedIn ↗</a>` : ''}
+      ${x ? `<a href="${esc(x.href)}" target="_blank" rel="noopener">X ${esc(x.text ?? '')} ↗</a>` : ''}
       ${site.resume ? `<a href="../${esc(site.resume)}" target="_blank" rel="noopener">Résumé (PDF) ↗</a>` : ''}
     </p>
     <nav class="w-nav" aria-label="Sections">${SECTIONS.map((s) => `<a href="#${s.id}">${s.title}</a>`).join('')}<a href="#films">Films</a><a href="#places">Places</a></nav>

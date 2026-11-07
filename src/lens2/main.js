@@ -128,8 +128,8 @@ const introEl = div(
   <ul class="lx-intro__links">
     ${site.email ? `<li><a href="mailto:${site.email}"><span>Email</span><span>${site.email}</span></a></li>` : ''}
     ${site.links
-      .filter((l) => l.label === 'LinkedIn')
-      .map((l) => `<li><a href="${l.href}" target="_blank" rel="noopener"><span>${l.label}</span><span>${bare(l.href)} ↗</span></a></li>`)
+      .filter((l) => l.label === 'LinkedIn' || l.label === 'X')
+      .map((l) => `<li><a href="${l.href}" target="_blank" rel="noopener"><span>${l.label}</span><span>${l.text ?? bare(l.href)} ↗</span></a></li>`)
       .join('')}
     ${site.resume ? `<li><a href="${site.resume}" target="_blank" rel="noopener"><span>Résumé</span><span>PDF ↗</span></a></li>` : ''}
     <li><a href="work/"><span>All work</span><span>List view →</span></a></li>

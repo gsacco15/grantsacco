@@ -26,6 +26,7 @@ export const site = {
   resume: 'grant-sacco-resume.pdf', // in /public — leave empty to hide
   links: [
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/grant-t-sacco' },
+    { label: 'X', href: 'https://x.com/gsacco151', text: '@gsacco151' },
     { label: 'GitHub', href: 'https://github.com/gsacco15' },
     // { label: 'Instagram', href: 'https://instagram.com/…' },
   ],
