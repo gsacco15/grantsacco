@@ -23,7 +23,7 @@ export function mountChrome(conceptId, { draft, standalone = false } = {}) {
     const bar = el('header', 'chrome chrome--site');
     bar.innerHTML = `
       <div class="chrome__id"><a class="chrome__name" href="./">${site.name}</a></div>
-      <div class="chrome__end"><a class="chrome__list" href="work/" title="Every project as a plain list" aria-label="List view: every project as a plain list"><span class="chrome__list-icon" aria-hidden="true">≡</span><span class="chrome__list-text">List view</span></a></div>`;
+      <div class="chrome__end"><a class="chrome__list" href="work/" title="Every project as a plain list" aria-label="List view: every project as a plain list"><span class="chrome__list-icon" aria-hidden="true">≡</span><span class="chrome__list-text">List view</span><span class="chrome__list-short" aria-hidden="true">List</span></a></div>`;
     document.body.appendChild(bar);
     mountContact(bar.querySelector('.chrome__end'));
     document.title = site.name;

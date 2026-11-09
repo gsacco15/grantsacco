@@ -55,6 +55,17 @@ import filmBrazil from './img/films/brazil.jpg';
 import filmPalmBeach from './img/films/palmbeach.jpg';
 import filmColombia from './img/films/colombia.jpg';
 import horizonteMoon from './img/horizonte.jpg';
+import resinLight from './img/resin-light.jpg';
+import resin1a from './img/photos/resin-1-1.jpg';
+import resin1b from './img/photos/resin-1-2.jpg';
+import resin1c from './img/photos/resin-1-3.jpg';
+import resin1d from './img/photos/resin-1-4.jpg';
+import resin2cad1 from './img/photos/resin-2-cad-1.jpg';
+import resin2cad2 from './img/photos/resin-2-cad-2.jpg';
+import resin2cad3 from './img/photos/resin-2-cad-3.jpg';
+import resin2cad4 from './img/photos/resin-2-cad-4.jpg';
+import resin2cad5 from './img/photos/resin-2-cad-5.jpg';
+import resin2progress from './img/photos/resin-2-progress.jpg';
 import mpocCpsTurn from './img/models/mpoc-cps-turn.jpg';
 import mpocPlan from './img/models/mpoc-plan.json?url';
 import drymixStill from './img/models/mapei-drymix.jpg';
@@ -464,23 +475,37 @@ export const artifacts = [
   },
   {
     // Resin Light 1.0 and 2.0 as one product: first prototype → production-intent design. Last in the list view's Projects, with the other lights.
-    id: 'resin', title: 'Resin Light', kind: 'build', org: 'Product design & development', years: [2024, 2024], listLast: true,
+    id: 'resin', title: 'Resin Light', kind: 'build', org: 'Product design & development', years: [2024, 2026], listLast: true, // 1.0 built, 2.0 in progress
     place: { name: 'Home workshop', lat: 32.78, lon: -96.8 }, main: 'build', also: ['image'], featured: 'yes', stage: 'built', axes: ax(m(0.3), 0.55, 0.12, 0.4),
     summary:
-      'Designed and built a custom LED resin lighting product from concept through multiple working prototypes, combining mechanical engineering, industrial design and hands-on fabrication. Developed 3D printed components, custom molds and resin casting processes while integrating LED electronics into a functional, finished product. Iterated on geometry, materials, light diffusion and assembly to improve aesthetics, durability and manufacturability, with the goal of a product suitable for small-scale production.',
+      'Designed and built a custom LED resin lighting product from concept through multiple working prototypes, combining mechanical engineering, industrial design and hands-on fabrication. Developed 3D printed components, custom molds and resin casting processes while integrating LED electronics into a functional, finished product. Iterated on geometry, materials, light diffusion and assembly to improve aesthetics, durability and manufacturability, with the goal of a product suitable for small-scale production. Resin Light 1.0 is built; Resin Light 2.0, redesigned in CAD and now being cast, is in progress.',
     facts: [
       'Mechanical & industrial design: 3D CAD modeling, component design, fit and assembly',
       'Rapid prototyping: FDM 3D printing, design iterations and functional testing',
       'Mold making & resin casting: custom molds, material selection, casting and finishing',
       'LED integration: lighting components, electrical integration, thermal considerations and light diffusion',
       'Design for manufacturing: repeatability, assembly methods, surface finish and production scalability',
-      'Project evolution: Resin Light 1.0 → Resin Light 2.0',
+      'Project evolution: Resin Light 1.0 (built) → Resin Light 2.0 (in progress)',
     ],
     lens: {
-      build: 'Resin Light 1.0 → 2.0: from a first working prototype to a production-intent design.',
+      build: 'Resin Light 1.0 → 2.0: from a first working prototype to a production-intent design. 2.0 is in progress.',
       image: 'A glowing cast-resin object: the resin is both the material and the diffuser.',
     },
-    picture: { scene: 'resin', refined: true }, related: ['ledwall'],
+    // Picture: Resin Light 1.0, lit, framed 3:2 on its own dark backdrop. Photos: 1.0 first, then 2.0 (CAD, then the first casts).
+    picture: { src: resinLight, bg: '#03190d' },
+    photos: [
+      { src: resin1a, alt: 'Resin Light 1.0 lit in the dark: a ribbed pink cast-resin block glowing orange from inside', caption: 'Resin Light 1.0' },
+      { src: resin1b, alt: 'Resin Light 1.0 from the front: two glowing resin columns joined down the middle', caption: 'Resin Light 1.0, front' },
+      { src: resin1c, alt: 'Resin Light 1.0 from the front in a lit room', caption: 'Resin Light 1.0 in daylight' },
+      { src: resin1d, alt: 'Resin Light 1.0 from the side, its light spilling onto the table', caption: 'Resin Light 1.0, side' },
+      { src: resin2cad1, alt: 'CAD render of Resin Light 2.0 from the back: the resin body with its mounting plates', caption: 'Resin Light 2.0 (in progress) · CAD, back' },
+      { src: resin2cad2, alt: 'CAD render of Resin Light 2.0: layered resin panels around the light', caption: 'Resin Light 2.0 · CAD, resin panels' },
+      { src: resin2cad3, alt: 'CAD render of Resin Light 2.0 from above: three LEDs in the cap over the diffusers', caption: 'Resin Light 2.0 · CAD, LED cap' },
+      { src: resin2cad4, alt: 'CAD render of Resin Light 2.0: LED cap, inner diffuser and side panels', caption: 'Resin Light 2.0 · CAD, inside' },
+      { src: resin2cad5, alt: 'CAD render of Resin Light 2.0: the back plate standing off the resin body', caption: 'Resin Light 2.0 · CAD, back plate' },
+      { src: resin2progress, alt: 'Resin Light 2.0 in progress: three red cast-resin bars held up to the light', caption: 'Resin Light 2.0 · first casts, in progress' },
+    ],
+    related: ['ledwall'],
   },
   {
     id: 'ledwall', title: 'LED wall art', kind: 'build', org: 'Personal', years: [2022, 2022], tbd: true, listLast: true,

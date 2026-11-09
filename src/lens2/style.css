@@ -2743,6 +2743,8 @@ body.concept-lens2 .lx-intro__name {
 }
 
 .lx-gallery__count {
+  flex: none;
+  white-space: nowrap;
   color: var(--ink);
 }
 
@@ -2957,12 +2959,26 @@ body.concept-lens2 .lx-intro__name {
 .chrome--site .chrome__name {
   white-space: nowrap;
 }
-.chrome__list-icon {
+.chrome__list-icon,
+.chrome__list-short {
   display: none;
 }
-/* Phones: a small round list button, so the name stays on one line; the
-   narrowest phones reach the list from the About card instead. */
+/* Phones: the button just says "List", so the name stays on one line; small
+   phones get the round ≡ button, and the narrowest reach the list from the
+   About card instead. */
 @media (max-width: 430px) {
+  .chrome__list {
+    padding: 0 11px;
+    font-size: 10.5px;
+  }
+  .chrome__list-text {
+    display: none;
+  }
+  .chrome__list-short {
+    display: inline;
+  }
+}
+@media (max-width: 359px) {
   .chrome__list {
     justify-content: center;
     width: 32px;
@@ -2973,7 +2989,7 @@ body.concept-lens2 .lx-intro__name {
   .chrome__list-icon {
     display: inline;
   }
-  .chrome__list-text {
+  .chrome__list-short {
     display: none;
   }
 }
