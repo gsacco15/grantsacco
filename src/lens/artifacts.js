@@ -55,7 +55,8 @@ import filmBrazil from './img/films/brazil.jpg';
 import filmPalmBeach from './img/films/palmbeach.jpg';
 import filmColombia from './img/films/colombia.jpg';
 import horizonteMoon from './img/horizonte.jpg';
-import resinLight from './img/resin-light.jpg';
+import resinLight2 from './img/resin-light-2.jpg';
+import resin2render from './img/photos/resin-2-render.jpg';
 import resin1a from './img/photos/resin-1-1.jpg';
 import resin1b from './img/photos/resin-1-2.jpg';
 import resin1c from './img/photos/resin-1-3.jpg';
@@ -491,14 +492,15 @@ export const artifacts = [
       build: 'Resin Light 1.0 → 2.0: from a first working prototype to a production-intent design. 2.0 is in progress.',
       image: 'A glowing cast-resin object: the resin is both the material and the diffuser.',
     },
-    // Picture: Resin Light 1.0, lit, framed 3:2 on its own dark backdrop. Photos: 1.0 first, then 2.0 (CAD, then the first casts).
-    picture: { src: resinLight, bg: '#03190d' },
+    // Picture: Grant's render of Resin Light 2.0 (in progress), framed 3:2 on its own background. Photos: 1.0 first, then 2.0 (render, CAD views, the first casts).
+    picture: { src: resinLight2, bg: '#141414' },
     photos: [
       { src: resin1a, alt: 'Resin Light 1.0 lit in the dark: a ribbed pink cast-resin block glowing orange from inside', caption: 'Resin Light 1.0' },
       { src: resin1b, alt: 'Resin Light 1.0 from the front: two glowing resin columns joined down the middle', caption: 'Resin Light 1.0, front' },
       { src: resin1c, alt: 'Resin Light 1.0 from the front in a lit room', caption: 'Resin Light 1.0 in daylight' },
       { src: resin1d, alt: 'Resin Light 1.0 from the side, its light spilling onto the table', caption: 'Resin Light 1.0, side' },
-      { src: resin2cad1, alt: 'CAD render of Resin Light 2.0 from the back: the resin body with its mounting plates', caption: 'Resin Light 2.0 (in progress) · CAD, back' },
+      { src: resin2render, alt: 'Render of Resin Light 2.0: stacked pink cast-resin panels lit from inside, on black', caption: 'Resin Light 2.0 (in progress) · render' },
+      { src: resin2cad1, alt: 'CAD render of Resin Light 2.0 from the back: the resin body with its mounting plates', caption: 'Resin Light 2.0 · CAD, back' },
       { src: resin2cad2, alt: 'CAD render of Resin Light 2.0: layered resin panels around the light', caption: 'Resin Light 2.0 · CAD, resin panels' },
       { src: resin2cad3, alt: 'CAD render of Resin Light 2.0 from above: three LEDs in the cap over the diffusers', caption: 'Resin Light 2.0 · CAD, LED cap' },
       { src: resin2cad4, alt: 'CAD render of Resin Light 2.0: LED cap, inner diffuser and side panels', caption: 'Resin Light 2.0 · CAD, inside' },
