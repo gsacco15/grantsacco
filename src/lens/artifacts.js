@@ -61,6 +61,8 @@ import atmosPreview from './img/atmos.jpg';
 import contactflowPreview from './img/contactflow.jpg';
 import atmosLabPreview from './img/atmos-lab.jpg';
 import jobpaperPreview from './img/jobpaper.jpg';
+import roomaiPreview from './img/roomai.jpg';
+import roomaiDashboard from './img/photos/roomai-dashboard.jpg';
 import resin2render from './img/photos/resin-2-render.jpg';
 import resin1a from './img/photos/resin-1-1.jpg';
 import resin1b from './img/photos/resin-1-2.jpg';
@@ -575,7 +577,10 @@ export const artifacts = [
     summary: 'Photograph a room; segmentation finds walls, floors, windows and doors and estimates materials and cost.',
     tech: 'Image segmentation (SAM), web app', link: 'https://luminous-horse-8a5278.netlify.app',
     lens: { digital: 'Segmentation turns one photo into quantities and costs.', structure: 'Takeoffs without a tape measure.' },
-    picture: { scene: 'app', label: 'RoomAI', layout: 'segment', accent: '#5cf2b0' }, related: ['jobpaper', 'llm'],
+    // Picture: a snippet of the app (the SAM 3.0 estimator dashboard), framed 3:2 on its own navy; the photo viewer shows it full size.
+    picture: { src: roomaiPreview, bg: '#0f172b' },
+    photos: [{ src: roomaiDashboard, alt: 'The estimator dashboard: a bedroom photo segmented into walls, floor and window, with areas, a cost breakdown and the materials list', caption: 'SAM 3.0 estimator: segmentation map, areas, cost and materials' }],
+    related: ['jobpaper', 'llm'],
   },
   {
     id: 'llm', title: 'Construction LLM', kind: 'app', org: 'Personal', years: [2025, 2025],
