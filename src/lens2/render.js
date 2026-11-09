@@ -248,52 +248,29 @@ function place(c, id) {
   g.putImageData(img, 0, 0);
 }
 
-const RAMP = ' .:-=+*#%@';
+// Digital: the app's own picture, clear and in colour, as on a screen: a touch
+// of contrast, faint scanlines and a soft edge. (It used to sit dimmed under
+// ASCII characters, which hid the apps.)
 function digital(c) {
   const { width: w, height: h } = c;
   const g = ctx(c);
-  const src = g.getImageData(0, 0, w, h).data;
-  const L = luminance(src, w * h);
-  const E = sobel(L, w, h);
-  // Normalise to the picture's own range so dark and bright scenes read alike.
-  const sorted = Float32Array.from(L).sort();
-  const lo = sorted[Math.floor(sorted.length * 0.05)];
-  const hi = sorted[Math.floor(sorted.length * 0.97)];
-  for (let i = 0; i < L.length; i++) L[i] = Math.min(1, Math.max(0, (L[i] - lo) / Math.max(0.05, hi - lo)));
-  // ~40 columns on a tile, finer on a large hero.
-  const cw = Math.max(4, Math.round(w / Math.min(110, Math.max(40, w / 8))));
-  const ch = Math.round(cw * 1.55);
-  // The picture stays underneath, dimmed and cooled, so the characters read as a
-  // layer on it rather than replacing it.
-  const base = g.getImageData(0, 0, w, h);
-  const bd = base.data;
-  for (let j = 0; j < bd.length; j += 4) {
-    bd[j] = 16 + bd[j] * 0.36;
-    bd[j + 1] = 16 + bd[j + 1] * 0.38;
-    bd[j + 2] = 18 + bd[j + 2] * 0.42;
-  }
-  g.putImageData(base, 0, 0);
-  g.font = `500 ${Math.round(ch * 0.95)}px "JetBrains Mono", ui-monospace, monospace`;
-  g.textBaseline = 'top';
-  for (let y = 0; y + ch <= h + ch / 2; y += ch) {
-    for (let x = 0; x + cw <= w + cw / 2; x += cw) {
-      let s = 0;
-      let e = 0;
-      let k = 0;
-      for (let yy = y; yy < Math.min(h, y + ch); yy += 2) {
-        for (let xx = x; xx < Math.min(w, x + cw); xx += 2) {
-          s += L[yy * w + xx];
-          e += E[yy * w + xx];
-          k++;
-        }
-      }
-      const l = Math.min(1, 0.5 * (s / k) ** 1.4 + Math.min(0.6, (e / k) * 0.9));
-      const ci = Math.round(l * (RAMP.length - 1));
-      if (ci === 0) continue;
-      g.fillStyle = `rgb(236 235 231 / ${(0.12 + 0.5 * l).toFixed(2)})`;
-      g.fillText(RAMP[ci], x, y);
+  const img = g.getImageData(0, 0, w, h);
+  const d = img.data;
+  const line = Math.max(2, Math.round(h / 140));
+  for (let y = 0; y < h; y++) {
+    const scan = y % (line * 2) < line ? 1 : 0.94;
+    const vy = (y / h - 0.5) * 2;
+    for (let x = 0; x < w; x++) {
+      const vx = (x / w - 0.5) * 2;
+      const v = scan * (1 - 0.1 * (vx * vx + vy * vy));
+      const j = (y * w + x) * 4;
+      const l = 0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2];
+      d[j] = (l + (d[j] - l) * 0.95) * v;
+      d[j + 1] = (l + (d[j + 1] - l) * 0.95) * v;
+      d[j + 2] = Math.min(255, (l + (d[j + 2] - l) * 0.95) * v + 3);
     }
   }
+  g.putImageData(img, 0, 0);
 }
 
 const MODES = { reality, structure, build, image, place, digital };

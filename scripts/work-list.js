@@ -27,7 +27,7 @@ const SECTIONS = [
 function item(a, mode) {
   const meta = [a.org, a.place?.name, years(a)].filter(Boolean).map(esc).join(' · ');
   const facts = (a.facts ?? []).map((f) => `<li>${esc(f)}</li>`).join('');
-  const links = (a.links ?? []).map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`);
+  const links = [...(a.link ? [{ label: 'Live app', href: a.link }] : []), ...(a.links ?? [])].map((l) => `<a href="${esc(l.href)}" target="_blank" rel="noopener">${esc(l.label)} ↗</a>`);
   return `
       <article class="w-item" id="${esc(a.id)}">
         <h3><a href="../?p=${encodeURIComponent(a.id)}#${a.main ?? mode}">${esc(a.title)}</a></h3>

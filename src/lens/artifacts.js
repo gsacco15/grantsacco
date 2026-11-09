@@ -56,6 +56,11 @@ import filmPalmBeach from './img/films/palmbeach.jpg';
 import filmColombia from './img/films/colombia.jpg';
 import horizonteMoon from './img/horizonte.jpg';
 import resinLight2 from './img/resin-light-2.jpg';
+import collateralPreview from './img/collateral.jpg';
+import atmosPreview from './img/atmos.jpg';
+import contactflowPreview from './img/contactflow.jpg';
+import atmosLabPreview from './img/atmos-lab.jpg';
+import jobpaperPreview from './img/jobpaper.jpg';
 import resin2render from './img/photos/resin-2-render.jpg';
 import resin1a from './img/photos/resin-1-1.jpg';
 import resin1b from './img/photos/resin-1-2.jpg';
@@ -521,7 +526,10 @@ export const artifacts = [
       digital: 'Arduino, a custom board, Bluetooth and an app to drive it.',
       structure: 'Layered structure that hides the LEDs and hardware.',
     },
-    picture: { scene: 'led' }, related: ['atmos'],
+    // Picture (for now): the preview of Atmos Lab, the web tool that turns a gradient into an LED light piece and drives it.
+    picture: { src: atmosLabPreview, bg: '#0f0d0d' },
+    links: [{ label: 'Atmos Lab', href: 'https://gradient-ui.vercel.app/led' }],
+    related: ['atmos'],
   },
 
   /* ── Digital (apps) ───────────────────────────────────────────────────────────── */
@@ -531,15 +539,17 @@ export const artifacts = [
     summary: 'Paste messy people and company data; get contacts, domains, email patterns, ranked candidates and a CSV.',
     tech: 'TypeScript, React, Vite, Tailwind, Supabase, Claude', link: 'https://contact-flow-web.vercel.app',
     lens: { digital: 'Extract → find domains → discover email patterns → rank → verify → export.' },
-    picture: { scene: 'app', label: 'ContactFlow', layout: 'table', accent: '#3d7be8' }, logo: LOGO.contactflow, related: [],
+    // Picture: the app's own link-preview image, framed 3:2 on its page colour so nothing is cropped.
+    picture: { src: contactflowPreview, bg: '#f6f5f2' }, logo: LOGO.contactflow, related: [],
   },
   {
     id: 'jobpaper', title: 'JobPaper', kind: 'app', org: 'Personal', years: [2026, 2026],
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'digital', also: [], featured: 'yes', stage: 'shipped', axes: ax(0.06, 0.66, 0.3, 0.5, 0.8, 0.72),
     summary: 'A ChatGPT app that turns contractor notes and photos into estimates, change orders and job reports.',
-    tech: 'TypeScript, MCP, ChatGPT Apps, jsPDF, Vercel', link: 'https://job-paper.vercel.app',
+    tech: 'TypeScript, MCP, ChatGPT Apps, jsPDF, Vercel', link: 'https://jobpaperapp.com',
     lens: { digital: 'Notes and photos in, editable documents and PDFs out.', structure: 'Built from years of running construction projects.' },
-    picture: { scene: 'app', label: 'JobPaper', layout: 'doc', accent: '#c2552d' }, related: ['roomai', 'llm'],
+    // Picture: the site's own preview screenshot (an estimate), shown as two panels: the line items, then the totals and Download PDF.
+    picture: { src: jobpaperPreview, bg: '#ece8e0' }, related: ['roomai', 'llm'],
   },
   {
     id: 'collateral', title: 'Collateral Damage', kind: 'app', org: 'Personal', years: [2026, 2026],
@@ -547,7 +557,8 @@ export const artifacts = [
     summary: 'An interactive simulation explaining collateral-damage estimation with a paper city and Monte Carlo runs.',
     tech: 'TypeScript, Vite, simulation workers', link: 'https://collateral-damage.vercel.app',
     lens: { digital: 'Adjustable strike parameters, Monte Carlo runs, population estimates.', structure: 'A simulation model made explainable.', image: 'A city made of paper.' },
-    picture: { scene: 'app', label: 'Collateral Damage', layout: 'city', accent: '#d9b37a' }, related: [],
+    // Picture: the app's own link-preview image (collateral-damage.vercel.app/og.jpg), cropped 3:2 around the title and the target.
+    picture: { src: collateralPreview, bg: '#f2eee3' }, related: [],
   },
   {
     id: 'atmos', title: 'Atmos Studio', kind: 'app', org: 'Personal', years: [2026, 2026],
@@ -555,7 +566,8 @@ export const artifacts = [
     summary: 'A nature-inspired gradient studio: 87 gradients, mesh editing, weather, Live Sky, photo palettes and AI generation.',
     tech: 'TypeScript, React, Vite, Supabase, Claude', link: 'https://gradient-ui.vercel.app',
     lens: { digital: 'Mesh editing, animation, Live Sky and palette extraction from photos.', image: '87 gradients taken from nature.' },
-    picture: { scene: 'app', label: 'Atmos Studio', layout: 'gradient', accent: '#ff7a45' }, related: ['ledwall'],
+    // Picture: the app's own link-preview image, framed 3:2 on its own dark background so nothing is cropped.
+    picture: { src: atmosPreview, bg: '#15141d' }, related: ['ledwall'],
   },
   {
     id: 'roomai', title: 'RoomAI', kind: 'app', org: 'Personal', years: [2025, 2025],

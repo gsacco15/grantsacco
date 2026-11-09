@@ -8,7 +8,7 @@ export const RENDER = {
   build: 'clay',
   image: 'film still · 2.39 : 1',
   place: 'tone · equirectangular',
-  digital: 'ascii · terminal',
+  digital: 'screen',
 };
 
 // Years as a label: "2021–24", "2025 – now", "until 2014"; "~" marks placeholder dates.
