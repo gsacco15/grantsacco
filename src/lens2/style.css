@@ -1960,11 +1960,10 @@ body.lx-page-open .lx-origin {
   gap: 3px;
 }
 
+/* The headline under the name: one plain sentence, in the accent. */
 .lx-intro__role {
-  font-family: var(--mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 12.5px;
+  line-height: 1.35;
   color: var(--accent);
 }
 

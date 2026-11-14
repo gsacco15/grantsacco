@@ -121,7 +121,7 @@ const introEl = div(
   `<button class="lx-intro__close" type="button" aria-label="Close">×</button>
   <div class="lx-intro__head">
     ${intro.headshot ? `<img class="lx-intro__photo" src="${intro.headshot}" alt="${site.name}" />` : `<span class="lx-intro__photo lx-intro__photo--todo" aria-hidden="true">${site.name.split(' ').map((w) => w[0]).join('')}</span>`}
-    <span class="lx-intro__who"><span class="lx-intro__name">${site.name}</span><span class="lx-intro__role">Mechanical engineer · Austin</span></span>
+    <span class="lx-intro__who"><span class="lx-intro__name">${site.name}</span><span class="lx-intro__role">${intro.headline ?? 'Mechanical engineer · Austin'}</span></span>
   </div>
   ${intro.lines.map((l) => `<p class="lx-intro__line">${l}</p>`).join('')}
   ${intro.personal ? `<p class="lx-intro__line lx-intro__line--personal">${intro.personal}</p>` : ''}
@@ -162,7 +162,7 @@ function setIntro(open, from = introFrom) {
     const p = from.getBoundingClientRect();
     const phone = innerWidth < 760;
     // Wider on desktop, so the paragraphs and the links fit without scrolling.
-    const w = Math.min(innerWidth >= 1200 ? 500 : innerWidth >= 1000 ? 420 : 320, innerWidth - 32);
+    const w = Math.min(innerWidth >= 1200 ? 550 : innerWidth >= 1000 ? 440 : 320, innerWidth - 32);
     introEl.style.width = `${w}px`;
     // On phones it stays clear of the section switcher at the bottom (and scrolls if it must).
     const room = innerHeight - (phone ? 72 + 112 : 76 + 120);

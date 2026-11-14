@@ -41,7 +41,8 @@ function item(a, mode) {
 export function renderWorkList({ artifacts, films, homes, countries, intro }, { site }) {
   const shown = artifacts.filter((a) => a.featured === 'yes' || a.featured === 'maybe');
   // Newest first; pieces marked `listLast` (the lights) go to the end of their section.
-  const byStart = (x, y) => !!x.listLast - !!y.listLast || (y.years[1] ?? 0) - (x.years[1] ?? 0) || (y.years[0] ?? 0) - (x.years[0] ?? 0);
+  // Ranked work first, in Grant's order (Engineering's six featured projects).
+  const byStart = (x, y) => (x.rank ?? 99) - (y.rank ?? 99) || !!x.listLast - !!y.listLast || (y.years[1] ?? 0) - (x.years[1] ?? 0) || (y.years[0] ?? 0) - (x.years[0] ?? 0);
   const sections = SECTIONS.map((s) => {
     const list = shown.filter((a) => !a.home && s.pick(a)).filter((a) => s.id !== 'experience' || a.featured === 'yes');
     const main = list.filter((a) => a.featured === 'yes').sort(byStart);
@@ -66,7 +67,7 @@ export function renderWorkList({ artifacts, films, homes, countries, intro }, { 
   <header class="w-head">
     <p class="w-back"><a href="../">← Interactive site</a></p>
     <h1>${esc(site.name)}</h1>
-    <p class="w-role">Mechanical engineer · Project engineering manager · Austin, TX</p>
+    <p class="w-role">${esc(intro.headline ?? 'Mechanical engineer · Austin, TX')}</p>
     ${intro.lines.map((l) => `<p>${esc(l)}</p>`).join('')}
     ${intro.personal ? `<p class="w-personal">${esc(intro.personal)}</p>` : ''}
     <p class="w-contact">

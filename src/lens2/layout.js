@@ -18,6 +18,8 @@ export const YEAR1 = 2027;
 export const isFocus = (a, mode) => {
   if (mode === 'reality' || mode === 'image') return true;
   if (mode === 'place') return a.kind === 'place';
+  // Engineering features Grant's six ranked projects; its other work is drawn smaller.
+  if (mode === 'structure' && a.main === 'structure') return !!a.rank;
   return a.main === mode;
 };
 
@@ -202,7 +204,9 @@ function captionSize(it, mode, W) {
   const lw = logo && !logo.icon ? LOGO_H * logo.ratio : 0;
   const lines = Math.ceil((tw + iw) / capMax(W));
   const lineH = (serif ? 18 : mono ? 12.6 : 14.4) * k;
-  return { cw: Math.min(capMax(W), Math.max(tw + iw, mw, lw)) + 4, capH: 7 + lines * lineH + (m ? 0 : 12) + (lw ? LOGO_H + 5 : 0) };
+  // A long meta line ("B.S. Mechanical Engineering · 2014–18") wraps, so it can take two lines.
+  const mlines = m ? 0 : Math.max(1, Math.ceil(mw / capMax(W)));
+  return { cw: Math.min(capMax(W), Math.max(tw + iw, mw, lw)) + 4, capH: 7 + lines * lineH + mlines * 12 + (lw ? LOGO_H + 5 : 0) };
 }
 
 /** Caption size for a film's stack on the Art plot (title over place · year). */

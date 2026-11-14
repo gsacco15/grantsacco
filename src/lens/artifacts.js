@@ -23,7 +23,10 @@ import enovisLogo from './img/logos/enovis.png';
 import mapeiLogo from './img/logos/mapei.png';
 import onlychargeLogo from './img/logos/onlychargeev.png';
 import kuLogo from './img/logos/ku.png';
-import kuEngineering from './img/ku-engineering.png';
+import kuEngineering from './img/ku-engineering-2.jpg';
+import enovisSurgical from './img/enovis-surgical.jpg';
+import mapeiCorpCover from './img/mapei-corp.jpg';
+import mapeiSpaCover from './img/mapei-spa.jpg';
 import fsaeCar from './img/fsae-car.jpg';
 import fsaeRain from './img/photos/fsae-rain.jpg';
 import palletizerRender from './img/palletizer.jpg';
@@ -109,7 +112,7 @@ const LOGO = {
 };
 
 /** One quiet line in About. */
-export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+ years in manufacturing · English, Italian' };
+export const quiet = { line: 'Based in Austin · B.S. Mechanical Engineering · 8+ years in manufacturing · English, Italian' };
 
 /**
  * The card behind the origin ("Grant" at the centre of About): a headshot,
@@ -118,9 +121,10 @@ export const quiet = { line: 'Based in Austin · Mechanical engineer, BSME · 8+
  * him (email and links come from `site` in src/content.js).
  */
 export const intro = {
-  headshot, // Grant in Rio, cropped to the face
+  headshot,
+  headline: 'Mechanical engineer leading advanced manufacturing facilities and capital projects.', // Grant in Rio, cropped to the face
   lines: [
-    "I'm a mechanical engineer and project engineering manager in Austin with 8+ years of experience delivering advanced manufacturing and industrial facilities. I own projects end to end, from scope and budget through design, contracting, construction and closeout, leading the contractors, vendors and engineering teams who build them.",
+    "I'm a mechanical engineer with 8+ years of experience leading advanced manufacturing and industrial capital projects. I manage projects from initial scope and engineering through procurement, construction, commissioning, and closeout, overseeing contractors, engineering firms, equipment vendors, budgets, and schedules. My work focuses on integrating complex manufacturing equipment, facilities, and infrastructure into operational production environments.",
     "Today I'm in medical technology at Enovis, leading the build-out of a facility for end-to-end orthopedic implant manufacturing under one roof: additive and subtractive manufacturing, cleaning, packaging, sterilization and shipping.",
     'Before that I delivered chemical manufacturing plants and production lines for MAPEI in Chicago, Milan, Dallas and Houston, and founded OnlyChargeEV, an EV charging company.',
   ],
@@ -230,31 +234,34 @@ export const artifacts = [
   {
     id: 'enovis', title: 'Enovis', kind: 'role', org: 'Sr. Project Engineer, Advanced Manufacturing', years: [2025, 2026], month: 4,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.9),
-    summary: "Owner's rep and engineering lead for a new 200K sq ft medical device plant for orthopedic implants, taking it from pre-construction through EPC delivery. One building for the whole process: additive and subtractive manufacturing, ISO 7 cleanrooms, sterilization and packaging, including the company's first U.S. additive manufacturing work center.",
+    summary: "Owner's representative and engineering lead for the development of a 200K sq ft integrated orthopedic implant manufacturing facility in Austin. Lead design and construction coordination, engineering consultants, contractors, equipment vendors, capital budgets, schedules, permitting, and major MEP infrastructure. The facility brings additive and subtractive manufacturing, automated cleaning, ISO 7 cleanrooms, packaging, and sterilization together under one roof.",
     facts: [
-      'Pre-construction engineering and development: scope, design, budget and schedule',
-      'EPC delivery: engineering, procurement, construction and qualification',
-      '10-year master plan, future-proofed for capacity growth',
-      'Infrastructure, utilities and MEP lead, from validated cleanroom utilities to life safety',
+      "Owner's representative overseeing engineering, construction, contractors, and vendors.",
+      'Lead facility MEP and process infrastructure, including electrical distribution, HVAC, compressed air, DI/RO water, process exhaust, and wastewater systems.',
+      'Manage project scope, capital budgets, schedules, permitting, procurement, and construction interfaces.',
+      'Develop infrastructure and facility master planning to support 10 years of manufacturing growth.',
     ],
     lens: { reality: '2025 – now · Austin. A 200K sq ft facility for orthopedic implants: cleanrooms, sterilization and the first U.S. additive manufacturing work center.' },
-    picture: { scene: 'badge', label: 'Enovis', sub: 'Austin · 2025 –', accent: '#2f7f86' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-cps', 'enovis-am'],
+    // Picture: the Enovis Surgical card, framed 3:2 on its red (the small logo stays under it, which keeps the About layout as tested).
+    picture: { src: enovisSurgical, bg: '#c9102f' }, logo: LOGO.enovis, related: ['enovis-facility', 'enovis-cps', 'enovis-am'],
   },
   {
-    id: 'mapei-dallas', title: 'MAPEI Corp', kind: 'role', org: 'Project Engineering Manager', years: [2021, 2024], month: 8, monthTbd: true,
+    id: 'mapei-dallas', title: 'MAPEI Corp', kind: 'role', org: 'Project Engineering Manager', years: [2021, 2025], month: 8, monthTbd: true,
     place: { name: 'Dallas, TX', lat: 32.78, lon: -96.8 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.85),
-    summary: 'Industrial construction and manufacturing capital projects, over $30M in total.',
+    summary: 'Industrial construction and manufacturing capital projects: plants, expansions and equipment, over $30M in cumulative capital projects (many projects, not one).',
     // MAPEI Corp in two stints: Chicago out of school, then Dallas after Milan.
-    periods: [{ years: [2018, 2019], place: 'Chicago' }, { years: [2021, 2024], place: 'Dallas' }],
-    lens: { reality: 'Chicago 2018 – 19, then Dallas 2021 – 24. Over $30M of plants, expansions and equipment.' },
-    picture: { scene: 'badge', label: 'MAPEI', sub: 'Dallas · 2021 – 24', accent: '#2b5aa6' }, logo: LOGO.mapei, related: ['drymix', 'palletizer', 'sitedev', 'staticmix', 'liquid'],
+    periods: [{ years: [2018, 2019], place: 'Chicago' }, { years: [2021, 2025], place: 'Dallas' }],
+    lens: { reality: 'Chicago 2018 – 19, then Dallas 2021 – 25. Over $30M in cumulative capital projects: plants, expansions and equipment.' },
+    // Picture: the Realtà MAPEI issue 100 cover art (the "100" under construction), masthead left off.
+    picture: { src: mapeiCorpCover, bg: '#ffffff' }, logo: LOGO.mapei, related: ['drymix', 'palletizer', 'sitedev', 'staticmix', 'liquid'],
   },
   {
     id: 'mapei-milan', title: 'MAPEI SpA', kind: 'role', org: 'Project Engineer', years: [2019, 2021], month: 3, monthTbd: true,
     place: { name: 'Milan, Italy', lat: 45.46, lon: 9.19 }, main: 'reality', also: [], featured: 'yes', stage: 'built', axes: ax(0.5, 0.6),
     summary: 'Manufacturing operations, capital projects and static mixing R&D at the Milan headquarters.',
     lens: { reality: '2019 – 2021 · Milan. Prototyped the static mixing process that later ran in Dallas.' },
-    picture: { scene: 'badge', label: 'MAPEI SpA', sub: 'Milan · 2019 – 21', accent: '#3d6fb8' }, logo: LOGO.mapei, related: ['staticmix'],
+    // Picture: the Realtà MAPEI issue 42 cover art (the city cartoon), masthead left off.
+    picture: { src: mapeiSpaCover, bg: '#ffffff' }, logo: LOGO.mapei, related: ['staticmix'],
   },
   {
     id: 'mapei-chicago', title: 'MAPEI Corp (Chicago)', kind: 'role', org: 'Junior Project Engineer', years: [2018, 2019],
@@ -265,27 +272,30 @@ export const artifacts = [
     picture: { scene: 'badge', label: 'MAPEI', sub: 'Chicago · 2018 – 19', accent: '#5a7fb8' }, logo: LOGO.mapei, related: [],
   },
   {
-    id: 'ku', title: 'University of Kansas', kind: 'education', org: 'B.S. Mechanical Engineering', years: [2014, 2018], month: 8, monthTbd: true, aboutNote: 'BSME',
+    id: 'ku', title: 'University of Kansas', kind: 'education', org: 'B.S. Mechanical Engineering', years: [2014, 2018], month: 8, monthTbd: true, aboutNote: 'B.S. Mechanical Eng.',
     place: { name: 'Lawrence, KS', lat: 38.97, lon: -95.24 }, main: 'reality', also: [], featured: 'yes', stage: 'shipped', axes: ax(0.4, 0.55),
-    summary: 'BSME. Formula SAE electric powertrain and biomechanical research.',
-    lens: { reality: '2014 – 2018 · Lawrence. A racecar and a piano-pedal device on the way to a BSME.' },
-    picture: { src: kuEngineering, bg: '#0167b1' }, related: ['fsae', 'pedal'],
+    summary: 'B.S. Mechanical Engineering. Formula SAE electric powertrain and biomechanical research.',
+    lens: { reality: '2014 – 2018 · Lawrence. A racecar and a piano-pedal device on the way to a B.S. in Mechanical Engineering.' },
+    // Picture: the current KU School of Engineering mark, on white.
+    picture: { src: kuEngineering, bg: '#ffffff' }, related: ['fsae', 'pedal'],
   },
 
   /* ── Engineering ────────────────────────────────────────────────────────── */
   {
-    id: 'enovis-facility', title: 'Operations facility build-out', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 6, monthTbd: true,
+    rank: 1,
+    id: 'enovis-facility', title: '200K SF Orthopedic Manufacturing Facility', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 8, monthTbd: true,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['reality'], featured: 'yes', stage: 'built', axes: ax(m(140), 0.95),
-    summary: "A new 200K sq ft advanced manufacturing facility for orthopedic implants, delivered as owner's rep: offices, automated distribution, cleanrooms, sterilization and packaging, and additive manufacturing under one roof.",
+    summary: 'Leading the development and buildout of a 200K sq ft advanced manufacturing facility for orthopedic implants. Responsible for owner-side project delivery, including engineering, construction management, contractor coordination, permitting, capital budgets, MEP infrastructure, and equipment integration. The facility consolidates manufacturing, cleanroom processing, sterilization, packaging, and distribution.',
     facts: ['200K sq ft · budget over $10M', 'Pre-construction through EPC delivery', 'Utilities and MEP: controls, life safety, equipment integration', '10-year master plan for growth'],
     lens: {
       structure: '200K sq ft: office, automated distribution, clean pack, sterilization and additive manufacturing under one roof.',
-      reality: 'The building he walks into every day, designed and built from the ground up.',
+      reality: '2025 – now · Austin. Transforming a 200K sq ft building into an orthopedic implant manufacturing facility.',
     },
     // Picture: a still of the MPOC model (Grant's concept model), and 72 frames of it turning for About's hover (Lens v2 opens the model itself).
     picture: { src: mpocModel, bg: '#f4f3f0', turn: { src: mpocTurn, frames: 72, cols: 12 } }, logo: LOGO.enovis, model: { id: 'mpoc', src: mpocPlan }, related: ['enovis', 'enovis-cps', 'enovis-am'],
   },
   {
+    rank: 4,
     id: 'enovis-am', title: 'ProMade additive manufacturing work center', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 4, ended: true, // through September 2026
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'built', axes: ax(m(40), 0.84),
     summary: 'The pilot ProMade work center: the first additive manufacturing capability for Enovis in the U.S., printing EBM titanium and PA 2200 nylon for patient-specific implants and precision surgical guides.',
@@ -310,20 +320,21 @@ export const artifacts = [
     related: ['enovis-facility', 'enovis-cps', 'enovis'],
   },
   {
-    id: 'enovis-cps', title: 'Clean pack & sterilization expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true, month: 4, monthTbd: true,
+    rank: 2,
+    id: 'enovis-cps', title: 'Clean Pack & Sterilization (CPS) Expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true, month: 4, monthTbd: true,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'sketch', axes: ax(m(50), 0.92),
-    summary: 'End to end, a 25K sq ft clean pack and sterilization suite inside the operations facility: design intent, engineering, permits, procurement, construction and qualification, with the validated utilities it runs on.',
+    summary: 'Leading the design and construction of a 25K sq ft clean pack and sterilization expansion supporting orthopedic implant manufacturing. Scope includes two ISO Class 7 cleanrooms, automated cleaning equipment, inspection and packaging areas, sterilization infrastructure, and critical process utilities. Responsible for design coordination, permitting, procurement, construction management, utility integration, and commissioning and qualification readiness.',
     facts: [
-      '25K sq ft: cleaning, two ISO 7 cleanrooms, sterilization, packaging and inspection',
+      '25K sq ft: two ISO Class 7 cleanrooms, automated cleaning, inspection, packaging and sterilization',
       'Automated clean line, sterile pack, VHP and gas plasma sterilization',
-      'Validated utilities: clean dry air, DI/RO process water, neutralization',
-      'Design intent through permits, procurement, construction and IQ/OQ',
-      'Three phases, the clean line first so validation can start early',
+      'Process utilities: clean dry air, DI/RO process water and wastewater neutralization',
+      'Design through permitting, procurement and construction; commissioning and qualification to follow',
+      'Three phases, the clean line first so qualification can start early',
     ],
     lens: {
-      structure: 'Two ISO 7 cleanrooms, an automated clean line and VHP and gas plasma sterilization, on validated air, water and neutralization systems.',
+      structure: '25K sq ft, two ISO Class 7 cleanrooms, an automated clean line and VHP and gas plasma sterilization, on clean dry air, DI/RO water and neutralization systems.',
       build: 'Design intent → permits → the clean line first, for early validation → sterile pack and sterilization → outer boxing and the corridor wall.',
-      reality: '2026 – now · Austin. A cleanroom suite inside the operations facility, from design intent to qualification.',
+      reality: '2026 – now · Austin. A 25K sq ft cleanroom suite inside the 200K SF facility, from design intent toward qualification.',
     },
     // In the same plant as the operations facility: the MPOC model opens with the clean pack & sterilization zone lit;
     // its still and 72 turning frames (About's hover) are rendered with that zone lit too.
@@ -331,6 +342,7 @@ export const artifacts = [
     related: ['enovis-facility', 'enovis-am', 'enovis'],
   },
   {
+    rank: 3,
     id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true, month: 3, monthTbd: true,
     place: { name: 'Houston, TX', lat: 29.76, lon: -95.37 }, main: 'structure', also: ['build', 'place', 'reality'], featured: 'yes', stage: 'shipped', axes: ax(m(60), 0.9),
     summary: 'A ground-up automated dry mix production and packaging plant.',
@@ -354,12 +366,13 @@ export const artifacts = [
     related: ['liquid', 'sitedev', 'mapei-dallas'],
   },
   {
+    rank: 5,
     id: 'palletizer', title: 'Robotic palletizer & bag applicator', kind: 'engineering', org: 'MAPEI', years: [2021, 2022], tbd: true,
     place: { name: 'Tempe, AZ', lat: 33.43, lon: -111.94 }, main: 'structure', also: ['build'], featured: 'yes', stage: 'shipped', axes: ax(m(6), 0.55),
-    summary: 'Automated robotic palletizing and bag application added to a running dry mix plant.',
+    summary: 'Automated robotic palletizing and bag application added to a running dry mix plant, doubling its production capacity and eliminating two manual operations.',
     facts: ['Doubled the plant\'s output capacity', 'Removed two manual operations', 'Prefab kept downtime minimal'],
     lens: {
-      structure: 'A robot cell added to a running plant: pneumatics, electrical and mechanical, integrated live.',
+      structure: 'A robot cell added to a running plant, integrated live: doubled capacity, two manual operations eliminated.',
       build: 'Doubled output and removed two manual steps.',
     },
     // Picture: Grant's render of the cell on white, framed 3:2 so nothing is cropped; the photo viewer has the robot at work.
@@ -380,9 +393,10 @@ export const artifacts = [
     picture: { src: siteStill, bg: '#f4f3f0' }, model: { id: 'drymix', src: houstonModel }, related: ['drymix', 'liquid'],
   },
   {
+    rank: 6,
     id: 'staticmix', title: 'In-line static mixing process', kind: 'engineering', org: 'MAPEI', years: [2020, 2021], tbd: true,
     place: { name: 'Milan → Dallas', lat: 32.78, lon: -96.8 }, main: 'structure', also: ['build'], featured: 'yes', stage: 'shipped', axes: ax(m(2.5), 0.74),
-    summary: 'The first production version of a new static mixing technology: prototyped in Milan, built in Dallas.',
+    summary: 'The first production version of a new static mixing technology, prototyped in Milan and built in Dallas, cutting production time by 35%.',
     facts: ['Production time −35%', 'Manual operations removed', 'Enabled bulk material purchasing'],
     lens: {
       structure: 'A mixing skid procured from Europe and installed in Dallas: −35% production time.',
@@ -400,8 +414,8 @@ export const artifacts = [
   {
     id: 'liquid', title: 'Liquid admixtures plant expansion', kind: 'engineering', org: 'MAPEI', years: [2023, 2024], tbd: true,
     place: { name: 'Houston, TX', lat: 29.76, lon: -95.37 }, main: 'structure', also: [], featured: 'yes', stage: 'shipped', axes: ax(m(25), 0.6),
-    summary: 'A $5M expansion introducing automated blending and bulk transfer to the Southern U.S.',
-    facts: ['$5M', 'Automated blending and bulk transfer', 'Design through commissioning and lifecycle'],
+    summary: 'A $5M capital project introducing automated blending and bulk transfer to the Southern U.S.',
+    facts: ['$5M capital project', 'Automated blending and bulk transfer', 'Design through commissioning and lifecycle'],
     lens: { structure: 'Automated blending and bulk transfer, new to the Southern U.S., $5M.' },
     // Inside the MAPEI Houston facility, with the dry mix plant: the model opens with the plant building lit.
     picture: { src: admixStill, bg: '#f4f3f0' }, model: { id: 'drymix', src: houstonModel, highlight: 'plant' }, related: ['drymix', 'sitedev'],
@@ -441,12 +455,12 @@ export const artifacts = [
   {
     id: 'fsae', title: 'Formula SAE electric racecar', kind: 'project', org: 'University of Kansas', years: [2017, 2018], month: 9, monthTbd: true,
     place: { name: 'Lawrence, KS', lat: 38.97, lon: -95.24 }, main: 'build', also: ['structure', 'reality'], featured: 'yes', stage: 'built', axes: ax(m(3), 0.8, 0.3, 0.6),
-    summary: 'The electric powertrain for KU\'s Formula SAE racecar.',
-    facts: ['Led 5 electrical engineers', 'In-house motor controller', 'Battery storage and management system', 'Raced at Formula SAE Electric'],
+    summary: 'The electric powertrain for KU\'s Formula SAE racecar: led five electrical engineers through the battery pack and motor controller.',
+    facts: ['Led five electrical engineers', 'In-house motor controller', 'Battery storage and management system', 'Raced at Formula SAE Electric'],
     lens: {
       build: 'Motor controller and battery system designed and built in-house, then raced.',
       structure: 'Powertrain integration across subsystems: SolidWorks, MATLAB, FEA.',
-      reality: '2017 – 2018 · led a team of five on the car.',
+      reality: '2017 – 2018 · Electric powertrain: battery pack and motor controller.',
     },
     // Picture: Grant's render of the car; the photo viewer has the car's nose in the rain.
     picture: { src: fsaeCar, bg: '#eef0f3' },
@@ -486,7 +500,7 @@ export const artifacts = [
     id: 'resin', title: 'Resin Light', kind: 'build', org: 'Product design & development', years: [2024, 2026], listLast: true, // 1.0 built, 2.0 in progress
     place: { name: 'Home workshop', lat: 32.78, lon: -96.8 }, main: 'build', also: ['image'], featured: 'yes', stage: 'built', axes: ax(m(0.3), 0.55, 0.12, 0.4),
     summary:
-      'Designed and built a custom LED resin lighting product from concept through multiple working prototypes, combining mechanical engineering, industrial design and hands-on fabrication. Developed 3D printed components, custom molds and resin casting processes while integrating LED electronics into a functional, finished product. Iterated on geometry, materials, light diffusion and assembly to improve aesthetics, durability and manufacturability, with the goal of a product suitable for small-scale production. Resin Light 1.0 is built; Resin Light 2.0, redesigned in CAD and now being cast, is in progress.',
+      'Designed and built a custom LED resin light combining mechanical and industrial design, 3D CAD, rapid prototyping, custom molds, resin casting, and integrated electronics. Iterated on geometry, lighting diffusion, materials, assembly, and manufacturability, progressing from a working 1.0 prototype to a redesigned 2.0 version currently in development.',
     facts: [
       'Mechanical & industrial design: 3D CAD modeling, component design, fit and assembly',
       'Rapid prototyping: FDM 3D printing, design iterations and functional testing',
