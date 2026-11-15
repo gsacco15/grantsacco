@@ -22,7 +22,6 @@ const yrs = (it) => {
   if (b >= NOW && !it.ended && it.kind !== 'app' && it.kind !== 'film') return `${t}${a} – now`;
   return a === b ? `${t}${a}` : `${t}${a}–${String(b).slice(2)}`;
 };
-const f2 = (v) => v.toFixed(2).replace(/^0/, '');
 
 /** Physical size from the 0–1 log scale axis (see SCALE: 0 = 10 cm, 1 = 1 km). */
 export function physicalSize(scale) {
@@ -43,7 +42,8 @@ export function metaFor(it, mode) {
     case 'reality':
       return it.aboutNote ? `${it.aboutNote} · ${yrs(it)}` : yrs(it);
     case 'structure':
-      return `≈ ${physicalSize(it.axes.scale)} · c ${f2(it.axes.complexity)}`;
+      // When and for whom (the chart's position already shows scale and complexity).
+      return `${yrs(it)} · ${it.org}`;
     case 'build':
       return `${it.stage} · ${yrs(it)}`;
     case 'image':
@@ -53,7 +53,8 @@ export function metaFor(it, mode) {
       if (it.home) return `${it.home.born ? 'born · ' : ''}${yrs(it)}`;
       return it.place.name;
     case 'digital':
-      return `d ${f2(it.axes.digital)} · f ${f2(it.axes.finished)}`;
+      // When, and live or what it runs on.
+      return `${yrs(it)} · ${it.link ? 'live app' : it.tech?.split(',')[0] || (it.kind === 'app' ? it.stage : it.org)}`;
     default:
       return '';
   }
