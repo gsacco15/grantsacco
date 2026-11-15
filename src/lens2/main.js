@@ -22,7 +22,7 @@ import { attachTurntable } from './turntable.js';
 import { layout, mapFrame, mapZoom, setMapZoom, MAX_ZOOM, polarFrame } from './layout.js';
 import { overlay, updateMap, DETAIL_ZOOM } from './overlay.js';
 import { createPage } from './page.js';
-import { RENDER, metaFor } from './meta.js';
+import { metaFor } from './meta.js';
 import { createStacks } from './stacks.js';
 import { createDarkroom } from './darkroom.js';
 import { createTripCard } from './trip.js';
@@ -75,7 +75,6 @@ const tripCard = createTripCard({
   parent: body,
   titleOf: (id) => items.find((a) => a.id === id)?.title,
   onWork: (id) => openProject(id, null),
-  onPage: (id, el) => openProject(id, el),
 });
 const sweep = div('lx-sweep', body, '<span class="lx-sweep__tag"></span>');
 sweep.setAttribute('aria-hidden', 'true');
@@ -92,8 +91,25 @@ const lg = {
   render: legend.querySelector('.lx-legend__render'),
 };
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
-// Lens reads some axes differently from the Coordinates mock.
-const READOUT = { reality: 'r = year · θ = time of year · origin = you' };
+// Each section's title and one plain line on how to read it (the Coordinates mock's
+// math-style titles, "r = year · θ = …", stay in that mock).
+const LEGEND = {
+  reality: ['My path, year by year', 'Each ring is a year, from 2014 at the centre to now. Clockwise from the top: January → December.'],
+  structure: ['Engineering projects', 'Left to right: one machine → a 200K sq ft plant. Bottom to top: simpler → more complex.'],
+  build: ['Things I’ve built', 'Left to right: when it started. Bottom to top: idea → shipped.'],
+  image: ['Photography', 'Each pile is a roll of 35mm film; click one to open the album.'],
+  place: ['Where I’ve lived and travelled', 'Blue dots are homes, black dots are trips.'],
+  digital: ['Apps and software', 'Left to right: hardware → pure software. Bottom to top: experiment → finished.'],
+};
+// Phones: the same, in one short line (two would run into the chart's axis labels).
+const LEGEND_PHONE = {
+  reality: 'Each ring is a year · clockwise: Jan → Dec',
+  structure: 'One machine → a 200K sq ft plant',
+  build: 'When it started · idea → shipped',
+  image: 'Each pile is a roll of 35mm film',
+  place: 'Blue: homes · black: trips',
+  digital: 'Hardware → pure software',
+};
 const HINT = { reality: 'Click the centre or any piece to open it', image: 'Click a film to open its album', place: 'Click a city or a trip · scroll or pinch to zoom' };
 
 // About's one quiet line.
@@ -427,8 +443,8 @@ function setMode(id) {
 
   const md = modes.find((m) => m.id === id);
   lg.kicker.textContent = `${String(MODE_IDS.indexOf(id) + 1).padStart(2, '0')} · ${md.section}`;
-  lg.title.textContent = systems[id].title;
-  lg.axes.textContent = READOUT[id] ?? systems[id].readout;
+  lg.title.textContent = LEGEND[id]?.[0] ?? systems[id].title;
+  lg.axes.textContent = (W < 760 ? LEGEND_PHONE[id] : LEGEND[id]?.[1]) ?? systems[id].readout;
   hint.textContent = HINT[id] ?? 'Click any piece of work to open it';
   quietEl.classList.toggle('is-on', id === 'reality');
   placeDogs();
@@ -437,12 +453,9 @@ function setMode(id) {
   if (id !== 'reality') setIntro(false);
   for (const el of raceEls) el.classList.toggle('is-on', id === 'reality');
   fillMore(id);
-  const renderName = RENDER[id];
-  lg.render.textContent = `render · ${renderName}`;
   legend.classList.remove('is-in');
   void legend.offsetWidth;
   legend.classList.add('is-in');
-  sweepTag.textContent = `render ▸ ${renderName}`;
 
   dyn.classList.remove('is-on');
   body.dataset.mode = id;

@@ -3,14 +3,14 @@
 //   fanning out on hover), its name, place, year and frame count, and "Open album".
 //   Google Photos only opens from that button (or the pile).
 // - a place lived: Grant's drawing of the city as one print, the years and why he was
-//   there, the work done while living there (each opens its project), and a link to the
-//   city's own page.
+//   there, and the work done while living there (each opens its project). The card is
+//   the whole thing: no separate city page from the map.
 import { drawInto } from './photos.js';
 
 const PRINTS = 3;
 const TILT = [-7, 5, 0]; // degrees, bottom of the pile → top
 
-export function createTripCard({ parent, titleOf, onWork, onPage }) {
+export function createTripCard({ parent, titleOf, onWork }) {
   const el = document.createElement('div');
   el.className = 'lx-trip';
   el.hidden = true;
@@ -20,13 +20,12 @@ export function createTripCard({ parent, titleOf, onWork, onPage }) {
     <a class="lx-trip__pile" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
       ${TILT.map((r, k) => `<span class="lx-trip__print" style="--r:${r}deg;--k:${k}"><canvas></canvas></span>`).join('')}
     </a>
-    <button class="lx-trip__city" type="button" tabindex="-1" aria-hidden="true"><span class="lx-trip__print"><img alt="" /></span></button>
+    <span class="lx-trip__city" aria-hidden="true"><span class="lx-trip__print"><img alt="" /></span></span>
     <span class="lx-trip__title"></span>
     <span class="lx-trip__meta"></span>
     <span class="lx-trip__label">While living here</span>
     <span class="lx-trip__work"></span>
-    <a class="lx-trip__open" target="_blank" rel="noopener">Open album <span aria-hidden="true">↗</span></a>
-    <button class="lx-trip__page" type="button">City page <span aria-hidden="true">→</span></button>`;
+    <a class="lx-trip__open" target="_blank" rel="noopener">Open album <span aria-hidden="true">↗</span></a>`;
   parent.appendChild(el);
   const $ = (s) => el.querySelector(s);
   const canvases = [...el.querySelectorAll('.lx-trip__pile canvas')];
@@ -106,7 +105,7 @@ export function createTripCard({ parent, titleOf, onWork, onPage }) {
     show(anchor);
     // The drawing may still be loading: place the card again once it has its size.
     if (!img.complete) img.addEventListener('load', place, { once: true });
-    ($('.lx-trip__work .lx-chip') ?? $('.lx-trip__page')).focus({ preventScroll: true });
+    ($('.lx-trip__work .lx-chip') ?? $('.lx-trip__close')).focus({ preventScroll: true });
   }
 
   function close({ refocus = false } = {}) {
@@ -124,14 +123,6 @@ export function createTripCard({ parent, titleOf, onWork, onPage }) {
     close();
     onWork(b.dataset.id);
   });
-  const toPage = () => {
-    const it = home;
-    const a = from;
-    close();
-    if (it) onPage(it.id, a);
-  };
-  $('.lx-trip__page').addEventListener('click', toPage);
-  $('.lx-trip__city').addEventListener('click', toPage);
   window.addEventListener('keydown', (e) => e.key === 'Escape' && !el.hidden && close({ refocus: true }));
   // A click anywhere else (the map, a drag, another dot) closes it.
   window.addEventListener('pointerdown', (e) => !el.hidden && !el.contains(e.target) && !from?.contains(e.target) && close(), true);

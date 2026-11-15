@@ -3115,7 +3115,6 @@ body.concept-lens2 .lx-intro__name {
 .lx-trip__city,
 .lx-trip__label,
 .lx-trip__work,
-.lx-trip__page,
 .lx-trip.is-home .lx-trip__pile,
 .lx-trip.is-home .lx-trip__open {
   display: none;
@@ -3125,7 +3124,6 @@ body.concept-lens2 .lx-intro__name {
   width: 100%;
   margin: 8px 0 12px;
   padding: 0;
-  cursor: pointer;
 }
 .lx-trip.is-home .lx-trip__city .lx-trip__print {
   position: relative;
@@ -3135,9 +3133,6 @@ body.concept-lens2 .lx-intro__name {
   width: 100%;
   transform: rotate(-1.5deg);
   padding: 7px 7px 18px;
-}
-.lx-trip.is-home .lx-trip__city:hover .lx-trip__print {
-  transform: rotate(0deg) translateY(-3px) scale(1.02);
 }
 .lx-trip__city img {
   display: block;
@@ -3165,22 +3160,6 @@ body.concept-lens2 .lx-intro__name {
   font-size: 12px;
   padding: 4px 10px;
 }
-.lx-trip.is-home .lx-trip__page {
-  display: inline-flex;
-  gap: 6px;
-  margin-top: 12px;
-  padding: 7px 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink);
-}
-.lx-trip.is-home .lx-trip__page:hover {
-  border-color: var(--ink);
-}
 
 /* Phones: the card never runs under the section switcher; it scrolls inside if it must. */
 @media (max-width: 760px) {
@@ -3203,4 +3182,16 @@ body.concept-lens2 .lx-intro__name {
 }
 @media (prefers-reduced-motion: reduce) {
   .ov-flow { animation: none; opacity: 0; }
+}
+
+/* The section's one plain line on how to read it: sentences now, so they may wrap. */
+.lx-legend__axes {
+  display: block;
+  max-width: min(640px, calc(100vw - 2 * var(--gutter)));
+  margin-inline: auto;
+  text-wrap: balance;
+}
+.lx-legend__render,
+.lx-sweep__tag {
+  display: none;
 }

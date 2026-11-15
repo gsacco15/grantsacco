@@ -11,7 +11,7 @@ import { loadLand, landPath } from '../shared/geo.js';
 import { clamp } from '../anim.js';
 import { render, ASPECT } from './render.js';
 import { createGallery } from './gallery.js';
-import { RENDER, physicalSize, yrs } from './meta.js';
+import { physicalSize, yrs } from './meta.js';
 
 const byId = new Map(items.map((it) => [it.id, it]));
 // The pager steps through everything on stage except films (they open their
@@ -277,7 +277,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
     el.related.innerHTML = rel.length
       ? `<span class="lx-page__label">${it.home ? 'While living here' : 'Related'}</span>${rel.map((r) => `<button type="button" class="lx-chip${r.film ? ' lx-chip--film' : ''}" data-id="${r.id}">${r.title}</button>`).join('')}`
       : '';
-    el.render.textContent = `render · ${RENDER[mode]}`;
+    el.render.textContent = ''; // the render name ("clay", "tone"…) meant nothing to visitors
     const [a, b, c] = notes(it, mode);
     el.noteDim.textContent = a;
     el.noteA.textContent = b;
@@ -474,7 +474,7 @@ export function createPage({ getMode, onNavigate, onClose }) {
       setVars(heroEl, textTarget);
       frameEl.dataset.mode = textTarget;
       model?.setMode(textTarget);
-      el.render.textContent = `render · ${RENDER[textTarget]}`;
+      el.render.textContent = '';
       const [a, b, c] = notes(byId.get(id), textTarget);
       el.noteDim.textContent = a;
       el.noteA.textContent = b;
