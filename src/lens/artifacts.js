@@ -118,7 +118,7 @@ const LOGO = {
 };
 
 /** One quiet line in About. */
-export const quiet = { line: 'Based in Austin · B.S. Mechanical Engineering · 8+ years in manufacturing · English, Italian' };
+export const quiet = { line: 'Based in Austin · B.S. Mechanical Engineering · 8+ years in advanced manufacturing · English, Italian' };
 
 /**
  * The card behind the origin ("Grant" at the centre of About): a headshot,

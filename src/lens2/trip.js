@@ -1,0 +1,97 @@
+// A trip on the Travel map opens a small album card by its dot: a pile of prints from
+// the roll (the cover on top, details of it underneath, fanning out on hover), the
+// film's name, place, year and frame count, and an "Open album" button. Google Photos
+// only opens from that button (or the pile), so a click on the map never leaves the site.
+import { drawInto } from './photos.js';
+
+const PRINTS = 3;
+const TILT = [-7, 5, 0]; // degrees, bottom of the pile → top
+
+export function createTripCard({ parent }) {
+  const el = document.createElement('div');
+  el.className = 'lx-trip';
+  el.hidden = true;
+  el.setAttribute('role', 'dialog');
+  el.innerHTML = `
+    <button class="lx-trip__close" type="button" aria-label="Close">×</button>
+    <a class="lx-trip__pile" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+      ${TILT.map((r, k) => `<span class="lx-trip__print" style="--r:${r}deg;--k:${k}"><canvas></canvas></span>`).join('')}
+    </a>
+    <span class="lx-trip__title"></span>
+    <span class="lx-trip__meta"></span>
+    <a class="lx-trip__open" target="_blank" rel="noopener">Open album <span aria-hidden="true">↗</span></a>`;
+  parent.appendChild(el);
+  const $ = (s) => el.querySelector(s);
+  const canvases = [...el.querySelectorAll('canvas')];
+  let film = null;
+  let from = null;
+
+  function paint() {
+    if (!film) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    canvases.forEach((c, k) => {
+      const w = c.parentElement.clientWidth || 180;
+      c.width = Math.round(w * dpr);
+      c.height = Math.round(w * 0.78 * dpr);
+      // The cover on top; details of the roll under it.
+      drawInto(c, film, k === PRINTS - 1 ? film.cover : (film.cover + k + 1) % film.count);
+    });
+  }
+  // A real cover arrived after the card opened: repaint it.
+  window.addEventListener('lx-film-photo', (e) => film && e.detail === film.id && paint());
+
+  function place() {
+    if (!from) return;
+    const r = from.getBoundingClientRect();
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+    const phone = innerWidth < 760;
+    const bottom = innerHeight - (phone ? 120 : 110); // above the section switcher
+    let x;
+    let y;
+    if (phone) {
+      x = (innerWidth - w) / 2;
+      y = r.bottom + 14 + h <= bottom ? r.bottom + 14 : r.top - 14 - h;
+    } else {
+      x = r.right + 16 + w <= innerWidth - 16 ? r.right + 16 : r.left - 16 - w;
+      y = r.top + r.height / 2 - h / 2;
+    }
+    el.style.left = `${Math.round(Math.max(16, Math.min(innerWidth - w - 16, x)))}px`;
+    el.style.top = `${Math.round(Math.max(72, Math.min(bottom - h, y)))}px`;
+  }
+
+  function open(f, anchor) {
+    film = f;
+    from = anchor;
+    $('.lx-trip__title').textContent = f.title;
+    $('.lx-trip__meta').textContent = `${f.place === f.title ? '' : `${f.place} · `}${f.year} · ${f.count} frames on 35mm`;
+    el.setAttribute('aria-label', `${f.title}, ${f.place}, ${f.year}`);
+    for (const a of el.querySelectorAll('a')) a.href = f.album;
+    el.hidden = false;
+    el.classList.remove('is-in');
+    void el.offsetWidth;
+    el.classList.add('is-in');
+    paint();
+    place();
+    $('.lx-trip__open').focus({ preventScroll: true });
+  }
+
+  function close({ refocus = false } = {}) {
+    if (el.hidden) return;
+    el.hidden = true;
+    if (refocus) from?.focus({ preventScroll: true });
+    film = null;
+  }
+
+  $('.lx-trip__close').addEventListener('click', () => close({ refocus: true }));
+  window.addEventListener('keydown', (e) => e.key === 'Escape' && !el.hidden && close({ refocus: true }));
+  // A click anywhere else (the map, a drag, another dot) closes it.
+  window.addEventListener('pointerdown', (e) => !el.hidden && !el.contains(e.target) && !from?.contains(e.target) && close(), true);
+  window.addEventListener('resize', () => !el.hidden && place());
+
+  return {
+    open,
+    close,
+    toggle: (f, anchor) => (!el.hidden && film?.id === f.id ? close() : open(f, anchor)),
+  };
+}

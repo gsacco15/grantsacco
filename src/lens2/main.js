@@ -25,6 +25,7 @@ import { createPage } from './page.js';
 import { RENDER, metaFor } from './meta.js';
 import { createStacks } from './stacks.js';
 import { createDarkroom } from './darkroom.js';
+import { createTripCard } from './trip.js';
 import { inject as injectAnalytics } from '@vercel/analytics';
 
 // Lens carries Grant's real work; only the pictures are stand-ins so far.
@@ -68,6 +69,8 @@ function openFilm(a, frame, el) {
   else darkroom.open(a.id, frame, el);
 }
 const stacks = createStacks({ albums, parent: body, onOpen: (a, frame, el) => openFilm(a, frame, el) });
+// On the Travel map a trip opens a small album card by its dot; the album itself opens from there.
+const tripCard = createTripCard({ parent: body });
 const sweep = div('lx-sweep', body, '<span class="lx-sweep__tag"></span>');
 sweep.setAttribute('aria-hidden', 'true');
 const sweepTag = sweep.firstElementChild;
@@ -85,7 +88,7 @@ const lg = {
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
 // Lens reads some axes differently from the Coordinates mock.
 const READOUT = { reality: 'r = year · θ = time of year · origin = you' };
-const HINT = { reality: 'Click the centre or any piece to open it', image: 'Click a film to open its album', place: 'Click a trip for photos · scroll or pinch to zoom' };
+const HINT = { reality: 'Click the centre or any piece to open it', image: 'Click a film to open its album', place: 'Click a trip to see its photos · scroll or pinch to zoom' };
 
 // About's one quiet line.
 const quietEl = div('lx-quiet', body, quiet.line.split(' · ').map((t) => `<span>${t}</span>`).join('<span class="lx-quiet__sep" aria-hidden="true">·</span>'));
@@ -281,7 +284,11 @@ const tiles = items.map((it) => {
   };
   // The film series is the photographs themselves: it opens straight into the films.
   // A film opens straight into its photographs; everything else opens its page.
-  el.addEventListener('click', () => (it.film ? openFilm(it.film, it.film.cover, el) : openProject(it.id, el)));
+  el.addEventListener('click', () => {
+    if (it.film && mode === 'place' && it.film.album) tripCard.toggle(it.film, el);
+    else if (it.film) openFilm(it.film, it.film.cover, el);
+    else openProject(it.id, el);
+  });
   el.addEventListener('pointerenter', () => setHover(it.id));
   el.addEventListener('pointerleave', () => setHover(null));
   el.addEventListener('focus', () => setHover(it.id));
@@ -361,6 +368,7 @@ function applyPalette(now) {
 /* ── Section changes ──────────────────────────────────────────────────────── */
 
 function setMode(id) {
+  tripCard.close();
   const now = performance.now() / 1000;
   const first = mode == null;
   const prev = mode;
@@ -681,7 +689,10 @@ const darkroomClosed = () => document.querySelector('.dk')?.hidden !== false;
 function showMapUi() {
   const F = mapFrame(layouts.place.R);
   Object.assign(mapHit.style, { left: `${F.x}px`, top: `${F.y}px`, width: `${F.w}px`, height: `${F.h}px` });
-  mapUi.style.transform = `translate(${(F.x + F.w - 8).toFixed(1)}px, ${(F.y + 8).toFixed(1)}px)`;
+  // Top right of the map on desktop (empty ocean and Siberia); bottom right on phones,
+  // where the top right is Europe and its trips.
+  const uiY = W < 760 ? F.y + F.h - 8 - (mapUi.offsetHeight || 104) : F.y + 8;
+  mapUi.style.transform = `translate(${(F.x + F.w - 8).toFixed(1)}px, ${uiY.toFixed(1)}px)`;
   mapUi.classList.add('is-on');
   syncZoomUi();
 }
@@ -698,6 +709,7 @@ function syncZoomUi() {
 let mapRaf = 0;
 function mapRefresh() {
   mapRaf = 0;
+  tripCard.close(); // its dot moved with the zoom
   if (mode !== 'place' || T) return;
   layouts.place = layout('place', W, H);
   const L = layouts.place;
