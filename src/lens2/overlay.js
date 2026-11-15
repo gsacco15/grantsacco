@@ -271,6 +271,8 @@ function mapLines(F, R, pal) {
     d += ` Q${f((x0 + x1) / 2)},${f(Math.min(y0, y1) - bow)} ${f(x1)},${f(y1)}`;
   }
   out.push(`<path d="${d}" fill="none" stroke="${hexA(pal.ink, 0.6)}" stroke-width="1.3"/>`);
+  // A slow flow along the moves, in the order they happened: faint blue dashes over the line.
+  out.push(`<path class="ov-flow" d="${d}" fill="none" stroke="${hexA(pal.accent, 0.75)}" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="1.5 22"/>`);
   return out.join('');
 }
 

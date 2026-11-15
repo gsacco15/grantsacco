@@ -69,8 +69,14 @@ function openFilm(a, frame, el) {
   else darkroom.open(a.id, frame, el);
 }
 const stacks = createStacks({ albums, parent: body, onOpen: (a, frame, el) => openFilm(a, frame, el) });
-// On the Travel map a trip opens a small album card by its dot; the album itself opens from there.
-const tripCard = createTripCard({ parent: body });
+// On the Travel map a trip or a place lived opens a small card by its dot (the album, or the
+// city's drawing and the work done there); the album, the work and the city page open from it.
+const tripCard = createTripCard({
+  parent: body,
+  titleOf: (id) => items.find((a) => a.id === id)?.title,
+  onWork: (id) => openProject(id, null),
+  onPage: (id, el) => openProject(id, el),
+});
 const sweep = div('lx-sweep', body, '<span class="lx-sweep__tag"></span>');
 sweep.setAttribute('aria-hidden', 'true');
 const sweepTag = sweep.firstElementChild;
@@ -88,7 +94,7 @@ const lg = {
 const hint = div('lx-hint', body, 'Click any piece of work to open it');
 // Lens reads some axes differently from the Coordinates mock.
 const READOUT = { reality: 'r = year · θ = time of year · origin = you' };
-const HINT = { reality: 'Click the centre or any piece to open it', image: 'Click a film to open its album', place: 'Click a trip to see its photos · scroll or pinch to zoom' };
+const HINT = { reality: 'Click the centre or any piece to open it', image: 'Click a film to open its album', place: 'Click a city or a trip · scroll or pinch to zoom' };
 
 // About's one quiet line.
 const quietEl = div('lx-quiet', body, quiet.line.split(' · ').map((t) => `<span>${t}</span>`).join('<span class="lx-quiet__sep" aria-hidden="true">·</span>'));
@@ -286,6 +292,7 @@ const tiles = items.map((it) => {
   // A film opens straight into its photographs; everything else opens its page.
   el.addEventListener('click', () => {
     if (it.film && mode === 'place' && it.film.album) tripCard.toggle(it.film, el);
+    else if (it.home && mode === 'place') tripCard.toggleHome(it, el);
     else if (it.film) openFilm(it.film, it.film.cover, el);
     else openProject(it.id, el);
   });

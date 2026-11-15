@@ -163,7 +163,7 @@ export const homes = [
   { id: 'home-chicago', name: 'Chicago, IL', years: [2018, 2019], lat: 41.88, lon: -87.63, note: 'MAPEI Chicago', phone: '', img: placeChicago }, // the river, the Wrigley Building and Tribune Tower
   { id: 'home-milan', name: 'Milan, Italy', years: [2019, 2021], lat: 45.46, lon: 9.19, note: 'MAPEI SpA', img: placeMilan }, // Piazza del Duomo, drawn
   { id: 'home-dallas', name: 'Dallas, TX', years: [2021, 2025], lat: 32.78, lon: -96.8, note: 'MAPEI Corp · OnlyChargeEV', img: placeDallas }, // Reunion Tower, the Magnolia, the trolley
-  { id: 'home-austin', name: 'Austin, TX', years: [2025, 2026], lat: 30.27, lon: -97.74, note: 'Since April 2025', img: placeAustin }, // the skyline over Lady Bird Lake
+  { id: 'home-austin', name: 'Austin, TX', years: [2025, 2026], lat: 30.27, lon: -97.74, note: 'Enovis', img: placeAustin }, // since April 2025 // the skyline over Lady Bird Lake
 ];
 
 /*

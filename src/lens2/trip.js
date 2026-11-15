@@ -1,13 +1,16 @@
-// A trip on the Travel map opens a small album card by its dot: a pile of prints from
-// the roll (the cover on top, details of it underneath, fanning out on hover), the
-// film's name, place, year and frame count, and an "Open album" button. Google Photos
-// only opens from that button (or the pile), so a click on the map never leaves the site.
+// The Travel map's cards, opened by a dot instead of leaving the map:
+// - a trip: a pile of prints from the roll (the cover on top, details of it underneath,
+//   fanning out on hover), its name, place, year and frame count, and "Open album".
+//   Google Photos only opens from that button (or the pile).
+// - a place lived: Grant's drawing of the city as one print, the years and why he was
+//   there, the work done while living there (each opens its project), and a link to the
+//   city's own page.
 import { drawInto } from './photos.js';
 
 const PRINTS = 3;
 const TILT = [-7, 5, 0]; // degrees, bottom of the pile → top
 
-export function createTripCard({ parent }) {
+export function createTripCard({ parent, titleOf, onWork, onPage }) {
   const el = document.createElement('div');
   el.className = 'lx-trip';
   el.hidden = true;
@@ -17,13 +20,18 @@ export function createTripCard({ parent }) {
     <a class="lx-trip__pile" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
       ${TILT.map((r, k) => `<span class="lx-trip__print" style="--r:${r}deg;--k:${k}"><canvas></canvas></span>`).join('')}
     </a>
+    <button class="lx-trip__city" type="button" tabindex="-1" aria-hidden="true"><span class="lx-trip__print"><img alt="" /></span></button>
     <span class="lx-trip__title"></span>
     <span class="lx-trip__meta"></span>
-    <a class="lx-trip__open" target="_blank" rel="noopener">Open album <span aria-hidden="true">↗</span></a>`;
+    <span class="lx-trip__label">While living here</span>
+    <span class="lx-trip__work"></span>
+    <a class="lx-trip__open" target="_blank" rel="noopener">Open album <span aria-hidden="true">↗</span></a>
+    <button class="lx-trip__page" type="button">City page <span aria-hidden="true">→</span></button>`;
   parent.appendChild(el);
   const $ = (s) => el.querySelector(s);
-  const canvases = [...el.querySelectorAll('canvas')];
+  const canvases = [...el.querySelectorAll('.lx-trip__pile canvas')];
   let film = null;
+  let home = null;
   let from = null;
 
   function paint() {
@@ -60,20 +68,45 @@ export function createTripCard({ parent }) {
     el.style.top = `${Math.round(Math.max(72, Math.min(bottom - h, y)))}px`;
   }
 
-  function open(f, anchor) {
-    film = f;
+  function show(anchor) {
     from = anchor;
-    $('.lx-trip__title').textContent = f.title;
-    $('.lx-trip__meta').textContent = `${f.place === f.title ? '' : `${f.place} · `}${f.year} · ${f.count} frames on 35mm`;
-    el.setAttribute('aria-label', `${f.title}, ${f.place}, ${f.year}`);
-    for (const a of el.querySelectorAll('a')) a.href = f.album;
     el.hidden = false;
     el.classList.remove('is-in');
     void el.offsetWidth;
     el.classList.add('is-in');
-    paint();
     place();
+  }
+
+  function open(f, anchor) {
+    film = f;
+    home = null;
+    el.classList.remove('is-home');
+    $('.lx-trip__title').textContent = f.title;
+    $('.lx-trip__meta').textContent = `${f.place === f.title ? '' : `${f.place} · `}${f.year} · ${f.count} frames on 35mm`;
+    el.setAttribute('aria-label', `${f.title}, ${f.place}, ${f.year}`);
+    for (const a of el.querySelectorAll('a')) a.href = f.album;
+    show(anchor);
+    paint();
     $('.lx-trip__open').focus({ preventScroll: true });
+  }
+
+  function openHome(it, anchor) {
+    film = null;
+    home = it;
+    el.classList.add('is-home');
+    const img = $('.lx-trip__city img');
+    img.src = it.home.img ?? '';
+    $('.lx-trip__city').hidden = !it.home.img;
+    $('.lx-trip__title').textContent = it.title;
+    $('.lx-trip__meta').textContent = (it.lens?.place ?? it.summary ?? '').replace(/\.$/, '');
+    const work = (it.related ?? []).filter((id) => titleOf(id));
+    $('.lx-trip__label').hidden = !work.length;
+    $('.lx-trip__work').innerHTML = work.map((id) => `<button type="button" class="lx-chip" data-id="${id}">${titleOf(id)}</button>`).join('');
+    el.setAttribute('aria-label', `${it.title}: ${it.lens?.place ?? ''}`);
+    show(anchor);
+    // The drawing may still be loading: place the card again once it has its size.
+    if (!img.complete) img.addEventListener('load', place, { once: true });
+    ($('.lx-trip__work .lx-chip') ?? $('.lx-trip__page')).focus({ preventScroll: true });
   }
 
   function close({ refocus = false } = {}) {
@@ -81,9 +114,24 @@ export function createTripCard({ parent }) {
     el.hidden = true;
     if (refocus) from?.focus({ preventScroll: true });
     film = null;
+    home = null;
   }
 
   $('.lx-trip__close').addEventListener('click', () => close({ refocus: true }));
+  $('.lx-trip__work').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-id]');
+    if (!b) return;
+    close();
+    onWork(b.dataset.id);
+  });
+  const toPage = () => {
+    const it = home;
+    const a = from;
+    close();
+    if (it) onPage(it.id, a);
+  };
+  $('.lx-trip__page').addEventListener('click', toPage);
+  $('.lx-trip__city').addEventListener('click', toPage);
   window.addEventListener('keydown', (e) => e.key === 'Escape' && !el.hidden && close({ refocus: true }));
   // A click anywhere else (the map, a drag, another dot) closes it.
   window.addEventListener('pointerdown', (e) => !el.hidden && !el.contains(e.target) && !from?.contains(e.target) && close(), true);
@@ -91,7 +139,9 @@ export function createTripCard({ parent }) {
 
   return {
     open,
+    openHome,
     close,
     toggle: (f, anchor) => (!el.hidden && film?.id === f.id ? close() : open(f, anchor)),
+    toggleHome: (it, anchor) => (!el.hidden && home?.id === it.id ? close() : openHome(it, anchor)),
   };
 }
