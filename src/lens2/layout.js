@@ -18,6 +18,8 @@ export const YEAR1 = 2027;
 export const isFocus = (a, mode) => {
   if (mode === 'reality' || mode === 'image') return true;
   if (mode === 'place') return a.kind === 'place';
+  // A showcase project is featured wherever it says (CPS and the dry mix plant in Projects too).
+  if (a.showcase?.[mode]) return true;
   // Engineering features Grant's six ranked projects; its other work is drawn smaller.
   if (mode === 'structure' && a.main === 'structure') return !!a.rank;
   return a.main === mode;
@@ -160,7 +162,10 @@ export function tileSize(it, mode, R, W) {
     const d = (it.kind === 'place' ? 12 : it.film ? 9 : 8) * (m ? 0.85 : 1);
     return [d, d];
   }
-  let w = mode === 'reality' ? base * 0.86 : focus ? base : base * 0.6;
+  // Showcase projects are drawn larger in Engineering and Projects (`showcase`: a multiplier per section).
+  // On phones the plot is too small for that, so the boost is only a hint there.
+  const k = it.showcase?.[mode] ?? 1;
+  let w = mode === 'reality' ? base * 0.86 : focus ? base * (m ? 1 + (k - 1) * 0.25 : k) : base * 0.6;
   if (mode === 'image') w *= focus ? 1.3 : 1.1;
   return [w, w / ASPECT[mode]];
 }

@@ -283,6 +283,7 @@ export const artifacts = [
   /* ── Engineering ────────────────────────────────────────────────────────── */
   {
     rank: 1,
+    showcase: { structure: 1.45 },
     id: 'enovis-facility', title: '200K SF Orthopedic Manufacturing Facility', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 8, monthTbd: true,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['reality'], featured: 'yes', stage: 'built', axes: ax(m(140), 0.95),
     summary: 'Leading the development and buildout of a 200K sq ft advanced manufacturing facility for orthopedic implants. Responsible for owner-side project delivery, including engineering, construction management, contractor coordination, permitting, capital budgets, MEP infrastructure, and equipment integration. The facility consolidates manufacturing, cleanroom processing, sterilization, packaging, and distribution.',
@@ -296,6 +297,7 @@ export const artifacts = [
   },
   {
     rank: 4,
+    showcase: { structure: 1.15 },
     id: 'enovis-am', title: 'ProMade additive manufacturing work center', kind: 'engineering', org: 'Enovis', years: [2025, 2026], month: 4, ended: true, // through September 2026
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'built', axes: ax(m(40), 0.84),
     summary: 'The pilot ProMade work center: the first additive manufacturing capability for Enovis in the U.S., printing EBM titanium and PA 2200 nylon for patient-specific implants and precision surgical guides.',
@@ -321,6 +323,7 @@ export const artifacts = [
   },
   {
     rank: 2,
+    showcase: { structure: 1.45, build: 1.6 },
     id: 'enovis-cps', title: 'Clean Pack & Sterilization (CPS) Expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true, month: 4, monthTbd: true,
     place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'sketch', axes: ax(m(50), 0.92),
     summary: 'Leading the design and construction of a 25K sq ft clean pack and sterilization expansion supporting orthopedic implant manufacturing. Scope includes two ISO Class 7 cleanrooms, automated cleaning equipment, inspection and packaging areas, sterilization infrastructure, and critical process utilities. Responsible for design coordination, permitting, procurement, construction management, utility integration, and commissioning and qualification readiness.',
@@ -343,6 +346,7 @@ export const artifacts = [
   },
   {
     rank: 3,
+    showcase: { structure: 1.45, build: 1.45 },
     id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true, month: 3, monthTbd: true,
     place: { name: 'Houston, TX', lat: 29.76, lon: -95.37 }, main: 'structure', also: ['build', 'place', 'reality'], featured: 'yes', stage: 'shipped', axes: ax(m(60), 0.9),
     summary: 'A ground-up automated dry mix production and packaging plant.',
@@ -367,6 +371,7 @@ export const artifacts = [
   },
   {
     rank: 5,
+    showcase: { structure: 1.15 },
     id: 'palletizer', title: 'Robotic palletizer & bag applicator', kind: 'engineering', org: 'MAPEI', years: [2021, 2022], tbd: true,
     place: { name: 'Tempe, AZ', lat: 33.43, lon: -111.94 }, main: 'structure', also: ['build'], featured: 'yes', stage: 'shipped', axes: ax(m(6), 0.55),
     summary: 'Automated robotic palletizing and bag application added to a running dry mix plant, doubling its production capacity and eliminating two manual operations.',
@@ -394,6 +399,7 @@ export const artifacts = [
   },
   {
     rank: 6,
+    showcase: { structure: 1.15 },
     id: 'staticmix', title: 'In-line static mixing process', kind: 'engineering', org: 'MAPEI', years: [2020, 2021], tbd: true,
     place: { name: 'Milan → Dallas', lat: 32.78, lon: -96.8 }, main: 'structure', also: ['build'], featured: 'yes', stage: 'shipped', axes: ax(m(2.5), 0.74),
     summary: 'The first production version of a new static mixing technology, prototyped in Milan and built in Dallas, cutting production time by 35%.',
@@ -532,7 +538,7 @@ export const artifacts = [
   },
   {
     id: 'ledwall', title: 'LED wall art', kind: 'build', org: 'Personal', years: [2022, 2022], tbd: true, listLast: true,
-    place: { name: 'Home workshop', lat: 32.78, lon: -96.8 }, main: 'build', also: ['image', 'digital', 'structure'], featured: 'yes', stage: 'built',
+    place: { name: 'Home workshop', lat: 32.78, lon: -96.8 }, main: 'build', also: ['image', 'digital'], featured: 'yes', stage: 'built',
     axes: { scale: m(1.2), complexity: 0.38, expressive: 0.24, experimental: 0.88, digital: 0.3, finished: 0.7 },
     summary: 'A series of wall pieces with concealed LEDs, layered structure and diffusers for a soft glow or gradient.',
     facts: ['Arduino controls and a custom circuit board', 'Bluetooth module', 'An app for behaviour, brightness and effects'],
