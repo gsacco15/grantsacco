@@ -487,7 +487,7 @@ export const artifacts = [
     facts: ['First time playing the pedals', 'Two additive prototypes, final part machined', 'Team of 4', 'National news coverage'],
     lens: {
       build: 'Two 3D-printed prototypes, then a machined final part.',
-      structure: 'A pedal mechanism designed around one person\'s constraints.',
+      structure: 'A hand-operated pedal mechanism, built so a paraplegic pianist could play the pedals.',
       reality: 'A pianist played the pedals for the first time.',
     },
     // Picture: stills of the device's model (a reconstruction from photos), turning in About; Lens v2 opens the model.

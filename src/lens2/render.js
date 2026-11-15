@@ -55,55 +55,6 @@ function canvas(w, h) {
 
 const ctx = (c) => c.getContext('2d', { willReadFrequently: true });
 
-function luminance(d, n) {
-  const L = new Float32Array(n);
-  for (let i = 0, j = 0; i < n; i++, j += 4) L[i] = (0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2]) / 255;
-  return L;
-}
-
-function boxBlur(L, w, h) {
-  const out = new Float32Array(L.length);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      let s = 0;
-      let k = 0;
-      for (let dy = -1; dy <= 1; dy++) {
-        const yy = y + dy;
-        if (yy < 0 || yy >= h) continue;
-        for (let dx = -1; dx <= 1; dx++) {
-          const xx = x + dx;
-          if (xx < 0 || xx >= w) continue;
-          s += L[yy * w + xx];
-          k++;
-        }
-      }
-      out[y * w + x] = s / k;
-    }
-  }
-  return out;
-}
-
-function sobel(L, w, h) {
-  const out = new Float32Array(L.length);
-  for (let y = 1; y < h - 1; y++) {
-    for (let x = 1; x < w - 1; x++) {
-      const i = y * w + x;
-      const a = L[i - w - 1];
-      const b = L[i - w];
-      const c = L[i - w + 1];
-      const d = L[i - 1];
-      const f = L[i + 1];
-      const g = L[i + w - 1];
-      const hh = L[i + w];
-      const k = L[i + w + 1];
-      const gx = c + 2 * f + k - a - 2 * d - g;
-      const gy = g + 2 * hh + k - a - 2 * b - c;
-      out[i] = Math.sqrt(gx * gx + gy * gy);
-    }
-  }
-  return out;
-}
-
 function grainAndVignette(d, w, h, seed, grain, vignette) {
   const rnd = mulberry32(seed);
   for (let y = 0; y < h; y++) {
@@ -143,48 +94,29 @@ function reality(c, id) {
   g.putImageData(img, 0, 0);
 }
 
-function structure(c) {
+// Engineering and Projects show the real picture, clear and in colour, so the work reads at
+// a glance (the hidden-line drawing and the clay render made it hard to see). Each keeps
+// only a light grade of its own: Engineering a touch cooler, Projects a touch warmer.
+function grade(c, { sat, r, g: gg, b }) {
   const { width: w, height: h } = c;
   const g = ctx(c);
   const img = g.getImageData(0, 0, w, h);
   const d = img.data;
-  const L = luminance(d, w * h);
-  const E = sobel(L, w, h);
-  const paper = hex('#f7f6f3');
-  const ink = hex('#151515');
-  for (let i = 0; i < w * h; i++) {
-    const j = i * 4;
-    // The picture itself, half desaturated and washed toward paper, with its
-    // edges inked over: a drawing that still reads as the thing.
-    const l = L[i] * 255;
-    const t = 0.85 * sstep(0.14, 0.46, E[i]);
-    for (let k = 0; k < 3; k++) {
-      const v = mix(mix(d[j + k], l, 0.5), paper[k], 0.32);
-      d[j + k] = mix(v, ink[k], t);
-    }
+  for (let j = 0; j < d.length; j += 4) {
+    const l = 0.2126 * d[j] + 0.7152 * d[j + 1] + 0.0722 * d[j + 2];
+    d[j] = Math.min(255, Math.max(0, l + (d[j] - l) * sat + r));
+    d[j + 1] = Math.min(255, Math.max(0, l + (d[j + 1] - l) * sat + gg));
+    d[j + 2] = Math.min(255, Math.max(0, l + (d[j + 2] - l) * sat + b));
   }
   g.putImageData(img, 0, 0);
 }
 
+function structure(c) {
+  grade(c, { sat: 0.88, r: -2, g: 0, b: 3 });
+}
+
 function build(c) {
-  const { width: w, height: h } = c;
-  const g = ctx(c);
-  const img = g.getImageData(0, 0, w, h);
-  const d = img.data;
-  const L = luminance(d, w * h);
-  const E = sobel(boxBlur(L, w, h), w, h);
-  const dark = hex('#3b3b3a');
-  const light = hex('#f0f0ee');
-  for (let i = 0; i < w * h; i++) {
-    // Clay: the picture's own light and shade in a neutral grey, lightly
-    // posterised, with a trace of its colour left so it stays recognisable.
-    const q = Math.round(L[i] * 5) / 5;
-    const v = mix(L[i], q, 0.3) * (1 - 0.3 * sstep(0.1, 0.4, E[i]));
-    const t = Math.min(1, Math.max(0, 0.06 + v * 0.96));
-    const j = i * 4;
-    for (let k = 0; k < 3; k++) d[j + k] = mix(mix(dark[k], light[k], t), d[j + k], 0.22);
-  }
-  g.putImageData(img, 0, 0);
+  grade(c, { sat: 0.92, r: 3, g: 1, b: -2 });
 }
 
 function image(c, id) {
