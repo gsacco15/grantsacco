@@ -1,5 +1,6 @@
-// The Travel map's cards, opened by a dot instead of leaving the map:
-// - a trip: a pile of prints from the roll (the cover on top, details of it underneath,
+// The album and city cards, opened by a dot on the Travel map or a roll in Art instead of
+// leaving the site:
+// - a trip (a film): a pile of prints from the roll (the cover on top, details of it underneath,
 //   fanning out on hover), its name, place, year and frame count, and "Open album".
 //   Google Photos only opens from that button (or the pile).
 // - a place lived: Grant's drawing of the city as one print, the years and why he was
@@ -48,8 +49,8 @@ export function createTripCard({ parent, titleOf, onWork }) {
   window.addEventListener('lx-film-photo', (e) => film && e.detail === film.id && paint());
 
   function place() {
-    if (!from) return;
-    const r = from.getBoundingClientRect();
+    // Beside the dot or roll that opened it; centred when it came from elsewhere (a chip).
+    const r = from?.isConnected ? from.getBoundingClientRect() : { left: innerWidth / 2, right: innerWidth / 2, top: innerHeight / 2, bottom: innerHeight / 2, height: 0 };
     const w = el.offsetWidth;
     const h = el.offsetHeight;
     const phone = innerWidth < 760;
@@ -97,7 +98,8 @@ export function createTripCard({ parent, titleOf, onWork }) {
     img.src = it.home.img ?? '';
     $('.lx-trip__city').hidden = !it.home.img;
     $('.lx-trip__title').textContent = it.title;
-    $('.lx-trip__meta').textContent = (it.lens?.place ?? it.summary ?? '').replace(/\.$/, '');
+    // Just the years: the companies and school follow as chips.
+    $('.lx-trip__meta').textContent = (it.lens?.place ?? '').split(' · ')[0];
     const work = (it.related ?? []).filter((id) => titleOf(id));
     $('.lx-trip__label').hidden = !work.length;
     $('.lx-trip__work').innerHTML = work.map((id) => `<button type="button" class="lx-chip" data-id="${id}">${titleOf(id)}</button>`).join('');

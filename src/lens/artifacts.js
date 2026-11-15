@@ -662,9 +662,8 @@ for (const h of homes) {
 
 /** Where Grant was living in `year`. */
 
-// What happened while each place was home: the work based there: roles, school, engineering
-// and builds. No films or trips (the map already shows them), and no apps or Art pieces, which
-// crowd the work on a home's page.
+// Where Grant worked or studied while each place was home: the companies, the startup and
+// the school, nothing else (projects, builds, apps and trips live in their own sections).
 const near = (p, h) => Math.abs(p.lat - h.lat) < 1.5 && Math.abs(p.lon - h.lon) < 1.5;
 // The current home (it runs to the present year) takes everything since it began.
 const during = (y, h) => y[0] < (h.years[1] >= 2026 ? Infinity : h.years[1]) && y[1] >= (h.years[0] ?? 0);
@@ -673,7 +672,7 @@ for (const a of artifacts) {
   // Lived and worked there: the map frames the dot in the "worked" square.
   a.worked = artifacts.some((b) => b.kind === 'role' && near(b.place, a.home) && during(b.years, a.home));
   a.related = artifacts
-    .filter((b) => !b.home && !b.film && b.main !== 'digital' && b.main !== 'image' && (b.featured === 'yes' || b.kind === 'role'))
+    .filter((b) => ['role', 'education', 'startup'].includes(b.kind))
     .filter((b) => near(b.place, a.home) && during(b.years, a.home))
     .sort((x, y) => x.years[0] - y.years[0])
     .map((b) => b.id);

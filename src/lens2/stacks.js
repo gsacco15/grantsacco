@@ -26,7 +26,7 @@ export function createStacks({ albums, parent, onOpen }) {
     el.type = 'button';
     el.className = 'pk';
     el.setAttribute('role', 'listitem');
-    el.setAttribute('aria-label', `${a.title} — ${a.place}, ${a.year}. ${a.count} photos. ${a.album ? 'Open the album (new tab)' : 'Open film'}`);
+    el.setAttribute('aria-label', `${a.title} — ${a.place}, ${a.year}. ${a.count} photos. ${a.album ? 'Show the album' : 'Open film'}`);
     el.style.setProperty('--d', `${ai * 70}ms`);
     // Bottom of the pile first; the last card is the one on top.
     const frames = [3, 2, 1, 4, a.cover].map((k) => k % a.count);

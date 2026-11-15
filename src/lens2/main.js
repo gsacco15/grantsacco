@@ -63,9 +63,10 @@ body.appendChild(dyn);
 const field = div('lx-field', body);
 field.setAttribute('role', 'list');
 field.setAttribute('aria-label', 'Work');
-// A film with an album link opens the album (Google Photos, new tab); one without opens the darkroom.
+// A film with an album link opens its album card (prints, name, "Open album"), in Art and on
+// the map alike, so a click never leaves the site; one without an album opens the darkroom.
 function openFilm(a, frame, el) {
-  if (a.album) window.open(a.album, '_blank', 'noopener');
+  if (a.album) tripCard.toggle(a, el);
   else darkroom.open(a.id, frame, el);
 }
 const stacks = createStacks({ albums, parent: body, onOpen: (a, frame, el) => openFilm(a, frame, el) });
@@ -95,22 +96,22 @@ const hint = div('lx-hint', body, 'Click any piece of work to open it');
 // math-style titles, "r = year · θ = …", stay in that mock).
 const LEGEND = {
   reality: ['My path, year by year', 'Each ring is a year, from 2014 at the centre to now. Clockwise from the top: January → December.'],
-  structure: ['Engineering projects', 'Left to right: one machine → a 200K sq ft plant. Bottom to top: simpler → more complex.'],
+  structure: ['Engineering projects', 'Left to right: a single machine → a whole plant. Bottom to top: simpler → more complex.'],
   build: ['Things I’ve built', 'Left to right: when it started. Bottom to top: idea → shipped.'],
-  image: ['Photography', 'Each pile is a roll of 35mm film; click one to open the album.'],
+  image: ['Photography', '35mm film from my travels. Click a roll to see its photos.'],
   place: ['Where I’ve lived and travelled', 'Blue dots are homes, black dots are trips.'],
   digital: ['Apps and software', 'Left to right: hardware → pure software. Bottom to top: experiment → finished.'],
 };
 // Phones: the same, in one short line (two would run into the chart's axis labels).
 const LEGEND_PHONE = {
   reality: 'Each ring is a year · clockwise: Jan → Dec',
-  structure: 'One machine → a 200K sq ft plant',
+  structure: 'A single machine → a whole plant',
   build: 'When it started · idea → shipped',
-  image: 'Each pile is a roll of 35mm film',
+  image: '35mm film from my travels',
   place: 'Blue: homes · black: trips',
   digital: 'Hardware → pure software',
 };
-const HINT = { reality: 'Click the centre or any piece to open it', image: 'Click a film to open its album', place: 'Click a city or a trip · scroll or pinch to zoom' };
+const HINT = { reality: 'Click the centre or any piece to open it', image: 'Click a roll to see its photos', place: 'Click a city or a trip · scroll or pinch to zoom' };
 
 // About's one quiet line.
 const quietEl = div('lx-quiet', body, quiet.line.split(' · ').map((t) => `<span>${t}</span>`).join('<span class="lx-quiet__sep" aria-hidden="true">·</span>'));
@@ -304,11 +305,9 @@ const tiles = items.map((it) => {
     to: null,
     delay: 0,
   };
-  // The film series is the photographs themselves: it opens straight into the films.
-  // A film opens straight into its photographs; everything else opens its page.
+  // A city or a film opens its card (Travel and Art); everything else opens its page.
   el.addEventListener('click', () => {
-    if (it.film && mode === 'place' && it.film.album) tripCard.toggle(it.film, el);
-    else if (it.home && mode === 'place') tripCard.toggleHome(it, el);
+    if (it.home && mode === 'place') tripCard.toggleHome(it, el);
     else if (it.film) openFilm(it.film, it.film.cover, el);
     else openProject(it.id, el);
   });
