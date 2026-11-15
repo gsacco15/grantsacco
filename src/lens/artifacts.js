@@ -661,19 +661,21 @@ for (const h of homes) {
 }
 
 /** Where Grant was living in `year`. */
-export const homeIn = (year) => homes.find((h) => (h.years[0] ?? 0) <= year && year < h.years[1]) ?? homes[homes.length - 1];
 
-// What happened while each place was home: the work based there, and the trips taken from it.
+// What happened while each place was home: the work based there: roles, school, engineering
+// and builds. No films or trips (the map already shows them), and no apps or Art pieces, which
+// crowd the work on a home's page.
 const near = (p, h) => Math.abs(p.lat - h.lat) < 1.5 && Math.abs(p.lon - h.lon) < 1.5;
-const during = (y, h) => y[0] < h.years[1] && y[1] >= (h.years[0] ?? 0);
+// The current home (it runs to the present year) takes everything since it began.
+const during = (y, h) => y[0] < (h.years[1] >= 2026 ? Infinity : h.years[1]) && y[1] >= (h.years[0] ?? 0);
 for (const a of artifacts) {
   if (!a.home) continue;
   // Lived and worked there: the map frames the dot in the "worked" square.
   a.worked = artifacts.some((b) => b.kind === 'role' && near(b.place, a.home) && during(b.years, a.home));
   a.related = artifacts
-    .filter((b) => !b.home && (b.featured === 'yes' || b.kind === 'role'))
-    .filter((b) => (b.film ? homeIn(b.film.year) === a.home : near(b.place, a.home) && during(b.years, a.home)))
-    .sort((x, y) => !!x.film - !!y.film || x.years[0] - y.years[0])
+    .filter((b) => !b.home && !b.film && b.main !== 'digital' && b.main !== 'image' && (b.featured === 'yes' || b.kind === 'role'))
+    .filter((b) => near(b.place, a.home) && during(b.years, a.home))
+    .sort((x, y) => x.years[0] - y.years[0])
     .map((b) => b.id);
 }
 
