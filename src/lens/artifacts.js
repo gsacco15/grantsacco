@@ -61,6 +61,11 @@ import horizonteMoon from './img/horizonte.jpg';
 import resinLight2 from './img/resin-light-2.jpg';
 import collateralPreview from './img/collateral.jpg';
 import placeMilan from './img/places/milan.jpg';
+import placeWilmette from './img/places/wilmette.jpg';
+import placeLawrence from './img/places/lawrence.jpg';
+import placeChicago from './img/places/chicago.jpg';
+import placeDallas from './img/places/dallas.jpg';
+import placeAustin from './img/places/austin.jpg';
 import atmosPreview from './img/atmos.jpg';
 import contactflowPreview from './img/contactflow.jpg';
 import atmosLabPreview from './img/atmos-lab.jpg';
@@ -153,12 +158,12 @@ export const races = [
  * width: the birthplace reads "Chicago · born" and the later Chicago has none.
  */
 export const homes = [
-  { id: 'home-wilmette', name: 'Wilmette, IL', years: [null, 2014], lat: 42.08, lon: -87.72, note: 'Born and grew up', town: true, born: true, phone: 'Chicago · born' },
-  { id: 'home-lawrence', name: 'Lawrence, KS', years: [2014, 2018], lat: 38.97, lon: -95.24, note: 'University of Kansas', town: true },
-  { id: 'home-chicago', name: 'Chicago, IL', years: [2018, 2019], lat: 41.88, lon: -87.63, note: 'MAPEI Chicago', phone: '' },
+  { id: 'home-wilmette', name: 'Wilmette, IL', years: [null, 2014], lat: 42.08, lon: -87.72, note: 'Born and grew up', town: true, born: true, phone: 'Chicago · born', img: placeWilmette }, // the Bahá'í temple and the lakefront
+  { id: 'home-lawrence', name: 'Lawrence, KS', years: [2014, 2018], lat: 38.97, lon: -95.24, note: 'University of Kansas', town: true, img: placeLawrence }, // Mount Oread and the campanile
+  { id: 'home-chicago', name: 'Chicago, IL', years: [2018, 2019], lat: 41.88, lon: -87.63, note: 'MAPEI Chicago', phone: '', img: placeChicago }, // the river, the Wrigley Building and Tribune Tower
   { id: 'home-milan', name: 'Milan, Italy', years: [2019, 2021], lat: 45.46, lon: 9.19, note: 'MAPEI SpA', img: placeMilan }, // Piazza del Duomo, drawn
-  { id: 'home-dallas', name: 'Dallas, TX', years: [2021, 2025], lat: 32.78, lon: -96.8, note: 'MAPEI Corp · OnlyChargeEV' },
-  { id: 'home-austin', name: 'Austin, TX', years: [2025, 2026], lat: 30.27, lon: -97.74, note: 'Since April 2025' },
+  { id: 'home-dallas', name: 'Dallas, TX', years: [2021, 2025], lat: 32.78, lon: -96.8, note: 'MAPEI Corp · OnlyChargeEV', img: placeDallas }, // Reunion Tower, the Magnolia, the trolley
+  { id: 'home-austin', name: 'Austin, TX', years: [2025, 2026], lat: 30.27, lon: -97.74, note: 'Since April 2025', img: placeAustin }, // the skyline over Lady Bird Lake
 ];
 
 /*
