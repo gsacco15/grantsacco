@@ -60,6 +60,7 @@ import filmColombia from './img/films/colombia.jpg';
 import horizonteMoon from './img/horizonte.jpg';
 import resinLight2 from './img/resin-light-2.jpg';
 import collateralPreview from './img/collateral.jpg';
+import placeMilan from './img/places/milan.jpg';
 import atmosPreview from './img/atmos.jpg';
 import contactflowPreview from './img/contactflow.jpg';
 import atmosLabPreview from './img/atmos-lab.jpg';
@@ -155,7 +156,7 @@ export const homes = [
   { id: 'home-wilmette', name: 'Wilmette, IL', years: [null, 2014], lat: 42.08, lon: -87.72, note: 'Born and grew up', town: true, born: true, phone: 'Chicago · born' },
   { id: 'home-lawrence', name: 'Lawrence, KS', years: [2014, 2018], lat: 38.97, lon: -95.24, note: 'University of Kansas', town: true },
   { id: 'home-chicago', name: 'Chicago, IL', years: [2018, 2019], lat: 41.88, lon: -87.63, note: 'MAPEI Chicago', phone: '' },
-  { id: 'home-milan', name: 'Milan, Italy', years: [2019, 2021], lat: 45.46, lon: 9.19, note: 'MAPEI SpA' },
+  { id: 'home-milan', name: 'Milan, Italy', years: [2019, 2021], lat: 45.46, lon: 9.19, note: 'MAPEI SpA', img: placeMilan }, // Piazza del Duomo, drawn
   { id: 'home-dallas', name: 'Dallas, TX', years: [2021, 2025], lat: 32.78, lon: -96.8, note: 'MAPEI Corp · OnlyChargeEV' },
   { id: 'home-austin', name: 'Austin, TX', years: [2025, 2026], lat: 30.27, lon: -97.74, note: 'Since April 2025' },
 ];
@@ -325,7 +326,7 @@ export const artifacts = [
     rank: 2,
     showcase: { structure: 1.45, build: 1.6 },
     id: 'enovis-cps', title: 'Clean Pack & Sterilization (CPS) Expansion', kind: 'engineering', org: 'Enovis', years: [2026, 2027], tbd: true, month: 4, monthTbd: true,
-    place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'sketch', axes: ax(m(50), 0.92),
+    place: { name: 'Austin, TX', lat: 30.27, lon: -97.74 }, main: 'structure', also: ['build', 'reality'], featured: 'yes', stage: 'built', axes: ax(m(50), 0.92),
     summary: 'Leading the design and construction of a 25K sq ft clean pack and sterilization expansion supporting orthopedic implant manufacturing. Scope includes two ISO Class 7 cleanrooms, automated cleaning equipment, inspection and packaging areas, sterilization infrastructure, and critical process utilities. Responsible for design coordination, permitting, procurement, construction management, utility integration, and commissioning and qualification readiness.',
     facts: [
       '25K sq ft: two ISO Class 7 cleanrooms, automated cleaning, inspection, packaging and sterilization',
@@ -347,7 +348,7 @@ export const artifacts = [
   {
     rank: 3,
     showcase: { structure: 1.45, build: 1.45 },
-    id: 'drymix', title: 'Automated dry mix plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true, month: 3, monthTbd: true,
+    id: 'drymix', title: 'Automated Chemical Dry Mix Plant', kind: 'engineering', org: 'MAPEI', years: [2022, 2023], tbd: true, month: 4, monthTbd: true,
     place: { name: 'Houston, TX', lat: 29.76, lon: -95.37 }, main: 'structure', also: ['build', 'place', 'reality'], featured: 'yes', stage: 'shipped', axes: ax(m(60), 0.9),
     summary: 'A ground-up automated dry mix production and packaging plant.',
     facts: ['European and North American vendors', 'Italian contractors for power and automation', 'Air permitting and FAA approval', 'On budget and on schedule'],
@@ -649,7 +650,8 @@ for (const h of homes) {
     id: h.id, title: h.name, kind: 'place', org: h.note, years: h.years,
     place: { name: h.name, lat: h.lat, lon: h.lon }, main: 'place', also: [], featured: 'yes', stage: 'shipped', axes: ax(0.9, 0.3),
     summary: h.note, lens: { place: `${h.years[0] ? `${h.years[0]} – ` : 'Until '}${h.years[1] === 2026 ? 'now' : h.years[1]} · ${h.note}.` },
-    picture: { scene: 'home', town: !!h.town }, related: [], home: h, phone: h.phone,
+    // A home with `img` shows that picture (a drawing or a black-and-white photo of the city); the rest keep the drawn skyline.
+    picture: h.img ? { src: h.img, bg: '#ffffff' } : { scene: 'home', town: !!h.town }, related: [], home: h, phone: h.phone,
   });
 }
 
