@@ -158,7 +158,7 @@ export const races = [
  * width: the birthplace reads "Chicago · born" and the later Chicago has none.
  */
 export const homes = [
-  { id: 'home-wilmette', name: 'Wilmette, IL', years: [null, 2014], lat: 42.08, lon: -87.72, note: 'Born and grew up', town: true, born: true, phone: 'Chicago · born', img: placeWilmette }, // the Bahá'í temple and the lakefront
+  { id: 'home-wilmette', name: 'Wilmette, IL', years: [null, 2013], lat: 42.08, lon: -87.72, note: 'Born and grew up', town: true, born: true, phone: 'Chicago · born', img: placeWilmette }, // the Bahá'í temple and the lakefront
   { id: 'home-lawrence', name: 'Lawrence, KS', years: [2014, 2018], lat: 38.97, lon: -95.24, note: 'University of Kansas', town: true, img: placeLawrence }, // Mount Oread and the campanile
   { id: 'home-chicago', name: 'Chicago, IL', years: [2018, 2019], lat: 41.88, lon: -87.63, note: 'MAPEI Chicago', phone: '', img: placeChicago }, // the river, the Wrigley Building and Tribune Tower
   { id: 'home-milan', name: 'Milan, Italy', years: [2019, 2021], lat: 45.46, lon: 9.19, note: 'MAPEI SpA', img: placeMilan }, // Piazza del Duomo, drawn

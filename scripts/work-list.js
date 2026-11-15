@@ -59,7 +59,7 @@ export function renderWorkList({ artifacts, films, homes, countries, intro }, { 
     .sort((a, b) => b.year - a.year)
     .map((f) => `<li><a href="${esc(f.album ?? `../?roll=${f.id}`)}"${f.album ? ' target="_blank" rel="noopener"' : ''}>${esc(f.title)}</a> <span class="w-meta">${esc(f.place)} · ${f.year} · ${f.count} frames</span></li>`)
     .join('');
-  const places = homes.map((h) => `${esc(h.name)}${h.years[0] ? ` ${h.years[0]}` : ''}`).join(' → ');
+  const places = homes.map((h) => `${esc(h.name)}${h.years[0] ? ` ${h.years[0]}` : ` (until ${h.years[1]})`}`).join(' → ');
   const linkedin = site.links.find((l) => l.label === 'LinkedIn');
   const x = site.links.find((l) => l.label === 'X');
 
