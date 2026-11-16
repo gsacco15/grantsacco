@@ -116,17 +116,21 @@ const HINT = { reality: 'Click the centre or any piece to open it', image: 'Clic
 // About's one quiet line.
 const quietEl = div('lx-quiet', body, quiet.line.split(' · ').map((t) => `<span>${t}</span>`).join('<span class="lx-quiet__sep" aria-hidden="true">·</span>'));
 
+// The pieces that sit on About's wheel beside the tiles (the dogs, the races, the
+// origin) share one layer, so a pinch zooms them with the plot.
+const onWheel = div('lx-onwheel', body);
+
 // Jaylee and Helga, sitting on their year's ring in About (named on hover).
 const dogsEl = div(
   'lx-dogs',
-  body,
+  onWheel,
   `<span class="lx-dogs__pics">${dogs.src.map((src) => `<img src="${src}" alt="" />`).join('')}</span><span class="lx-dogs__cap"><span>${dogs.names}</span><span>${dogs.year}</span></span>`,
 );
 dogsEl.setAttribute('role', 'img');
 dogsEl.setAttribute('aria-label', `${dogs.names}, ${dogs.year}`);
 // Races as their logos, small, on the wheel at their year and month (named on hover).
 const raceEls = races.map((rc) => {
-  const el = div('lx-race', body, `<img class="lx-race__pic" src="${rc.logo}" alt="" /><span class="lx-race__cap"><span>${rc.name}</span><span>${rc.when}</span></span>`);
+  const el = div('lx-race', onWheel, `<img class="lx-race__pic" src="${rc.logo}" alt="" /><span class="lx-race__cap"><span>${rc.name}</span><span>${rc.when}</span></span>`);
   el.setAttribute('role', 'img');
   el.setAttribute('aria-label', `${rc.name}, ${rc.when}`);
   return el;
@@ -135,7 +139,7 @@ const raceEls = races.map((rc) => {
 // The origin ("Grant" at the centre of About) opens a small card: headshot,
 // two plain sentences, and how to reach him.
 const bare = (href) => href.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
-const originBtn = div('lx-origin', body);
+const originBtn = div('lx-origin', onWheel);
 originBtn.setAttribute('role', 'button');
 originBtn.tabIndex = 0;
 originBtn.setAttribute('aria-label', `About ${site.name}`);
@@ -339,16 +343,18 @@ window.addEventListener('lx-film-photo', (e) => {
   if (t && t.show >= 0 && !T && mode) paint(t, t.show, mode);
 });
 
-const pxW = (w) => Math.max(24, Math.ceil((w * DPR) / 24) * 24);
+const pxW = (w, q = 1) => Math.max(24, Math.ceil((w * DPR * q) / 24) * 24);
 
-function paint(t, idx, m) {
+/** Draw tile `t`'s picture in mode `m` into its canvas `idx`, `q`× sharper when pinch-zoomed. */
+function paint(t, idx, m, q = 1) {
   const c = t.pics[idx];
-  const src = render(t.it.id, m, pxW(t.to.w));
+  const src = render(t.it.id, m, pxW(t.to.w, q), undefined, { keep: q === 1 });
   if (c.width !== src.width || c.height !== src.height) {
     c.width = src.width;
     c.height = src.height;
   }
   c.getContext('2d').drawImage(src, 0, 0);
+  c.dataset.q = q;
 }
 
 /* ── State ────────────────────────────────────────────────────────────────── */
@@ -391,6 +397,7 @@ function applyPalette(now) {
 
 function setMode(id) {
   tripCard.close();
+  resetZoom(); // every section opens whole
   const now = performance.now() / 1000;
   const first = mode == null;
   const prev = mode;
@@ -867,6 +874,192 @@ mapHit.addEventListener('dblclick', (e) => {
   if (mode === 'place' && !T) animateZoom(Math.min(MAX_ZOOM, mapZoom().k * 2), e.clientX, e.clientY);
 });
 
+/* ── Pinch to zoom: every section but the map (it has its own) ────────────── */
+
+// On a touch screen two fingers zoom into the plot (up to 3×) and, zoomed in, one
+// finger pans; a double tap on empty space zooms in there or back out, and "fit"
+// shows the whole section again. Only the plot zooms (its drawing, tiles, piles and
+// the wheel's sprites); the header, title, switcher and cards stay put, and a tap on
+// a piece still opens it. Unzoomed, the page is exactly as before.
+const ZOOM_MAX = 3;
+let zv = { k: 1, x: 0, y: 0 }; // screen = layout × k + (x, y)
+const zoomLayers = [ovOld, ovNew, dyn, field, stacks.el, onWheel];
+const zoomUi = div('lx-zoomui', body, '<button type="button" aria-label="Zoom back out to the whole section">fit</button>');
+zoomUi.firstElementChild.addEventListener('click', () => zoomTo(1, W / 2, H / 2));
+const zoomScrim = div('lx-zoomscrim', body);
+zoomScrim.setAttribute('aria-hidden', 'true');
+
+/** The soft edges run under the header and above the switcher; "fit" sits just above it. */
+function frameZoomUi() {
+  const top = document.querySelector('.chrome')?.getBoundingClientRect().bottom ?? 64;
+  const sw = document.querySelector('.switcher')?.getBoundingClientRect().top ?? H;
+  zoomScrim.style.setProperty('--zt', `${Math.round(top)}px`);
+  zoomScrim.style.setProperty('--zb', `${Math.round(H - sw + 6)}px`);
+  zoomUi.style.top = `${Math.round(sw - 40)}px`;
+}
+
+const clampZoom = ({ k, x, y }) => {
+  const kk = clamp(k, 1, ZOOM_MAX);
+  return { k: kk, x: clamp(x, W - W * kk, 0), y: clamp(y, H - H * kk, 0) };
+};
+
+function setZoom(v) {
+  zv = clampZoom(v);
+  const on = zv.k > 1.001;
+  if (on && !body.classList.contains('lx-zoomed')) frameZoomUi();
+  const tf = on ? `translate(${zv.x.toFixed(1)}px, ${zv.y.toFixed(1)}px) scale(${zv.k.toFixed(4)})` : '';
+  for (const el of zoomLayers) el.style.transform = tf;
+  const capz = on ? (1 / Math.sqrt(zv.k)).toFixed(4) : '';
+  field.style.setProperty('--capz', capz);
+  stacks.el.style.setProperty('--capz', capz);
+  body.classList.toggle('lx-zoomed', on);
+  zoomUi.classList.toggle('is-on', on);
+}
+
+let zoomRaf = 0;
+function resetZoom() {
+  cancelAnimationFrame(zoomRaf);
+  touches.clear();
+  gesture = null;
+  body.classList.remove('lx-zooming');
+  if (zv.k !== 1) setZoom({ k: 1, x: 0, y: 0 });
+}
+
+/** Ease to zoom `k`, keeping the spot under the screen point (px, py) where it is. */
+function zoomTo(k, px, py) {
+  cancelAnimationFrame(zoomRaf);
+  const from = { ...zv };
+  const lx = (px - from.x) / from.k;
+  const ly = (py - from.y) / from.k;
+  const to = clampZoom({ k, x: px - lx * k, y: py - ly * k });
+  const t0 = performance.now();
+  const step = (now) => {
+    const s = reduced ? 1 : ease.inOutCubic(clamp((now - t0) / 300));
+    setZoom({ k: lerp(from.k, to.k, s), x: lerp(from.x, to.x, s), y: lerp(from.y, to.y, s) });
+    if (s < 1) zoomRaf = requestAnimationFrame(step);
+    else sharpenSoon();
+  };
+  zoomRaf = requestAnimationFrame(step);
+}
+
+// Zoomed in, the pictures on screen are drawn again at the new size so they stay sharp
+// (a few per frame), and so are Art's top prints.
+let sharpTimer = 0;
+let sharpQueue = [];
+const onScreen = (r) => r.right > 0 && r.left < W && r.bottom > 0 && r.top < H;
+function sharpenSoon() {
+  clearTimeout(sharpTimer);
+  sharpTimer = setTimeout(sharpen, 140);
+}
+function sharpen() {
+  if (T || !mode || gesture) return;
+  const q = zv.k < 1.3 ? 1 : zv.k < 2.3 ? 2 : 3;
+  if (q === 1) return;
+  sharpQueue = tiles.filter((t) => {
+    if (t.show < 0 || t.hidden || t.to?.hidden || Number(t.pics[t.show].dataset.q || 1) >= q) return false;
+    const x = (t.x - t.w / 2) * zv.k + zv.x;
+    const y = (t.y - t.h / 2) * zv.k + zv.y;
+    return onScreen({ left: x, top: y, right: x + t.w * zv.k, bottom: y + t.h * zv.k });
+  });
+  const m = mode;
+  const step = () => {
+    const until = performance.now() + 12;
+    while (sharpQueue.length && performance.now() < until && mode === m && !T) {
+      const t = sharpQueue.shift();
+      paint(t, t.show, m, q);
+    }
+    if (sharpQueue.length && mode === m && !T) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+  if (mode === 'image') stacks.sharpen(q, (el) => onScreen(el.getBoundingClientRect()));
+}
+
+const touches = new Map();
+let gesture = null; // { pinch, k0, x0, y0, d0, lx, ly } or { pan, moved }; .used once it moved the view
+let swallowUntil = 0;
+let lastTap = null;
+const zoomable = () => mode && mode !== 'place' && !T && !body.classList.contains('lx-page-open') && darkroomClosed();
+// Gestures that start on the header, the switcher, a card or a control are theirs.
+const OFF_PLOT = '.chrome, .switcher, .lx-more, .lx-intro, .lx-trip, .lx-zoomui, .lx-mapui, .lx-page, .dk';
+const TAPPABLE = 'button, a, [role="button"], .lx-dogs, .lx-race';
+
+function startPinch() {
+  const [a, b] = [...touches.values()];
+  const mx = (a.x + b.x) / 2;
+  const my = (a.y + b.y) / 2;
+  gesture = { pinch: true, used: true, k0: zv.k, d0: Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), lx: (mx - zv.x) / zv.k, ly: (my - zv.y) / zv.k };
+}
+
+window.addEventListener(
+  'pointerdown',
+  (e) => {
+    if (e.pointerType !== 'touch' || !zoomable() || e.target.closest?.(OFF_PLOT)) return;
+    cancelAnimationFrame(zoomRaf);
+    touches.set(e.pointerId, { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY });
+    if (touches.size === 2) {
+      startPinch();
+      body.classList.add('lx-zooming');
+    } else if (touches.size === 1) gesture = { pan: true, moved: false };
+  },
+  true,
+);
+
+window.addEventListener('pointermove', (e) => {
+  const p = touches.get(e.pointerId);
+  if (!p || !gesture) return;
+  const [px, py] = [p.x, p.y];
+  p.x = e.clientX;
+  p.y = e.clientY;
+  if (gesture.pinch && touches.size >= 2) {
+    const [a, b] = [...touches.values()];
+    const k = clamp((gesture.k0 * Math.hypot(a.x - b.x, a.y - b.y)) / gesture.d0, 1, ZOOM_MAX);
+    setZoom({ k, x: (a.x + b.x) / 2 - gesture.lx * k, y: (a.y + b.y) / 2 - gesture.ly * k });
+  } else if (gesture.pan && zv.k > 1.001) {
+    // A small wobble is still a tap; past it, one finger drags the zoomed plot.
+    if (!gesture.moved && Math.hypot(p.x - p.x0, p.y - p.y0) < 8) return;
+    gesture.moved = gesture.used = true;
+    body.classList.add('lx-zooming');
+    setZoom({ k: zv.k, x: zv.x + p.x - px, y: zv.y + p.y - py });
+  }
+});
+
+const endTouch = (e) => {
+  const p = touches.get(e.pointerId);
+  if (!p) return;
+  touches.delete(e.pointerId);
+  // Whatever this gesture moved, the tap that ends it opens nothing.
+  if (gesture?.used) swallowUntil = performance.now() + 400;
+  if (touches.size === 1 && gesture?.pinch) {
+    // One finger left: it carries on as a pan.
+    gesture = { pan: true, moved: true, used: true };
+    return;
+  }
+  if (touches.size) return;
+  const tap = gesture && !gesture.used && e.type === 'pointerup';
+  gesture = null;
+  body.classList.remove('lx-zooming');
+  sharpenSoon();
+  // A double tap on empty space: zoom in there, or back out.
+  if (!tap || e.target.closest?.(TAPPABLE)) return (lastTap = null);
+  const now = performance.now();
+  if (lastTap && now - lastTap.t < 320 && Math.hypot(p.x - lastTap.x, p.y - lastTap.y) < 32) {
+    lastTap = null;
+    zoomTo(zv.k > 1.001 ? 1 : 2.5, p.x, p.y);
+  } else lastTap = { t: now, x: p.x, y: p.y };
+};
+window.addEventListener('pointerup', endTouch, true);
+window.addEventListener('pointercancel', endTouch, true);
+window.addEventListener(
+  'click',
+  (e) => {
+    if (performance.now() < swallowUntil && !e.target.closest?.(OFF_PLOT)) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+  },
+  true,
+);
+
 /* ── Boot ─────────────────────────────────────────────────────────────────── */
 
 const switcher = mountSwitcher({
@@ -894,6 +1087,7 @@ let resizeTimer = 0;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
+    resetZoom();
     W = innerWidth;
     H = innerHeight;
     computeLayouts();

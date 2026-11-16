@@ -98,12 +98,25 @@ export function createStacks({ albums, parent, onOpen }) {
 
   function paintCards(s) {
     const pw = Math.round(s.size * 0.9 * DPR);
+    s.q = 1;
     s.cards.forEach((card, k) => {
       const c = card.querySelector('canvas');
       c.width = pw;
       c.height = Math.round(pw * 1.04);
       drawInto(c, s.a, k === CARDS - 1 ? s.frame : s.frames[k]);
     });
+  }
+
+  /** Pinch-zoomed in `q`×: redraw the top print of the piles on screen (`seen(s)`) that sharp. */
+  function sharpen(q, seen) {
+    for (const s of stacks) {
+      if (!s.inn || !s.size || (s.q ?? 1) >= q || !seen(s.el)) continue;
+      s.q = q;
+      const pw = Math.round(s.size * 0.9 * DPR * q);
+      s.top.width = pw;
+      s.top.height = Math.round(pw * 1.04);
+      drawInto(s.top, s.a, s.frame, { keep: false });
+    }
   }
 
   /** Place every pile at its spot on the Art plot ({ stacks: [{ id, x, y, capAlign }], card }). */
@@ -169,6 +182,7 @@ export function createStacks({ albums, parent, onOpen }) {
     layout,
     sweep,
     warm,
+    sharpen,
     el: wall,
     focus: (id) => stacks.find((s) => s.a.id === id)?.el.focus({ preventScroll: true }),
   };

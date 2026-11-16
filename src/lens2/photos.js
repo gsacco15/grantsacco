@@ -374,8 +374,8 @@ function treat(c, album, i) {
 
 const cache = new Map();
 
-/** Frame `i` of `album`, `w` px wide (height from the frame's aspect). Cached. */
-export function photo(album, i, w) {
+/** Frame `i` of `album`, `w` px wide (height from the frame's aspect). Cached unless `keep` is false. */
+export function photo(album, i, w, keep = true) {
   const W = Math.max(16, Math.round(w));
   const key = `${album.id}|${i}|${W}`;
   let c = cache.get(key);
@@ -394,7 +394,7 @@ export function photo(album, i, w) {
     const sw = img.naturalWidth / z;
     const sh = img.naturalHeight / z;
     g.drawImage(img, (img.naturalWidth - sw) * rnd(), (img.naturalHeight - sh) * (0.2 + rnd() * 0.6), sw, sh, 0, 0, W, H);
-    cache.set(key, c);
+    if (keep) cache.set(key, c);
     return c;
   }
   if (album.photo) {
@@ -430,13 +430,13 @@ export function photo(album, i, w) {
     g.restore();
   }
   treat(c, album, i);
-  cache.set(key, c);
+  if (keep) cache.set(key, c);
   return c;
 }
 
 /** Draw frame `i` into `target`, cropped to fill it. */
-export function drawInto(target, album, i, { contain = false } = {}) {
-  const src = photo(album, i, Math.max(target.width, contain ? target.width : target.height * photoAspect(album, i)));
+export function drawInto(target, album, i, { contain = false, keep = true } = {}) {
+  const src = photo(album, i, Math.max(target.width, contain ? target.width : target.height * photoAspect(album, i)), keep);
   const g = target.getContext('2d');
   const s = contain ? Math.min(target.width / src.width, target.height / src.height) : Math.max(target.width / src.width, target.height / src.height);
   const w = src.width * s;

@@ -35,12 +35,12 @@ const sstep = (a, b, v) => {
 const mix = (a, b, t) => a + (b - a) * t;
 
 const sources = new Map();
-function source(id, w, h) {
+function source(id, w, h, keep = true) {
   // Pictures are 3:2. Draw one big enough to cover w × h, then centre-crop.
   const sw = Math.ceil(Math.max(w, h * 1.5));
   const key = `${id}@${sw}`;
-  if (!sources.has(key)) sources.set(key, picture(id, sw, Math.round(sw / 1.5)));
-  const src = sources.get(key);
+  const src = sources.get(key) ?? picture(id, sw, Math.round(sw / 1.5));
+  if (keep) sources.set(key, src);
   const c = canvas(w, h);
   c.getContext('2d').drawImage(src, Math.round((src.width - w) / 2), Math.round((src.height - h) / 2), w, h, 0, 0, w, h);
   return c;
@@ -222,17 +222,18 @@ export function develop(c, mode, id) {
 
 /**
  * Item `id` rendered in `mode` at `w` px wide. Height comes from the mode's
- * frame aspect unless `aspect` is given.
+ * frame aspect unless `aspect` is given. `keep: false` skips the cache (a
+ * one-off, sharper render for a pinch-zoomed tile).
  */
-export function render(id, mode, w, aspect = ASPECT[mode]) {
+export function render(id, mode, w, aspect = ASPECT[mode], { keep = true } = {}) {
   const W = Math.max(16, Math.round(w));
   const key = `${id}|${mode}|${W}|${aspect.toFixed(3)}`;
   let c = cache.get(key);
   if (!c) {
     const H = Math.max(12, Math.round(W / aspect));
-    c = source(id, W, H);
+    c = source(id, W, H, keep);
     MODES[mode](c, id);
-    cache.set(key, c);
+    if (keep) cache.set(key, c);
   }
   return c;
 }

@@ -2159,6 +2159,118 @@ body.lx-page-open .lx-mapui {
   cursor: default;
 }
 
+/* ── Pinch to zoom (touch, every section but the map) ─────────────────────── */
+
+/* The dogs, the races and the origin ride on About's wheel in one layer. */
+.lx-onwheel {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* The plot's layers scale from the top left together (main.js sets the transform). */
+.lx-ovwrap,
+.lx-dyn,
+.lx-field,
+.pk-wall,
+.lx-onwheel {
+  transform-origin: 0 0;
+}
+
+body.lx-zooming :is(.lx-ovwrap--new, .lx-dyn, .lx-field, .pk-wall, .lx-onwheel) {
+  will-change: transform;
+}
+
+/* Captions grow more slowly than the pictures (√zoom), so they stay readable, not huge. */
+.lx-tile__cap,
+.pk__cap {
+  scale: var(--capz, 1);
+  transform-origin: 0 0;
+}
+
+.lx-tile.cap-end:not([data-r='place']) .lx-tile__cap,
+.pk.cap-end .pk__cap {
+  transform-origin: 100% 0;
+}
+
+.pk:not(.cap-end) .pk__cap {
+  transform-origin: 50% 0;
+}
+
+/* Zoomed and still: the tiles drop their own layers so their captions redraw sharp. */
+body.lx-zoomed:not(.lx-zooming) .lx-tile {
+  will-change: auto;
+}
+
+/* Zoomed in, the plot slides under the header and the switcher: a soft edge of
+   the background keeps them clear, and the title and quiet line step aside. */
+.lx-zoomscrim {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+  background:
+    linear-gradient(var(--bg) var(--zt, 64px), transparent calc(var(--zt, 64px) + 28px)) top / 100% 50% no-repeat,
+    linear-gradient(transparent calc(100% - var(--zb, 96px) - 24px), var(--bg) calc(100% - var(--zb, 96px))) bottom / 100% 50% no-repeat;
+}
+
+body.lx-zoomed .lx-zoomscrim {
+  opacity: 1;
+}
+
+.lx-legend {
+  transition: opacity 0.3s;
+}
+
+body.lx-zoomed .lx-legend {
+  opacity: 0 !important;
+}
+
+body.lx-zoomed .lx-quiet {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+/* "Fit": back to the whole section, shown only while zoomed (just above the switcher). */
+.lx-zoomui {
+  position: fixed;
+  top: 0;
+  right: var(--gutter);
+  z-index: 21;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.lx-zoomui.is-on {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+body.lx-page-open .lx-zoomui {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lx-zoomui button {
+  display: grid;
+  place-items: center;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  backdrop-filter: blur(8px);
+}
+
 /* ── "+ more": the rest of a section, one click away ──────────────────────── */
 
 /* Top right, opposite About's quiet line, clear of the axis labels below the plot. */
